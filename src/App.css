@@ -40,3 +40,56 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Balloon float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom component classes */
+.balloon {
+  position: absolute;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.balloon:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.balloon:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.balloon-body {
+  width: 144px;
+  height: 176px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 4px solid white;
+  position: relative;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  overflow: visible;
+}
+
+.balloon-string {
+  position: absolute;
+  width: 4px;
+  height: 64px;
+  background: linear-gradient(to bottom, rgba(55, 65, 81, 1), transparent);
+  bottom: -64px;
+  left: 50%;
+  transform: translateX(-50%);
+}

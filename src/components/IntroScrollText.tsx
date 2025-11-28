@@ -2,28 +2,26 @@ import { useState, useEffect } from "react";
 
 const IntroScrollText = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!hasScrolled && window.scrollY > 50) {
-        setHasScrolled(true);
-        setIsVisible(false);
-      }
-    };
+    // Auto-hide after animation completes (3 seconds)
+    const autoHideTimer = setTimeout(() => {
+      setIsVisible(false);
+    }, 3000);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasScrolled]);
+    return () => {
+      clearTimeout(autoHideTimer);
+    };
+  }, []);
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background pointer-events-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
       <h1 
-        className="text-6xl md:text-8xl font-bold text-foreground animate-fade-in"
+        className="text-6xl md:text-8xl font-bold text-foreground"
         style={{
-          animation: "fadeUpward 3s ease-in-out infinite"
+          animation: "fadeUpward 3s ease-in-out forwards"
         }}
       >
         HARRY THE BLAZE
@@ -34,7 +32,7 @@ const IntroScrollText = () => {
             opacity: 0;
             transform: translateY(20px);
           }
-          50% {
+          30% {
             opacity: 1;
             transform: translateY(-10px);
           }

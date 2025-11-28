@@ -80,7 +80,68 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+  }
+}
+
+@keyframes balloon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@layer components {
+  .animate-float {
+    animation: balloon-float 3s ease-in-out infinite;
+  }
+
+  .balloon {
+    position: absolute;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.25));
+  }
+
+  .balloon:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .balloon:active {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  .balloon-body {
+    width: 150px;
+    height: 190px;
+    border-radius: 50% 50% 48% 48% / 60% 60% 40% 40%;
+    border: 6px solid rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+  }
+
+  .balloon-string {
+    position: absolute;
+    width: 4px;
+    height: 70px;
+    background: linear-gradient(to bottom, rgba(55, 65, 81, 0.9), transparent);
+    bottom: -70px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
