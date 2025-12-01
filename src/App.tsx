@@ -12,6 +12,7 @@ import BalloonMathGame from "./pages/BalloonMath";
 import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import MobileRestriction from "@/components/MobileRestriction";
 
 const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -26,6 +27,7 @@ const App = () => (
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <MobileRestriction />
         <Toaster />
         <Sonner />
         <BrowserRouter
