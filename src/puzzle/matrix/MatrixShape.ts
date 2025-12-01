@@ -1,5 +1,6 @@
-import { Connector, invertFlow, rotateDirection } from "./directions";
+import { Connector, invertFlow, rotateDirection, Direction } from "./directions";
 import { Matrix3x3, MatrixSymbol, TileType } from "./types";
+import { createEmptyMatrix } from "./utils";
 
 const rotateMatrix = (matrix: Matrix3x3, steps: number): Matrix3x3 => {
   if (steps % 4 === 0) {
@@ -59,37 +60,41 @@ const flipSymbol = (symbol: MatrixSymbol): MatrixSymbol => {
 };
 
 export abstract class MatrixShape {
-  constructor(public rotation = 0, public flipped = false) { }
+  constructor(
+    public rotation = 0,
+    public flipped = false,
+    public disabledPorts: Direction[] = []
+  ) { }
 
   abstract readonly type: TileType;
   abstract readonly isHub: boolean;
   protected abstract baseConnectors: Connector[];
 
-  protected abstract spawn(rotation: number, flipped: boolean): MatrixShape;
+  protected abstract spawn(rotation: number, flipped: boolean, disabledPorts: Direction[]): MatrixShape;
+
+  cycleConfiguration(): MatrixShape {
+    return this;
+  }
 
   rotateClockwise(): MatrixShape {
-    return this.spawn((this.rotation + 1) % 4, this.flipped);
+    return this.spawn((this.rotation + 1) % 4, this.flipped, this.disabledPorts);
   }
 
   rotateBy(steps: number): MatrixShape {
     const normalized = ((this.rotation + steps) % 4 + 4) % 4;
-    return this.spawn(normalized, this.flipped);
+    return this.spawn(normalized, this.flipped, this.disabledPorts);
   }
 
   toggleFlip(): MatrixShape {
-    return this.spawn(this.rotation, !this.flipped);
+    return this.spawn(this.rotation, !this.flipped, this.disabledPorts);
   }
 
   setFlip(flipped: boolean): MatrixShape {
-    return this.spawn(this.rotation, flipped);
+    return this.spawn(this.rotation, flipped, this.disabledPorts);
   }
 
   getMatrix(): Matrix3x3 {
-    const matrix: Matrix3x3 = [
-      ["x", "x", "x"],
-      ["x", "x", "x"],
-      ["x", "x", "x"],
-    ];
+    const matrix = createEmptyMatrix();
 
     const connectors = this.getConnectors();
 
@@ -107,11 +112,21 @@ export abstract class MatrixShape {
       if (side === "right") matrix[1][2] = symbol;
     });
 
+    // Render disabled ports as empty roads ("0")
+    this.disabledPorts.forEach((baseSide) => {
+      // Rotate base side to visual side
+      const visualSide = rotateDirection(baseSide, this.rotation);
+      if (visualSide === "up") matrix[0][1] = "0";
+      if (visualSide === "down") matrix[2][1] = "0";
+      if (visualSide === "left") matrix[1][0] = "0";
+      if (visualSide === "right") matrix[1][2] = "0";
+    });
+
     // Fill center
     if (this.isHub) {
       matrix[1][1] = "0";
     } else {
-      // For paths (Straight/Corner), center follows the OUT flow
+      // For paths (Straight/Corner/Tee), center follows the OUT flow
       // If no OUT flow (shouldn't happen in valid tiles but safe fallback), use "0"
       const outConnector = connectors.find(c => c.flow === "out");
       if (outConnector) {
@@ -143,14 +158,16 @@ export abstract class MatrixShape {
   }
 
   getConnectors(): Connector[] {
-    return this.baseConnectors.map(({ side, flow }) => ({
-      side: rotateDirection(side, this.rotation),
-      flow: this.flipped ? invertFlow(flow) : flow,
-    }));
+    return this.baseConnectors
+      .filter(c => !this.disabledPorts.includes(c.side))
+      .map(({ side, flow }) => ({
+        side: rotateDirection(side, this.rotation),
+        flow: this.flipped ? invertFlow(flow) : flow,
+      }));
   }
 
   clone(): MatrixShape {
-    return this.spawn(this.rotation, this.flipped);
+    return this.spawn(this.rotation, this.flipped, this.disabledPorts);
   }
 }
 

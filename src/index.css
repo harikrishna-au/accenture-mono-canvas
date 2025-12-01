@@ -92,3 +92,71 @@ All colors MUST be HSL.
   }
 }
 
+
+/* Balloon Math Game Styles */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translateY(-20px);
+  }
+}
+
+@keyframes wiggle {
+
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-wiggle {
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+.balloon {
+  animation: float 3s ease-in-out infinite;
+}
+
+.balloon:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.balloon:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.balloon:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.balloon:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+.balloon-body {
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+}
+
+.balloon-body::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid inherit;
+  /* Will take the balloon color if we use currentcolor, but here we need specific color */
+  /* Since we use bg-color classes, we can't easily inherit. Let's use a pseudo element for the knot */
+  width: 0;
+  height: 0;
+}

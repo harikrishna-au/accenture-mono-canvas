@@ -1,4 +1,4 @@
-import { Connector } from "../directions";
+import { Connector, Direction } from "../directions";
 import { Matrix3x3 } from "../types";
 import { MatrixShape } from "../MatrixShape";
 
@@ -12,8 +12,8 @@ export class StraightShape extends MatrixShape {
     { side: "right", flow: "out" },
   ];
 
-  protected spawn(rotation: number, flipped: boolean): MatrixShape {
-    return new StraightShape(rotation, flipped);
+  protected spawn(rotation: number, flipped: boolean, disabledPorts: Direction[]): MatrixShape {
+    return new StraightShape(rotation, flipped, disabledPorts);
   }
 }
 

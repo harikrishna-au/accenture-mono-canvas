@@ -5,8 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import Landing from "./pages/Landing";
+import Guidelines from "./pages/Guidelines";
 import Dashboard from "./pages/Dashboard";
 import FindMin from "./pages/findmin";
+import BalloonMathGame from "./pages/BalloonMath";
+import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -14,7 +17,7 @@ const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const App = () => (
-  <ClerkProvider 
+  <ClerkProvider
     publishableKey={clerkPubKey}
     appearance={{
       baseTheme: undefined,
@@ -35,7 +38,17 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/game/find-min" element={<FindMin />} />
+
+            {/* Matrix Flow Game */}
+            <Route path="/game/matrix" element={<Guidelines />} />
+            <Route path="/game/matrix/play" element={<FindMin />} />
+
+            {/* Balloon Math Game */}
+            <Route path="/game/balloon" element={<BalloonMathGame />} />
+
+            {/* Hidden Maze Game */}
+            <Route path="/game/hidden-maze" element={<HiddenMaze />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
