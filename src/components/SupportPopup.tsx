@@ -33,11 +33,15 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
                     </div>
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 space-y-4">
-                        <img
-                            src={qrCode}
-                            alt="Buy Me A Coffee QR"
-                            className="w-64 h-64 mx-auto rounded-xl shadow-sm mix-blend-multiply"
-                        />
+                        <a
+                            href="https://buymeachai.ezee.li/harrytheblaze"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 w-full py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition-colors"
+                        >
+                            <Coffee className="w-5 h-5" />
+                            Buy me a chai
+                        </a>
                     </div>
 
                     <Button

@@ -6,7 +6,8 @@ import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
 import qrCode from "@/lib/qr-code.png";
-import { Coffee } from "lucide-react";
+import FeedbackPopup from "@/components/FeedbackPopup";
+import { Coffee, MessageSquare } from "lucide-react";
 
 import Header from "@/components/Header";
 import SupportPopup from "@/components/SupportPopup";
@@ -16,6 +17,7 @@ import accentureLogo from "@/lib/accenture-svgrepo-com.svg";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showSupportPopup, setShowSupportPopup] = useState(false);
+  const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
 
   const games = [
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
@@ -37,6 +39,7 @@ const Dashboard = () => {
       <Header />
       <CompletionPopup />
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
+      <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
 
       <div className="flex-1 flex flex-col items-center w-full p-8 pt-20 overflow-y-auto">
         <SignedIn>
@@ -102,14 +105,23 @@ const Dashboard = () => {
 
             {/* Footer */}
             <div className="w-full mt-auto pt-8 border-t border-neutral-100 flex flex-col items-center justify-center pb-8">
-              <div className="flex items-center gap-6 bg-neutral-50 px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm">
-                <span className="font-bold text-neutral-900 text-lg">Enjoying the practice?</span>
+              <div className="flex items-center gap-4 bg-neutral-50 px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm">
+                <span className="font-bold text-neutral-900 text-lg mr-2">Enjoying the practice?</span>
+
+                <button
+                  onClick={() => setShowFeedbackPopup(true)}
+                  className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-neutral-200 text-neutral-700 rounded-xl font-bold hover:bg-neutral-50 hover:border-neutral-300 transition-all hover:scale-105 active:scale-95"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  Feedback
+                </button>
+
                 <button
                   onClick={() => setShowSupportPopup(true)}
                   className="flex items-center gap-2 px-6 py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition-all hover:scale-105 active:scale-95 shadow-sm"
                 >
                   <Coffee className="w-5 h-5" />
-                  Buy me a coffee
+                  Buy me a chai
                 </button>
               </div>
             </div>

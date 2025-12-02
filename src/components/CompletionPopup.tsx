@@ -53,19 +53,14 @@ const CompletionPopup = () => {
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100">
                         <p className="text-sm font-medium text-neutral-500 mb-4">Support my work</p>
-                        <img
-                            src={qrCode}
-                            alt="Buy Me A Coffee QR"
-                            className="w-48 h-48 mx-auto rounded-xl shadow-sm mb-4"
-                        />
                         <a
-                            href="https://buymeacoffee.com/harrytheblaze"
+                            href="https://buymeachai.ezee.li/harrytheblaze"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-yellow-600 font-bold hover:underline"
                         >
                             <Coffee className="w-4 h-4" />
-                            buymeacoffee.com/harrytheblaze
+                            Buy me a chai
                         </a>
                     </div>
 
