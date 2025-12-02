@@ -5,6 +5,7 @@ import qrCode from "@/lib/qr-code.png";
 
 const CompletionPopup = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [scores, setScores] = useState({ matrix: "0", maze: "0", balloon: "0" });
 
     useEffect(() => {
         const checkCompletion = () => {
@@ -13,10 +14,11 @@ const CompletionPopup = () => {
             const balloon = localStorage.getItem("completed_balloon");
 
             if (matrix && maze && balloon) {
-                // Check if we've already shown it this session to avoid annoyance? 
-                // Or just show it. User said "when a user completes all 3 games show a pop up".
-                // Let's show it if it hasn't been dismissed yet, or maybe just show it.
-                // For now, let's just show it.
+                setScores({
+                    matrix: localStorage.getItem("score_matrix") || "0",
+                    maze: localStorage.getItem("score_maze") || "0",
+                    balloon: localStorage.getItem("score_balloon") || "0"
+                });
                 setIsOpen(true);
             }
         };
@@ -24,7 +26,7 @@ const CompletionPopup = () => {
         // Check on mount
         checkCompletion();
 
-        // Listen for storage events in case a game was just finished in another tab (unlikely but good practice)
+        // Listen for storage events
         window.addEventListener("storage", checkCompletion);
         return () => window.removeEventListener("storage", checkCompletion);
     }, []);
@@ -48,8 +50,23 @@ const CompletionPopup = () => {
 
                     <h2 className="text-3xl font-black text-neutral-900">Amazing Job!</h2>
                     <p className="text-lg text-neutral-600">
-                        You've successfully completed all 3 assessment games. You're ready to crush it!
+                        You've successfully completed all 3 assessment games.
                     </p>
+
+                    <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                            <div className="font-bold text-neutral-900">Matrix</div>
+                            <div className="text-neutral-500">{scores.matrix}s left</div>
+                        </div>
+                        <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                            <div className="font-bold text-neutral-900">Maze</div>
+                            <div className="text-neutral-500">{scores.maze}s left</div>
+                        </div>
+                        <div className="bg-neutral-50 p-3 rounded-xl border border-neutral-100">
+                            <div className="font-bold text-neutral-900">Balloon</div>
+                            <div className="text-neutral-500">{scores.balloon}/25</div>
+                        </div>
+                    </div>
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100">
                         <p className="text-sm font-medium text-neutral-500 mb-4">Support my work</p>

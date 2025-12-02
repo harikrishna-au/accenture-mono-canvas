@@ -124,6 +124,10 @@ const Dashboard = () => {
                   Buy me a chai
                 </button>
               </div>
+
+              <div className="mt-8 text-neutral-400 font-medium text-sm flex items-center gap-1.5">
+                Designed and developed by <span className="text-neutral-900 font-bold">Hari Krishna</span> with <span className="text-red-500 animate-pulse">❤️</span>
+              </div>
             </div>
 
           </div>

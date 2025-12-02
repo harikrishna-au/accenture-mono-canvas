@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import PageWrapper from '@/components/PageWrapper';
 import Header from "@/components/Header";
+import { LogOut } from "lucide-react";
 
 interface Balloon {
     id: number;
@@ -127,6 +128,7 @@ const BalloonMathGame: React.FC = () => {
     const nextRound = (answered: boolean) => {
         if (round >= TOTAL_ROUNDS) {
             setGameOver(true);
+            localStorage.setItem('score_balloon', score.toString());
             localStorage.setItem('completed_balloon', 'true');
         } else {
             setRound(round + 1);

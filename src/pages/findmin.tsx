@@ -11,7 +11,8 @@ import {
   Check,
   ArrowRight,
   Youtube,
-  Trophy
+  Trophy,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createShape } from "@/puzzle/matrix/createShape";
@@ -117,6 +118,7 @@ export default function FindMin() {
         }, 1000);
       } else {
         setGameComplete(true);
+        localStorage.setItem('score_matrix', timeLeft.toString());
         localStorage.setItem('completed_matrix', 'true');
       }
     }
@@ -242,6 +244,14 @@ export default function FindMin() {
           className="h-12 w-12 rounded-lg bg-neutral-600 p-0 text-white hover:bg-neutral-700"
         >
           <Check className="h-6 w-6" />
+        </Button>
+
+        {/* Exit Button */}
+        <Button
+          onClick={() => window.location.href = "/dashboard"}
+          className="h-12 w-12 rounded-lg bg-red-500 p-0 text-white hover:bg-red-600"
+        >
+          <LogOut className="h-6 w-6" />
         </Button>
       </div>
 

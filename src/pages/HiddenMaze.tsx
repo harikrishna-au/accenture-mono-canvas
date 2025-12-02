@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer } from 'lucide-react';
+import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from "@/components/Header";
 
@@ -132,6 +132,7 @@ const HiddenMaze = () => {
         } else {
             // Game Over
             setGameFinished(true);
+            localStorage.setItem('score_maze', timeLeft.toString());
             localStorage.setItem('completed_maze', 'true');
             setIsGameActive(false);
         }
@@ -339,6 +340,14 @@ const HiddenMaze = () => {
                     <Timer className="w-6 h-6" />
                     <span>{formatTime(timeLeft)}</span>
                 </div>
+
+                <Button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-red-50 text-red-600 hover:bg-red-100 font-bold"
+                >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Exit
+                </Button>
             </div>
 
             {/* Grid Container */}
