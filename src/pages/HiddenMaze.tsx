@@ -78,6 +78,7 @@ const HiddenMaze = () => {
 
     // Game State
     const [level, setLevel] = useState(1);
+    const [levelsWon, setLevelsWon] = useState(0);
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
     const [isGameActive, setIsGameActive] = useState(true);
     const [gameFinished, setGameFinished] = useState(false);
@@ -125,6 +126,10 @@ const HiddenMaze = () => {
     }, [isGameActive, gameFinished, level]);
 
     const handleLevelComplete = (won: boolean) => {
+        if (won) {
+            setLevelsWon(prev => prev + 1);
+        }
+
         if (level < 3) {
             // Next Level
             setLevel(prev => prev + 1);
@@ -132,6 +137,9 @@ const HiddenMaze = () => {
         } else {
             // Game Over
             setGameFinished(true);
+            // We need to wait for the state update of levelsWon if we use it immediately, 
+            // but for localStorage we can just use the current value + (won ? 1 : 0)
+            // However, for the UI render, the state update will be reflected.
             localStorage.setItem('score_maze', timeLeft.toString());
             localStorage.setItem('completed_maze', 'true');
             setIsGameActive(false);
@@ -271,7 +279,7 @@ const HiddenMaze = () => {
     // Instructions Screen
     if (showInstructions) {
         return (
-            <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center bg-white text-neutral-900 overflow-hidden pt-20">
+            <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white text-neutral-900 overflow-auto pt-24 pb-10">
                 <Header />
                 <div className="max-w-2xl w-full bg-neutral-100 p-8 rounded-2xl shadow-xl border-2 border-neutral-200">
                     <h2 className="text-3xl font-bold text-neutral-900 mb-6 text-center">Hidden Maze Instructions</h2>
@@ -317,7 +325,10 @@ const HiddenMaze = () => {
                     <UserCheck className="w-24 h-24 text-neutral-900 mx-auto" />
                     <h2 className="text-3xl font-bold text-neutral-900">Assessment Complete</h2>
                     <p className="text-xl text-neutral-600">
-                        Practice hard for the exam!
+                        {levelsWon === 3 && "Outstanding! Your spatial memory is elite. You navigated the invisible paths flawlessly."}
+                        {levelsWon === 2 && "Great job! You have strong spatial awareness. Try to visualize the entire path to master the final level."}
+                        {levelsWon === 1 && "Good effort! You're getting the hang of it. Focus on memorizing key turning points."}
+                        {levelsWon === 0 && "Keep practicing! Try to map out the path step-by-step and learn from each reset."}
                     </p>
                     <Button
                         onClick={() => navigate('/dashboard')}
@@ -330,7 +341,7 @@ const HiddenMaze = () => {
         );
     }
     return (
-        <div className={`fixed inset-0 w-screen h-screen flex flex-col items-center justify-center bg-white text-neutral-900 overflow-hidden pt-20 transition-transform ${shake ? 'translate-x-[-10px]' : ''}`}>
+        <div className={`min-h-screen w-full flex flex-col items-center justify-center bg-white text-neutral-900 overflow-auto pt-24 pb-10 transition-transform ${shake ? 'translate-x-[-10px]' : ''}`}>
             <Header />
 
             {/* Header Info */}
@@ -344,7 +355,7 @@ const HiddenMaze = () => {
 
             {/* Grid Container */}
             <div
-                className="grid gap-0.5 bg-neutral-200 p-2 rounded-xl shadow-xl border-4 border-neutral-100"
+                className="grid gap-0.5 bg-neutral-200 p-2 rounded-xl shadow-xl border-4 border-neutral-100 w-full max-w-lg mx-auto"
                 style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
             >
                 {Array.from({ length: gridSize * gridSize }).map((_, idx) => {
@@ -385,20 +396,20 @@ const HiddenMaze = () => {
                         content = (
                             <div className="relative w-full h-full flex items-center justify-center">
                                 {allKeysCollected ? (
-                                    <UserCheck className="w-10 h-10 text-white z-10 relative" />
+                                    <UserCheck className="w-1/2 h-1/2 text-white z-10 relative" />
                                 ) : (
-                                    <User className="w-10 h-10 text-white z-10 relative" />
+                                    <User className="w-1/2 h-1/2 text-white z-10 relative" />
                                 )}
                             </div>
                         );
                     }
                     else if (type === 'KEY') {
                         if (!isKeyCollected) {
-                            content = <Key className={`w-8 h-8 ${isRevealed ? 'text-yellow-400' : 'text-neutral-900'}`} />;
+                            content = <Key className={`w-2/5 h-2/5 ${isRevealed ? 'text-yellow-400' : 'text-neutral-900'}`} />;
                         }
                     }
                     else if (type === 'GOAL') {
-                        content = <DoorOpen className={`w-10 h-10 ${isRevealed ? (allKeysCollected ? 'text-emerald-400' : 'text-neutral-500') : 'text-neutral-900'}`} />;
+                        content = <DoorOpen className={`w-1/2 h-1/2 ${isRevealed ? (allKeysCollected ? 'text-emerald-400' : 'text-neutral-500') : 'text-neutral-900'}`} />;
                     }
 
                     // Interactive State & Arrows
@@ -407,10 +418,10 @@ const HiddenMaze = () => {
                     // Determine arrow direction if adjacent
                     let arrowContent = null;
                     if (isAdjacent) {
-                        if (row < playerPos.row) arrowContent = <ArrowUp className="w-6 h-6 text-neutral-400" />; // Up
-                        if (row > playerPos.row) arrowContent = <ArrowDown className="w-6 h-6 text-neutral-400" />; // Down
-                        if (col < playerPos.col) arrowContent = <ArrowLeft className="w-6 h-6 text-neutral-400" />; // Left
-                        if (col > playerPos.col) arrowContent = <ArrowRight className="w-6 h-6 text-neutral-400" />; // Right
+                        if (row < playerPos.row) arrowContent = <ArrowUp className="w-1/3 h-1/3 text-neutral-400" />; // Up
+                        if (row > playerPos.row) arrowContent = <ArrowDown className="w-1/3 h-1/3 text-neutral-400" />; // Down
+                        if (col < playerPos.col) arrowContent = <ArrowLeft className="w-1/3 h-1/3 text-neutral-400" />; // Left
+                        if (col > playerPos.col) arrowContent = <ArrowRight className="w-1/3 h-1/3 text-neutral-400" />; // Right
                     }
 
                     return (
@@ -418,7 +429,7 @@ const HiddenMaze = () => {
                             key={`${row}-${col}`}
                             onClick={() => handleCellClick(row, col)}
                             className={`
-                                w-20 h-20 flex items-center justify-center rounded-xl transition-colors duration-300 relative
+                                aspect-square w-full flex items-center justify-center rounded-xl transition-colors duration-300 relative
                                 ${bgColor} ${borderClass}
                                 ${isAdjacent ? 'cursor-pointer hover:bg-neutral-200' : ''}
                                 ${isPlayer ? 'ring-4 ring-neutral-300 z-10' : ''}

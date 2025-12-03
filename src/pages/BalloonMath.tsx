@@ -233,7 +233,9 @@ const BalloonMathGame: React.FC = () => {
                         </div>
 
                         <p className="text-xl text-neutral-600">
-                            {score >= 17 ? 'Excellent work!' : 'Keep practicing for exam !'}
+                            {score >= 20 && "Lightning fast! Your mental math calculation is impressive. You're ready for any challenge."}
+                            {score >= 10 && score < 20 && "Good accuracy! Work on your speed by practicing simple operations daily to reach the next level."}
+                            {score < 10 && "Keep practicing! Focus on accuracy first. Take your time to solve each equation correctly, then build up speed."}
                         </p>
 
                         <Button
@@ -250,11 +252,11 @@ const BalloonMathGame: React.FC = () => {
 
     // Active Game Screen
     return (
-        <div className="fixed inset-0 w-screen h-screen bg-white overflow-hidden pt-20"> {/* Added pt-20 */}
+        <div className="min-h-screen w-full bg-white relative overflow-hidden pt-20"> {/* Added pt-20 */}
             <Header /> {/* Added Header component */}
             {/* Header */}
-            <div className="absolute top-8 left-0 right-0 flex justify-end items-center px-8 z-50">
-                <div className={`text-4xl font-bold ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-neutral-900'} `}>
+            <div className="absolute top-24 right-8 flex justify-end items-center z-50 pointer-events-none">
+                <div className={`text-6xl font-black tracking-tighter tabular-nums ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-neutral-900'} `}>
                     {timeLeft}s
                 </div>
             </div>

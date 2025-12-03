@@ -42,7 +42,7 @@ const Auth = () => {
           }
         });
         if (error) throw error;
-        toast.success("Account created! Please check your email to confirm.");
+        toast.success("Account created! Please check your email (including spam folder) to confirm.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,

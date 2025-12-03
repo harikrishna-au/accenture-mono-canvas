@@ -37,7 +37,7 @@ const Dashboard = () => {
   const [isFooterHovered, setIsFooterHovered] = useState(false);
 
   return (
-    <div className="fixed inset-0 w-screen h-screen flex flex-col items-center bg-neutral-50 overflow-hidden font-sans selection:bg-red-100 selection:text-red-900">
+    <div className="min-h-screen w-full flex flex-col items-center bg-neutral-50 overflow-y-auto font-sans selection:bg-red-100 selection:text-red-900">
       {/* Premium Background Layer */}
       <div className="fixed inset-0 -z-10 h-full w-full bg-neutral-50">
         <div className="absolute h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
@@ -49,14 +49,14 @@ const Dashboard = () => {
         <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tl from-red-100/40 to-orange-100/40 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
       </div>
 
-      <div className={`w-full flex flex-col items-center transition-all duration-500 z-10 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`w-full flex flex-col items-center transition-all duration-500 z-50 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <Header />
       </div>
       <CompletionPopup />
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
 
-      <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 overflow-hidden transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
           <div className="flex flex-col items-center w-full max-w-5xl flex-1">
 
@@ -149,11 +149,11 @@ const Dashboard = () => {
 
       {/* Footer */}
       <div
-        className="w-full mt-auto pt-8 border-t border-neutral-100 flex flex-col items-center justify-center pb-8 relative z-50 bg-white/80 backdrop-blur-md"
+        className="w-full py-8 border-t border-neutral-100 flex flex-col items-center justify-center relative z-50 bg-white/80 backdrop-blur-md"
         onMouseEnter={() => setIsFooterHovered(true)}
         onMouseLeave={() => setIsFooterHovered(false)}
       >
-        <div className="group relative flex items-center gap-4 bg-neutral-50 px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm">
+        <div className="group relative flex flex-wrap justify-center items-center gap-4 bg-neutral-50 px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm mx-4">
           <span className="font-bold text-neutral-900 text-lg mr-2">Enjoying the practice?</span>
 
           <button

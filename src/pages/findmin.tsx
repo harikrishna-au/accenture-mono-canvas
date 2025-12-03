@@ -37,6 +37,7 @@ const buildBoard = (level: number) =>
 
 export default function FindMin() {
   const [level, setLevel] = useState(1);
+  const [levelsWon, setLevelsWon] = useState(0);
   const [tiles, setTiles] = useState<TileState[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [validation, setValidation] = useState<EvaluationResult | null>(null);
@@ -49,11 +50,26 @@ export default function FindMin() {
 
   // Timer logic
   useEffect(() => {
+    if (gameComplete) return;
+
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // Time's up logic handled in separate effect or here
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [gameComplete]);
+
+  // Handle Timeout
+  useEffect(() => {
+    if (timeLeft === 0 && !gameComplete) {
+      handleLevelComplete(false);
+    }
+  }, [timeLeft, gameComplete]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -104,23 +120,30 @@ export default function FindMin() {
     }
   };
 
+  const handleLevelComplete = (won: boolean) => {
+    if (won) {
+      setLevelsWon(prev => prev + 1);
+    }
+
+    if (level < 3) {
+      setTimeout(() => {
+        setLevel(l => l + 1);
+        setValidation(null);
+        setSelectedIndex(null);
+        setTimeLeft(240);
+      }, won ? 1000 : 0); // Delay if won to show success message
+    } else {
+      setGameComplete(true);
+      localStorage.setItem('score_matrix', timeLeft.toString());
+      localStorage.setItem('completed_matrix', 'true');
+    }
+  };
+
   const handleValidate = () => {
     const result = evaluateBoard(tiles);
     setValidation(result);
     if (result.solved) {
-      if (level < 3) {
-        // Auto-advance after a short delay
-        setTimeout(() => {
-          setLevel(l => l + 1);
-          setValidation(null);
-          setSelectedIndex(null);
-          setTimeLeft(240); // Reset timer for next level
-        }, 1000);
-      } else {
-        setGameComplete(true);
-        localStorage.setItem('score_matrix', timeLeft.toString());
-        localStorage.setItem('completed_matrix', 'true');
-      }
+      handleLevelComplete(true);
     }
   };
 
@@ -145,12 +168,15 @@ export default function FindMin() {
 
   if (gameComplete) {
     return (
-      <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center bg-neutral-50 p-4 font-sans text-neutral-900 text-center overflow-hidden">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-neutral-50 p-4 font-sans text-neutral-900 text-center overflow-y-auto">
         <div className="bg-white p-12 rounded-3xl shadow-2xl space-y-6 max-w-lg">
           <Trophy className="h-24 w-24 text-yellow-500 mx-auto animate-bounce" />
           <h1 className="text-4xl font-extrabold text-neutral-900">Assessment Complete!</h1>
           <p className="text-xl text-neutral-600">
-            You have successfully solved all 3 levels of the Matrix Flow Puzzle.
+            {levelsWon === 3 && "Outstanding! Your spatial reasoning is top-notch. You can visualize complex patterns easily."}
+            {levelsWon === 2 && "Great job! You have a solid grasp of logic. Practice rotating shapes mentally to improve speed."}
+            {levelsWon === 1 && "Good start! Focus on tracing the path from Start to End before moving tiles."}
+            {levelsWon === 0 && "Keep practicing! Try breaking the path down into smaller segments and solving them one by one."}
           </p>
           <Button onClick={() => window.location.href = "/"} className="w-full h-14 text-lg bg-neutral-900 text-white">
             Back to Home
@@ -161,7 +187,7 @@ export default function FindMin() {
   }
 
   return (
-    <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center bg-neutral-50 p-4 pt-20 font-sans text-neutral-900 overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-neutral-50 p-4 pt-24 pb-10 font-sans text-neutral-900 overflow-y-auto">
       <Header />
 
       <div className="text-center mb-8">
