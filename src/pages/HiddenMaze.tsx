@@ -340,14 +340,6 @@ const HiddenMaze = () => {
                     <Timer className="w-6 h-6" />
                     <span>{formatTime(timeLeft)}</span>
                 </div>
-
-                <Button
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-red-50 text-red-600 hover:bg-red-100 font-bold"
-                >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Exit
-                </Button>
             </div>
 
             {/* Grid Container */}
