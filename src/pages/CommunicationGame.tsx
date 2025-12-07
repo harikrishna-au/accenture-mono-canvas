@@ -65,12 +65,22 @@ export default function CommunicationGame() {
     };
 
     const playBotAudio = () => {
-        if (currentQuestion?.audioSrc) {
-            setIsBotSpeaking(true);
-            communicationService.speak(currentQuestion.audioSrc, () => {
+        if (!currentQuestion?.audioSrc) return;
+
+        setIsBotSpeaking(true);
+        communicationService.speak(currentQuestion.audioSrc, () => {
+            // If there's a follow-up question (Listening Comp), play it after a short pause
+            if (currentQuestion.followUpQuestion) {
+                setTimeout(() => {
+                    if (gameState !== 'PLAYING') return; // Safety check
+                    communicationService.speak(currentQuestion.followUpQuestion!, () => {
+                        setIsBotSpeaking(false);
+                    });
+                }, 1000); // 1 second pause between passage and question
+            } else {
                 setIsBotSpeaking(false);
-            });
-        }
+            }
+        });
     };
 
     const stopBotAudio = () => {
@@ -186,6 +196,13 @@ export default function CommunicationGame() {
                     {currentQuestion?.promptText && (
                         <p className="text-2xl font-medium text-neutral-800 leading-relaxed">
                             {currentQuestion.promptText}
+                        </p>
+                    )}
+
+                    {/* Show Follow-up question text ONLY when it's being spoken or after to aid user */}
+                    {currentQuestion?.followUpQuestion && !isBotSpeaking && (
+                        <p className="text-xl font-medium text-blue-600 animate-fade-in-up">
+                            Question: {currentQuestion.followUpQuestion}
                         </p>
                     )}
 

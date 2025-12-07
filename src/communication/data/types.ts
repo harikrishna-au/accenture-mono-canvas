@@ -13,6 +13,7 @@ export interface Question {
     section: SectionType;
     promptText?: string; // Text to read or topic
     audioSrc?: string; // Audio to listen to (simulated via TTS)
+    followUpQuestion?: string; // Should be spoken after the audioSrc for Listening Comp
     correctAnswer?: string; // For grading
     timeLimit?: number; // In seconds
 }
@@ -91,6 +92,7 @@ export const MOCK_QUESTIONS: Question[] = [
         section: 'A',
         promptText: 'Listen to the passage about the library.',
         audioSrc: 'The extensive renovation of the city library is essentially complete. New study rooms and a larger computer lab are available for public use starting tomorrow.', // Text for TTS
+        followUpQuestion: 'When can the public start using the new facilities?',
         correctAnswer: 'The library renovation is complete and opens tomorrow.',
     },
     // Section B: Conversation Response
