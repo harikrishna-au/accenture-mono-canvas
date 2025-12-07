@@ -23,24 +23,24 @@ export default function AudioRecorder({ isRecording, onStart, onStop, onTranscri
             recognitionRef.current.lang = 'en-US';
 
             recognitionRef.current.onresult = (event: any) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
+                let fullTranscript = '';
 
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                // Iterate over ALL results to rebuild the complete transcript
+                for (let i = 0; i < event.results.length; ++i) {
+                    fullTranscript += event.results[i][0].transcript;
                 }
 
-                onTranscript(finalTranscript || interimTranscript);
+                onTranscript(fullTranscript);
             };
 
             recognitionRef.current.onerror = (event: any) => {
                 console.error('Speech recognition error', event.error);
-                setError('Microphone error. Please use Chrome.');
-                onStop();
+                if (event.error === 'not-allowed') {
+                    setError('Microphone access denied.');
+                } else {
+                    // specific error handling could go here
+                }
+                // Don't auto-stop on simple no-speech errors to allow user to try again
             };
         } else {
             setError('Browser not supported.');
@@ -86,7 +86,7 @@ export default function AudioRecorder({ isRecording, onStart, onStop, onTranscri
                 </Button>
             </div>
             <p className="text-sm font-medium text-neutral-500">
-                {isRecording ? 'Listening...' : disabled ? 'Wait...' : 'Tap to Speak'}
+                {isRecording ? 'Tap to Stop & Submit' : disabled ? 'Wait...' : 'Tap to Speak'}
             </p>
         </div>
     );
