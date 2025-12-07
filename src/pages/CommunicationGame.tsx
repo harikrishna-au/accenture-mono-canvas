@@ -206,11 +206,7 @@ export default function CommunicationGame() {
                         </p>
                     )}
 
-                    {currentQuestion?.audioSrc && !isBotSpeaking && (
-                        <Button variant="outline" size="sm" onClick={playBotAudio} className="gap-2">
-                            <Play className="w-4 h-4" /> Replay Audio
-                        </Button>
-                    )}
+
                 </div>
 
                 {/* Answer Area */}
