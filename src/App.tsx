@@ -12,6 +12,7 @@ import BalloonMathGame from "./pages/BalloonMath";
 import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import CommunicationGame from "./pages/CommunicationGame";
 import MobileRestriction from "@/components/MobileRestriction";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,9 @@ const App = () => (
 
             {/* Hidden Maze Game */}
             <Route path="/game/hidden-maze" element={<HiddenMaze />} />
+
+            {/* Communication Game */}
+            <Route path="/game/communication" element={<CommunicationGame />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

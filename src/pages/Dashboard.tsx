@@ -23,7 +23,7 @@ const Dashboard = () => {
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
-    { id: 4, name: "", path: "" },
+    { id: 4, name: "Communication Round", path: "/game/communication" },
     { id: 5, name: "", path: "" },
     { id: 6, name: "", path: "" },
     { id: 7, name: "", path: "" },
