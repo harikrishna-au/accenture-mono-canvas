@@ -99,9 +99,10 @@ export const MOCK_QUESTIONS: Question[] = [
     {
         id: 'b1',
         section: 'B',
-        promptText: 'Bot: "I am sorry, but I cannot approve your leave request for next week because of the upcoming project deadline."',
-        audioSrc: 'I am sorry, but I cannot approve your leave request for next week because of the upcoming project deadline.',
-        correctAnswer: 'I understand the situation. I will reschedule my leave for after the deadline.',
+        promptText: 'Listen to the conversation between two college students, Alex and Sarah.',
+        audioSrc: 'Alex (Male voice): "Hey Sarah, are you coming to the Hackathon this weekend?" ... Sarah (Female voice): "I really want to, but I have a huge assignment due on Monday. I am not sure if I can manage both."',
+        followUpQuestion: 'How would you advise Sarah to handle this situation politely?', // Simplified for single TTS flow, or just prompt user response
+        correctAnswer: 'You could suggest she tries to finish the assignment early or participates for a shorter time.',
     },
     // Section C: Reading Aloud
     {
