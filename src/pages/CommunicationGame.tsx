@@ -20,6 +20,7 @@ import { SectionType, Question, SECTIONS } from '../communication/data/types';
 type GameState = 'INTRO' | 'SECTION_INTRO' | 'PLAYING' | 'FEEDBACK' | 'SUMMARY';
 
 export default function CommunicationGame() {
+    const UNDER_DEVELOPMENT = true;
     const navigate = useNavigate();
     const [gameState, setGameState] = useState<GameState>('INTRO');
     const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -300,6 +301,16 @@ export default function CommunicationGame() {
         </div>
     );
 
+    if (UNDER_DEVELOPMENT) {
+        return (
+            <PageWrapper>
+                <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50">
+                    <h1 className="text-4xl font-bold text-neutral-900">Communication Round – Under Development</h1>
+                    <p className="mt-4 text-lg text-neutral-600">This feature is coming soon. Stay tuned!</p>
+                </div>
+            </PageWrapper>
+        );
+    }
     return (
         <PageWrapper>
             <div className="min-h-screen bg-neutral-50/50 pb-20">
