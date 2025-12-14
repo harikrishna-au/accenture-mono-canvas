@@ -132,7 +132,11 @@ const Dashboard = () => {
                     )}
                     {game.disabled && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <XCircle className="w-12 h-12 text-red-600" />
+                        <div className="relative">
+                          <div className="w-48 h-8 bg-red-600 transform -rotate-45 origin-center rounded-md shadow-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">UNDER DEVELOPMENT</span>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
