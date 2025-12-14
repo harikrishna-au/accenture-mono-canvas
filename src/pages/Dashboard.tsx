@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { XCircle } from "lucide-react";
 import { useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Youtube } from "lucide-react";
@@ -23,7 +24,7 @@ const Dashboard = () => {
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
-    { id: 4, name: "Communication Round", path: "/game/communication" },
+    { id: 4, name: "Communication Round", path: "/game/communication", disabled: true },
     { id: 5, name: "", path: "" },
     { id: 6, name: "", path: "" },
     { id: 7, name: "", path: "" },
@@ -103,14 +104,15 @@ const Dashboard = () => {
 
             <div className="w-full mb-12">
               <div className="grid grid-cols-4 gap-4">
-                {games.map((game) => (
+                {games.map((game) =>
                   <div
                     key={game.id}
                     className={`relative h-32 border-2 border-black rounded-xl flex items-center justify-center p-4 ${game.name
                       ? "bg-white hover:bg-black hover:text-white cursor-pointer transition-colors group"
-                      : "bg-gray-50 cursor-not-allowed"
-                      }`}
-                    onClick={() => game.path && navigate(game.path)}
+                      : "bg-gray-50 cursor-not-allowed"}
+                        ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
+                      `}
+                    onClick={() => !game.disabled && game.path && navigate(game.path)}
                   >
                     {game.name ? (
                       <>
@@ -128,8 +130,13 @@ const Dashboard = () => {
                         Coming Soon
                       </span>
                     )}
+                    {game.disabled && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <XCircle className="w-12 h-12 text-red-600" />
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
