@@ -15,52 +15,60 @@ import NotFound from "./pages/NotFound";
 import CommunicationGame from "./pages/CommunicationGame";
 import MobileRestriction from "@/components/MobileRestriction";
 
+import { useState } from "react";
+import SplashScreen from "@/components/SplashScreen";
+
 const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-const App = () => (
-  <ClerkProvider
-    publishableKey={clerkPubKey}
-    appearance={{
-      baseTheme: undefined,
-      variables: { colorPrimary: '#000000' }
-    }}
-  >
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <MobileRestriction />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}
-        >
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
 
-            {/* Matrix Flow Game */}
-            <Route path="/game/matrix" element={<Guidelines />} />
-            <Route path="/game/matrix/play" element={<FindMin />} />
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      appearance={{
+        baseTheme: undefined,
+        variables: { colorPrimary: '#000000' }
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+          <MobileRestriction />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
 
-            {/* Balloon Math Game */}
-            <Route path="/game/balloon" element={<BalloonMathGame />} />
+              {/* Matrix Flow Game */}
+              <Route path="/game/matrix" element={<Guidelines />} />
+              <Route path="/game/matrix/play" element={<FindMin />} />
 
-            {/* Hidden Maze Game */}
-            <Route path="/game/hidden-maze" element={<HiddenMaze />} />
+              {/* Balloon Math Game */}
+              <Route path="/game/balloon" element={<BalloonMathGame />} />
 
-            {/* Communication Game */}
-            <Route path="/game/communication" element={<CommunicationGame />} />
+              {/* Hidden Maze Game */}
+              <Route path="/game/hidden-maze" element={<HiddenMaze />} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ClerkProvider>
-);
+              {/* Communication Game */}
+              <Route path="/game/communication" element={<CommunicationGame />} />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
+  );
+};
 
 export default App;

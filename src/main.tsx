@@ -4,7 +4,7 @@ import "./index.css";
 
 // Safari and some old browsers are missing requestIdleCallback; provide a tiny polyfill.
 if (typeof window !== "undefined" && !("requestIdleCallback" in window)) {
-  window.requestIdleCallback = (callback: IdleRequestCallback, options?: IdleRequestOptions): number => {
+  (window as any).requestIdleCallback = (callback: any, options?: any): number => {
     const start = Date.now();
     return window.setTimeout(() => {
       callback({
@@ -13,7 +13,13 @@ if (typeof window !== "undefined" && !("requestIdleCallback" in window)) {
       });
     }, options?.timeout ?? 1);
   };
-  window.cancelIdleCallback = (id: number) => window.clearTimeout(id);
+  (window as any).cancelIdleCallback = (id: number) => window.clearTimeout(id);
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+import { HelmetProvider } from 'react-helmet-async';
+
+createRoot(document.getElementById("root")!).render(
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>
+);

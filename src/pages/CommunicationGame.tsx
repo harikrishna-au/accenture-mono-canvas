@@ -16,6 +16,7 @@ import Header from "@/components/Header";
 import AudioRecorder from '../communication/components/AudioRecorder';
 import { communicationService } from '../communication/service/CommunicationService';
 import { SectionType, Question, SECTIONS } from '../communication/data/types';
+import SEO from "@/components/SEO";
 
 type GameState = 'INTRO' | 'SECTION_INTRO' | 'PLAYING' | 'FEEDBACK' | 'SUMMARY';
 
@@ -278,6 +279,10 @@ const CommunicationGame: React.FC = () => {
 
     return (
         <PageWrapper>
+            <SEO
+                title="Communication Round | Harry The Blaze"
+                description="Master the Accenture Communication Assessment with real-time practice scenarios. Harry the Blaze helps you improve speaking and listening skills."
+            />
             <div className="min-h-screen bg-neutral-50/50 pb-20">
                 <Header />
                 <main className="container mx-auto px-4 pt-8">
