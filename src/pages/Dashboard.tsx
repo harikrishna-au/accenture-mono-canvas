@@ -107,7 +107,7 @@ const Dashboard = () => {
                 {games.map((game) =>
                   <div
                     key={game.id}
-                    className={`relative h-32 border-2 border-black rounded-xl flex items-center justify-center p-4 ${game.name
+                    className={`relative h-32 border-2 border-black rounded-xl flex items-center justify-center p-4 overflow-hidden ${game.name
                       ? "bg-white hover:bg-black hover:text-white cursor-pointer transition-colors group"
                       : "bg-gray-50 cursor-not-allowed"}
                         ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
@@ -133,8 +133,8 @@ const Dashboard = () => {
                     {game.disabled && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="relative">
-                          <div className="w-48 h-8 bg-red-600 transform -rotate-45 origin-center rounded-md shadow-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">UNDER DEVELOPMENT</span>
+                          <div className="w-[200%] h-8 bg-red-600 transform -rotate-12 origin-center shadow-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm tracking-widest">UNDER DEVELOPMENT</span>
                           </div>
                         </div>
                       </div>
