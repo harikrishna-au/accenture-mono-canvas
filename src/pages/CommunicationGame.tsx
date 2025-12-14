@@ -274,17 +274,7 @@ const CommunicationGame: React.FC = () => {
         </div>
     );
 
-    // Placeholder for future under‑development flag (currently disabled).
-    const UNDER_DEVELOPMENT = false;
-    if (UNDER_DEVELOPMENT) {
-        return (
-            <PageWrapper>
-                <div className="flex items-center justify-center min-h-screen bg-neutral-50">
-                    <h1 className="text-3xl font-bold text-neutral-900">Communication Round – Coming Soon</h1>
-                </div>
-            </PageWrapper>
-        );
-    }
+
 
     return (
         <PageWrapper>
