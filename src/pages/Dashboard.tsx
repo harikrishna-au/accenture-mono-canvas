@@ -133,8 +133,8 @@ const Dashboard = () => {
                     {game.disabled && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="relative">
-                          <div className="w-[200%] h-8 bg-red-600 transform -rotate-12 origin-center shadow-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm tracking-widest">UNDER DEVELOPMENT</span>
+                          <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
+                            <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
                           </div>
                         </div>
                       </div>
