@@ -36,6 +36,23 @@ npm i
 npm run dev
 ```
 
+### Running the Python Backend (Communication Round)
+
+The "Communication Round" features require a Python backend.
+
+```sh
+# Step 1: Navigate to backend directory
+cd communication-backend
+
+# Step 2: Install Python dependencies
+pip install -r requirements.txt
+
+# Step 3: Start the server
+python3 main.py
+```
+The backend runs on `http://localhost:8000`.
+
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
