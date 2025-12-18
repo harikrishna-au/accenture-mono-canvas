@@ -1,6 +1,11 @@
 # Accenture Assessment Simulator
 
-> **Bridging the gap between preparation and performance.**
+# Accenture Assessment Simulator
+
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-HarryTheBlaze.site-2ea44f?style=for-the-badge&logo=vercel)](https://www.harrytheblaze.site/)
+[![React](https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61dafb)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007acc?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Users](https://img.shields.io/badge/Users-Growing_Fast-blue?style=for-the-badge&logo=clerk)](https://www.harrytheblaze.site/)
 
 ![Project Banner](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80)
 
