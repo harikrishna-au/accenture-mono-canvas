@@ -95,6 +95,12 @@ const Auth = () => {
             />
           </div>
 
+          {isSignUp && (
+            <p className="text-sm text-foreground/60 text-center px-4">
+              Note: The verification email might arrive in your spam folder. Please check there if you don't see it in your inbox.
+            </p>
+          )}
+
           <OutlineButton
             type="submit"
             disabled={loading}
