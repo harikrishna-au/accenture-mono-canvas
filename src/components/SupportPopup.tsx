@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { X, Coffee, Heart } from "lucide-react";
-import qrCode from "@/lib/qr-code.png";
+import { X, Coffee, Heart, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SupportPopupProps {
     isOpen: boolean;
@@ -8,6 +11,68 @@ interface SupportPopupProps {
 }
 
 const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
+    const { user } = useUser();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handlePayU = async () => {
+        if (!user) {
+            toast.error("Please sign in to proceed");
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const { data, error } = await supabase.functions.invoke('create-payment', {
+                body: {
+                    amount: 499, // Example amount
+                    productinfo: "Premium Upgrade",
+                    firstname: user.firstName || "User",
+                    email: user.primaryEmailAddress?.emailAddress,
+                    phone: "9999999999", // PayU requires phone, maybe collect or dummy
+                    clerk_user_id: user.id
+                }
+            });
+
+            if (error) throw error;
+
+            // PayU requires a POST form submission
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = data.action;
+
+            const fields = {
+                key: data.key,
+                txnid: data.txnid,
+                amount: data.amount,
+                productinfo: data.productinfo,
+                firstname: data.firstname,
+                email: data.email,
+                phone: data.phone,
+                surl: data.surl,
+                furl: data.furl,
+                hash: data.hash,
+                udf1: data.udf1
+            };
+
+            for (const key in fields) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = fields[key as keyof typeof fields];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+
+        } catch (error: any) {
+            console.error('Payment Error:', error);
+            toast.error(error.message || "Failed to initiate payment");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -43,14 +108,17 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
                             Buy me a chai
                         </a>
 
-                        <a
-                            href="https://dashboard-staging.payu.in/web/66DE398CF392CAF3F701B2F0DFADC8B4"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1065b7] text-white rounded-xl font-bold hover:bg-[#0e5a9c] transition-colors"
+                        <button
+                            onClick={handlePayU}
+                            disabled={isLoading}
+                            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1065b7] text-white rounded-xl font-bold hover:bg-[#0e5a9c] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            <span className="text-xs uppercase tracking-wider">Pay Now via PayU</span>
-                        </a>
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <span className="text-xs uppercase tracking-wider">Pay Now via PayU</span>
+                            )}
+                        </button>
                     </div>
 
                     <Button
