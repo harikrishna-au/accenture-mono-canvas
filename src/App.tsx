@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import CommunicationGame from "./pages/CommunicationGame";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import AboutUs from "./pages/AboutUs";
 import MobileRestriction from "@/components/MobileRestriction";
 
 import { useState } from "react";
@@ -52,6 +53,7 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/refund" element={<RefundPolicy />} />
+              <Route path="/about" element={<AboutUs />} />
 
               {/* Matrix Flow Game */}
               <Route path="/game/matrix" element={<Guidelines />} />
