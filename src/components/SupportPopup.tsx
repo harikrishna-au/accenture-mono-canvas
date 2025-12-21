@@ -42,6 +42,15 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
                             <Coffee className="w-5 h-5" />
                             Buy me a chai
                         </a>
+
+                        <a
+                            href="https://dashboard-staging.payu.in/web/66DE398CF392CAF3F701B2F0DFADC8B4"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1065b7] text-white rounded-xl font-bold hover:bg-[#0e5a9c] transition-colors"
+                        >
+                            <span className="text-xs uppercase tracking-wider">Pay Now via PayU</span>
+                        </a>
                     </div>
 
                     <Button
