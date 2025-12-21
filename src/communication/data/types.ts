@@ -16,6 +16,12 @@ export interface Question {
     followUpQuestion?: string; // Should be spoken after the audioSrc for Listening Comp
     correctAnswer?: string; // For grading
     timeLimit?: number; // In seconds
+    voiceType?: string; // voice_type from backend
+    subQuestions?: {
+        id: string;
+        text: string;
+        options: string[];
+    }[];
 }
 
 export interface SectionInfo {

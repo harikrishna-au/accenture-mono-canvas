@@ -28,3 +28,7 @@ communication-backend/venv/
 communication-backend/__pycache__/
 __pycache__/
 *.pyc
+
+# Environment Variables
+.env
+backend/.env

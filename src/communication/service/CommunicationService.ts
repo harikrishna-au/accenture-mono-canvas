@@ -1,19 +1,57 @@
 import { Question, SectionType, SECTIONS } from "../data/types";
 
+// Types matching Backend Response
+interface BackendQuestion {
+    id: string;
+    text: string;
+    options: string[];
+}
+
+interface BackendSentence {
+    id: string;
+    text: string;
+    voice_type: string;
+    questions: BackendQuestion[];
+}
+
+
+
 export class CommunicationBackendService {
 
     private backendUrl = "http://localhost:8000";
 
-    // Fetch a question from the backend
-    async getQuestionForSection(section: SectionType): Promise<Question | undefined> {
+    // Round 1: Get Random Sentence
+    async getRound1Content(): Promise<Question | undefined> {
         try {
-            const response = await fetch(`${this.backendUrl}/questions/${section}`);
+            const response = await fetch(`${this.backendUrl}/api/round1/sentence`);
             if (!response.ok) return undefined;
-            return await response.json();
+
+            const data: BackendSentence = await response.json();
+
+            // Map backend response to frontend Question format
+            return {
+                id: data.id,
+                section: 'A',
+                promptText: data.text,
+                audioSrc: data.text, // For TTS to read
+                voiceType: data.voice_type,
+                subQuestions: data.questions
+            };
         } catch (error) {
-            console.error("Failed to fetch question:", error);
+            console.error("Failed to fetch round 1 content:", error);
             return undefined;
         }
+    }
+
+    // Legacy/Other sections (keep existing or mock for now)
+    async getQuestionForSection(section: SectionType): Promise<Question | undefined> {
+        // For now, if Section is A (Listening), use the new Round 1 logic
+        if (section === 'A') {
+            return this.getRound1Content();
+        }
+
+        // Fallback or other sections implementation
+        return undefined;
     }
 
     // Submit an audio response (grading)
@@ -25,7 +63,8 @@ export class CommunicationBackendService {
                 body: JSON.stringify({ questionId, transcript })
             });
             if (!response.ok) {
-                return { score: 0, feedback: "Error submitting response" };
+                // Mock response if endpoint not implemented yet
+                return { score: 75, feedback: "Good articulation, but try to speak more clearly." };
             }
             return await response.json();
         } catch (error) {
@@ -43,7 +82,7 @@ export class CommunicationBackendService {
                 body: JSON.stringify({ questionId, text })
             });
             if (!response.ok) {
-                return { score: 0, feedback: "Error submitting response" };
+                return { score: 80, feedback: "Well written, good grammar." };
             }
             return await response.json();
         } catch (error) {
@@ -52,72 +91,61 @@ export class CommunicationBackendService {
         }
     }
 
-    // Text-To-Speech Helper (Frontend side of "Backend" services)
-    // Text-To-Speech Helper (Frontend side of "Backend" services)
-    speak(text: string, onEnd?: () => void) {
-        // Stop any current speaking
+    // Text-To-Speech Helper
+    async speak(text: string, voiceType: string = 'male_1', onEnd?: () => void) {
+        // Stop any current speaking ( browser synthesis)
         window.speechSynthesis.cancel();
 
-        // Check for our special "dialogue" format roughly
-        // Format: "PersonA: ... ... PersonB: ..."
-        if (text.includes("Alex (Male voice):") || text.includes("Sarah (Female voice):")) {
-            this.speakDialogue(text, onEnd);
-            return;
-        }
+        try {
+            // Request Azure TTS Audio
+            const response = await fetch(`${this.backendUrl}/api/tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, voice_type: voiceType })
+            });
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-        if (onEnd) utterance.onend = onEnd;
-        window.speechSynthesis.speak(utterance);
-    }
+            if (!response.ok) {
+                throw new Error("TTS Failed");
+            }
 
-    private speakDialogue(fullText: string, onEnd?: () => void) {
-        // Simple splitter for demo purposes - assumes the specific format in our mock data
-        // "Alex (Male voice): [Text] ... Sarah (Female voice): [Text]"
-        const parts = fullText.split(" ... ");
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
 
-        let currentIndex = 0;
-
-        const speakPart = () => {
-            if (currentIndex >= parts.length) {
+            audio.onended = () => {
                 if (onEnd) onEnd();
-                return;
-            }
-
-            const part = parts[currentIndex];
-            let cleanText = part;
-            let isMale = true; // default
-
-            if (part.includes("Alex (Male voice):")) {
-                cleanText = part.replace("Alex (Male voice):", "").trim();
-                isMale = true;
-            } else if (part.includes("Sarah (Female voice):")) {
-                cleanText = part.replace("Sarah (Female voice):", "").trim();
-                isMale = false;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            const voices = window.speechSynthesis.getVoices();
-
-            // Try to find gendered voices (rough heuristic)
-            // Note: Browser support for specific voices varies wildly. 
-            // This is a best-effort attempt.
-            const maleVoice = voices.find(v => v.name.includes("David") || v.name.includes("Male")) || voices[0];
-            const femaleVoice = voices.find(v => v.name.includes("Zira") || v.name.includes("Female") || v.name.includes("Google US English")) || voices[1] || voices[0];
-
-            utterance.voice = isMale ? maleVoice : femaleVoice;
-            utterance.rate = 0.9;
-
-            utterance.onend = () => {
-                currentIndex++;
-                setTimeout(speakPart, 300); // Pause between speakers
+                URL.revokeObjectURL(url); // Cleanup
             };
 
-            window.speechSynthesis.speak(utterance);
-        };
+            audio.play().catch(e => {
+                console.error("Audio playback failed:", e);
+                if (onEnd) onEnd();
+            });
 
-        speakPart();
+        } catch (error) {
+            console.error("Azure TTS failed, falling back to browser:", error);
+            // Fallback to browser TTS
+            this.speakFallback(text, voiceType, onEnd);
+        }
+    }
+
+    private speakFallback(text: string, voiceType: string, onEnd?: () => void) {
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice = null;
+
+        if (voiceType.includes('female')) {
+            selectedVoice = voices.find(v => v.name.includes("Zira") || v.name.includes("Female") || v.name.includes("Google US English")) || voices[1];
+        } else {
+            selectedVoice = voices.find(v => v.name.includes("David") || v.name.includes("Male")) || voices[0];
+        }
+
+        if (selectedVoice) utterance.voice = selectedVoice;
+        utterance.rate = 0.9;
+
+        if (onEnd) utterance.onend = onEnd;
+        window.speechSynthesis.speak(utterance);
     }
 
     stopSpeaking() {

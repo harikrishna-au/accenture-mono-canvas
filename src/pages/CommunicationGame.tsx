@@ -32,6 +32,7 @@ const CommunicationGame: React.FC = () => {
     const [gameState, setGameState] = useState<GameState>('INTRO');
     const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+    const [subQuestionIndex, setSubQuestionIndex] = useState(-1); // -1: Main Audio, 0+: Sub-questions
     const [isBotSpeaking, setIsBotSpeaking] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [transcript, setTranscript] = useState('');
@@ -61,7 +62,11 @@ const CommunicationGame: React.FC = () => {
         setWrittenText('');
         // Auto‑play audio if exists (except for Monologue/Written where flow differs)
         if (currentQuestion?.audioSrc && currentSectionInfo.id !== 'G') {
+            // For Round 1 (Section A), we start with Main Audio (-1), then move to Q1 (0)
+            setSubQuestionIndex(-1);
             playBotAudio();
+        } else {
+            setSubQuestionIndex(0);
         }
         // Monologue timer logic
         if (currentSectionInfo.id === 'G') {
@@ -72,17 +77,26 @@ const CommunicationGame: React.FC = () => {
     const playBotAudio = () => {
         if (!currentQuestion?.audioSrc) return;
         setIsBotSpeaking(true);
-        communicationService.speak(currentQuestion.audioSrc, () => {
-            if (currentQuestion.followUpQuestion) {
-                setTimeout(() => {
-                    if (gameState !== 'PLAYING') return;
-                    communicationService.speak(currentQuestion.followUpQuestion!, () => {
-                        setIsBotSpeaking(false);
-                    });
-                }, 1000);
-            } else {
-                setIsBotSpeaking(false);
+        communicationService.speak(currentQuestion.audioSrc, currentQuestion.voiceType || 'male_1', () => {
+            setIsBotSpeaking(false);
+            if (currentSectionInfo.id === 'A') {
+                // For Section A, after main audio, move to first sub-question
+                setSubQuestionIndex(0);
+                // Optionally speak the first question
+                if (currentQuestion.subQuestions && currentQuestion.subQuestions.length > 0) {
+                    setTimeout(() => {
+                        playSubQuestionAudio(0);
+                    }, 500);
+                }
             }
+        });
+    };
+
+    const playSubQuestionAudio = (index: number) => {
+        if (!currentQuestion?.subQuestions?.[index]) return;
+        setIsBotSpeaking(true);
+        communicationService.speak(currentQuestion.subQuestions[index].text, 'female_1', () => {
+            setIsBotSpeaking(false);
         });
     };
 
@@ -100,10 +114,26 @@ const CommunicationGame: React.FC = () => {
     const handleStopRecording = async () => {
         setIsRecording(false);
         if (currentQuestion) {
-            const result = await communicationService.submitAudioResponse(currentQuestion.id, transcript);
-            setFeedback(result);
-            setTotalScore(prev => prev + result.score);
-            setGameState('FEEDBACK');
+            // Determine what we are answering
+            const qId = subQuestionIndex >= 0 && currentQuestion.subQuestions
+                ? currentQuestion.subQuestions[subQuestionIndex].id
+                : currentQuestion.id;
+
+            const result = await communicationService.submitAudioResponse(qId, transcript);
+
+            // For Section A (Round 1), check if there are more sub-questions
+            if (currentSectionInfo.id === 'A' && currentQuestion.subQuestions && subQuestionIndex < currentQuestion.subQuestions.length - 1) {
+                // Move to next sub-question
+                setSubQuestionIndex(prev => prev + 1);
+                setTranscript('');
+                setTotalScore(prev => prev + result.score);
+                // Play next question audio
+                setTimeout(() => playSubQuestionAudio(subQuestionIndex + 1), 1000);
+            } else {
+                setFeedback(result);
+                setTotalScore(prev => prev + result.score);
+                setGameState('FEEDBACK');
+            }
         }
     };
 
@@ -173,6 +203,10 @@ const CommunicationGame: React.FC = () => {
                     {currentSectionInfo.id === 'G' && prepTimeLeft > 0 && (
                         <div className="text-orange-600 font-bold bg-orange-50 px-4 py-2 rounded-lg">Prep Time: {prepTimeLeft}s</div>
                     )}
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span className="text-xs font-bold text-blue-700 uppercase tracking-widest">Azure AI Premium</span>
+                    </div>
                 </div>
                 {/* Question Area */}
                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-neutral-100 min-h-[200px] flex flex-col items-center justify-center text-center space-y-6">
@@ -181,11 +215,18 @@ const CommunicationGame: React.FC = () => {
                             <Volume2 className={`w-8 h-8 ${isBotSpeaking ? 'text-blue-600 animate-pulse' : 'text-neutral-500'}`} />
                         </div>
                     )}
-                    {currentQuestion?.promptText && (
-                        <p className="text-2xl font-medium text-neutral-800 leading-relaxed">{currentQuestion.promptText}</p>
-                    )}
-                    {currentQuestion?.followUpQuestion && !isBotSpeaking && (
-                        <p className="text-xl font-medium text-blue-600 animate-fade-in-up">Question: {currentQuestion.followUpQuestion}</p>
+                    {currentQuestion?.subQuestions && subQuestionIndex >= 0 ? (
+                        // Show Sub-Question
+                        <p className="text-2xl font-medium text-neutral-800 leading-relaxed animate-fade-in">
+                            {currentQuestion.subQuestions[subQuestionIndex].text}
+                        </p>
+                    ) : (
+                        // Show Main Prompt / Listening Status
+                        currentQuestion?.promptText && (
+                            <p className="text-2xl font-medium text-neutral-800 leading-relaxed">
+                                {isBotSpeaking ? "Listening..." : currentQuestion.promptText}
+                            </p>
+                        )
                     )}
                 </div>
                 {/* Answer Area */}
