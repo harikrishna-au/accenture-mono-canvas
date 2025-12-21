@@ -66,10 +66,83 @@ const LEVEL_3_EDGES = new Set([
     '6,2|6,1', '6,1|6,0' // Goal
 ]);
 
+const LEVEL_4_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_4_EDGES = new Set([
+    '0,0|0,1', '0,1|0,2', '0,2|0,3', '0,3|1,3',
+    '1,3|1,2', '1,2|1,1', '1,1|2,1',
+    '2,1|2,2', '2,2|2,3', '2,3|2,4', '2,4|3,4',
+    '3,4|3,3', '3,3|3,2', '3,2|4,2',
+    '4,2|4,3', '4,3|4,4', '4,4|4,5', '4,5|5,5',
+    '5,5|5,4', // Key
+    '5,4|6,4', '6,4|6,3', '6,3|6,2', '6,2|6,1', '6,1|6,0'
+]);
+
+const LEVEL_5_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_5_EDGES = new Set([
+    // Spiral In
+    '0,0|0,1', '0,1|0,2', '0,2|0,3', '0,3|0,4', '0,4|1,4',
+    '1,4|2,4', '2,4|2,3', // Key 1
+
+    // Redirect inward
+    '2,3|2,2', '2,2|2,1', '2,1|3,1',
+    '3,1|4,1', '4,1|4,2', // Key 2
+
+    // Long escape path
+    '4,2|4,3', '4,3|4,4', '4,4|5,4', '5,4|6,4',
+    '6,4|6,3', '6,3|6,2', '6,2|6,1', '6,1|6,0'
+]);
+
+const LEVEL_6_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_6_EDGES = new Set([
+    // False progression
+    '0,0|1,0', '1,0|2,0', '2,0|3,0', '3,0|3,1',
+    '3,1|3,2', '3,2|2,2', '2,2|1,2',
+
+    // Key 1
+    '1,2|1,3', '1,3|2,3', '2,3|3,3', '3,3|4,3',
+
+    // Forced reroute
+    '4,3|4,2', // Key 2
+    '4,2|5,2', '5,2|6,2',
+
+    // Final descent
+    '6,2|6,1', '6,1|6,0'
+]);
+
 const LEVELS = [
     { map: LEVEL_1_MAP, edges: LEVEL_1_EDGES },
     { map: LEVEL_2_MAP, edges: LEVEL_2_EDGES },
-    { map: LEVEL_3_MAP, edges: LEVEL_3_EDGES }
+    { map: LEVEL_3_MAP, edges: LEVEL_3_EDGES },
+    { map: LEVEL_4_MAP, edges: LEVEL_4_EDGES },
+    { map: LEVEL_5_MAP, edges: LEVEL_5_EDGES },
+    { map: LEVEL_6_MAP, edges: LEVEL_6_EDGES }
 ];
 const TIME_LIMIT = 300; // 5 minutes in seconds
 
@@ -130,7 +203,7 @@ const HiddenMaze = () => {
             setLevelsWon(prev => prev + 1);
         }
 
-        if (level < 3) {
+        if (level < 6) {
             // Next Level
             setLevel(prev => prev + 1);
             resetLevelState();
@@ -325,7 +398,7 @@ const HiddenMaze = () => {
                     <UserCheck className="w-24 h-24 text-neutral-900 mx-auto" />
                     <h2 className="text-3xl font-bold text-neutral-900">Assessment Complete</h2>
                     <p className="text-xl text-neutral-600">
-                        {levelsWon === 3 && "Outstanding! Your spatial memory is elite. You navigated the invisible paths flawlessly."}
+                        {levelsWon >= 3 && "Outstanding! Your spatial memory is elite. You navigated the invisible paths flawlessly."}
                         {levelsWon === 2 && "Great job! You have strong spatial awareness. Try to visualize the entire path to master the final level."}
                         {levelsWon === 1 && "Good effort! You're getting the hang of it. Focus on memorizing key turning points."}
                         {levelsWon === 0 && "Keep practicing! Try to map out the path step-by-step and learn from each reset."}
