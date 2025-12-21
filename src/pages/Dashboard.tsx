@@ -26,7 +26,7 @@ const Dashboard = () => {
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
     { id: 4, name: "Communication Round", path: "/game/communication", disabled: true },
-    { id: 5, name: "", path: "" },
+    { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
     { id: 6, name: "", path: "" },
     { id: 7, name: "", path: "" },
     { id: 8, name: "", path: "" },
@@ -117,7 +117,15 @@ const Dashboard = () => {
                       : "bg-gray-50 cursor-not-allowed"}
                         ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
                       `}
-                    onClick={() => !game.disabled && game.path && navigate(game.path)}
+                    onClick={() => {
+                      if (!game.disabled && game.path) {
+                        if ((game as any).isExternal) {
+                          window.open(game.path, '_blank', 'noopener,noreferrer');
+                        } else {
+                          navigate(game.path);
+                        }
+                      }
+                    }}
                   >
                     {game.name ? (
                       <>
