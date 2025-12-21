@@ -205,7 +205,12 @@ export default function FindMin() {
 
       {/* Game Board */}
       <div className="relative mb-8">
-        <div className="grid grid-cols-3 gap-px bg-white border-4 border-white rounded-xl overflow-hidden shadow-2xl">
+        <div
+          className="grid gap-px bg-white border-4 border-white rounded-xl overflow-hidden shadow-2xl"
+          style={{
+            gridTemplateColumns: `repeat(${Math.sqrt(tiles.length) || 3}, minmax(0, 1fr))`
+          }}
+        >
           {tiles.map((tile, index) => (
             <FlowTile
               key={tile.id}

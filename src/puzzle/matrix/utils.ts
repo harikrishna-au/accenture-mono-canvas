@@ -35,17 +35,40 @@ export const INITIAL_BOARD_CONFIG: BoardConfig[] = [
 // --- Static Levels (Scrambled) ---
 
 const LEVEL_1: BoardConfig[] = [
-    { row: 0, col: 0, type: "corner", rotation: 1, flipped: false, isStart: true, ports: [{ side: "left", flow: "in" }] },
-    { row: 0, col: 1, type: "straight", rotation: 1, flipped: false },
+    { row: 0, col: 0, type: "cross", rotation: 1, flipped: false, isStart: true, ports: [{ side: "left", flow: "in" }] },
+    { row: 0, col: 1, type: "straight", rotation: 0, flipped: false },
     { row: 0, col: 2, type: "corner", rotation: 2, flipped: false },
-    { row: 1, col: 0, type: "straight", rotation: 0, flipped: false },
-    { row: 1, col: 1, type: "corner", rotation: 0, flipped: false },
-    { row: 1, col: 2, type: "straight", rotation: 0, flipped: false },
-    { row: 2, col: 0, type: "corner", rotation: 0, flipped: false },
-    { row: 2, col: 1, type: "straight", rotation: 1, flipped: false },
-    { row: 2, col: 2, type: "straight", rotation: 1, flipped: false, isEnd: true, ports: [{ side: "right", flow: "out" }] },
-];
+    { row: 0, col: 3, type: "straight", rotation: 1, flipped: false },
+    { row: 0, col: 4, type: "corner", rotation: 3, flipped: false },
 
+    // Row 1
+    { row: 1, col: 0, type: "tee", rotation: 2, flipped: false },
+    { row: 1, col: 1, type: "cross", rotation: 0, flipped: false },
+    { row: 1, col: 2, type: "straight", rotation: 1, flipped: false },
+    { row: 1, col: 3, type: "tee", rotation: 3, flipped: false },
+    { row: 1, col: 4, type: "straight", rotation: 1, flipped: false },
+
+    // Row 2
+    { row: 2, col: 0, type: "corner", rotation: 0, flipped: false },
+    { row: 2, col: 1, type: "straight", rotation: 0, flipped: false },
+    { row: 2, col: 2, type: "cross", rotation: 1, flipped: false },
+    { row: 2, col: 3, type: "straight", rotation: 0, flipped: false },
+    { row: 2, col: 4, type: "corner", rotation: 2, flipped: false },
+
+    // Row 3
+    { row: 3, col: 0, type: "straight", rotation: 1, flipped: false },
+    { row: 3, col: 1, type: "tee", rotation: 1, flipped: false },
+    { row: 3, col: 2, type: "straight", rotation: 1, flipped: false },
+    { row: 3, col: 3, type: "cross", rotation: 0, flipped: false },
+    { row: 3, col: 4, type: "tee", rotation: 2, flipped: false },
+
+    // Row 4
+    { row: 4, col: 0, type: "corner", rotation: 1, flipped: false },
+    { row: 4, col: 1, type: "straight", rotation: 0, flipped: false },
+    { row: 4, col: 2, type: "corner", rotation: 1, flipped: false },
+    { row: 4, col: 3, type: "straight", rotation: 0, flipped: false },
+    { row: 4, col: 4, type: "cross", rotation: 3, flipped: false, isEnd: true, ports: [{ side: "right", flow: "out" }] },
+];
 const LEVEL_2: BoardConfig[] = [
     { row: 0, col: 0, type: "straight", rotation: 1, flipped: false, isStart: true, ports: [{ side: "left", flow: "in" }] },
     { row: 0, col: 1, type: "tee", rotation: 0, flipped: false },

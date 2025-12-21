@@ -1,33 +1,9 @@
 import { TileState, EvaluationResult } from "./types";
 import { Flow, Connector, DIRECTIONS, OFFSETS, OPPOSITE, directionLabel } from "./directions";
 
-export const GRID_SIZE = 3;
-
-const transformPorts = (tile: TileState): Connector[] => {
-    return tile.ports || [];
-};
-
-const createEmptyCounts = () => ({
-    up: { in: 0, out: 0 },
-    down: { in: 0, out: 0 },
-    left: { in: 0, out: 0 },
-    right: { in: 0, out: 0 },
-});
-
-const summarizeConnectors = (connectors: Connector[]) => {
-    const counts = createEmptyCounts();
-    connectors.forEach((c) => {
-        if (c.flow === "in") counts[c.side].in++;
-        else counts[c.side].out++;
-    });
-    return counts;
-};
-
-const cloneCounts = (counts: ReturnType<typeof createEmptyCounts>) =>
-    JSON.parse(JSON.stringify(counts)) as ReturnType<typeof createEmptyCounts>;
-
 export const evaluateBoard = (tiles: TileState[]): EvaluationResult => {
     const errors: string[] = [];
+    const gridSize = Math.sqrt(tiles.length);
     const startIndex = tiles.findIndex((tile) => tile.isStart);
     const endIndex = tiles.findIndex((tile) => tile.isEnd);
 
@@ -97,12 +73,12 @@ export const evaluateBoard = (tiles: TileState[]): EvaluationResult => {
             const neighborCol = currentTile.col + OFFSETS[dir].col;
 
             // Check Boundary
-            if (neighborRow < 0 || neighborRow >= GRID_SIZE || neighborCol < 0 || neighborCol >= GRID_SIZE) {
+            if (neighborRow < 0 || neighborRow >= gridSize || neighborCol < 0 || neighborCol >= gridSize) {
                 errors.push(`Tile ${currentTile.id} points ${directionLabel(dir)} into empty space.`);
                 continue;
             }
 
-            const neighborIndex = neighborRow * GRID_SIZE + neighborCol;
+            const neighborIndex = neighborRow * gridSize + neighborCol;
             const neighborTile = tiles[neighborIndex];
             const neighborConnectors = connectorsMap[neighborIndex];
             const oppositeDir = OPPOSITE[dir];
