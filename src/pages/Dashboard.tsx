@@ -112,11 +112,14 @@ const Dashboard = () => {
                 {games.map((game) =>
                   <div
                     key={game.id}
-                    className={`relative h-32 border-2 border-black rounded-xl flex items-center justify-center p-4 overflow-hidden ${game.name
-                      ? "bg-white hover:bg-black hover:text-white cursor-pointer transition-colors group"
-                      : "bg-gray-50 cursor-not-allowed"}
-                        ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
-                      `}
+                    className={`relative h-32 border-2 rounded-xl flex items-center justify-center p-4 overflow-hidden transition-all duration-300
+                      ${game.name === "Connect with me"
+                        ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
+                        : game.name
+                          ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
+                          : "bg-gray-50 border-black cursor-not-allowed"}
+                      ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
+                    `}
                     onClick={() => {
                       if (!game.disabled && game.path) {
                         if ((game as any).isExternal) {
@@ -127,14 +130,21 @@ const Dashboard = () => {
                       }
                     }}
                   >
+                    {game.name === "Connect with me" && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[200%] group-hover:animate-shine pointer-events-none z-10" />
+                    )}
                     {game.name ? (
                       <>
-                        <img
-                          src={accentureLogo}
-                          alt="Accenture"
-                          className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
-                        />
-                        <span className="text-lg font-bold text-center leading-tight mt-2">
+                        {game.name === "Connect with me" ? (
+                          <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
+                        ) : (
+                          <img
+                            src={accentureLogo}
+                            alt="Accenture"
+                            className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
+                          />
+                        )}
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : ""}`}>
                           {game.name}
                         </span>
                       </>
