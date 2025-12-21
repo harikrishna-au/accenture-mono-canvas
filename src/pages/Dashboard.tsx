@@ -27,7 +27,7 @@ const Dashboard = () => {
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
     { id: 4, name: "Communication Round", path: "/game/communication", disabled: true },
     { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
-    { id: 6, name: "", path: "" },
+    { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     { id: 7, name: "", path: "" },
     { id: 8, name: "", path: "" },
     { id: 9, name: "", path: "" },
