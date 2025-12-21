@@ -27,26 +27,53 @@ const BalloonMathGame: React.FC = () => {
     const TOTAL_ROUNDS = 25;
     const TIME_PER_ROUND = 10;
 
-    const operators = ['+', '-', '*', '/', '%'];
-
     const generateEquation = () => {
-        const num1 = Math.floor(Math.random() * 20) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        const operator = operators[Math.floor(Math.random() * operators.length)];
+        // 30% chance for Decimal Multiplication, 70% for Integer Math
+        const type = Math.random() > 0.7 ? 'decimal' : 'integer';
 
-        let equation = `${num1} ${operator} ${num2} `;
-        let answer: number;
+        if (type === 'decimal') {
+            // Generate 0.1 to 0.9
+            const decimal = Number((Math.random() * 0.9 + 0.1).toFixed(1));
+            const int = Math.floor(Math.random() * 9) + 2; // 2 to 10
 
-        switch (operator) {
-            case '+': answer = num1 + num2; break;
-            case '-': answer = num1 - num2; break;
-            case '*': answer = num1 * num2; break;
-            case '/': answer = Math.floor(num1 / num2); break;
-            case '%': answer = num1 % num2; break;
-            default: answer = 0;
+            return {
+                equation: `${decimal} * ${int}`,
+                answer: Number((decimal * int).toFixed(2))
+            };
+        } else {
+            // Standard Integer Math
+            const operators = ['+', '-', '*', '/', '%'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+
+            let num1 = Math.floor(Math.random() * 20) + 1;
+            let num2 = Math.floor(Math.random() * 10) + 1;
+
+            // Special handling to ensure clean integer results/valid math
+            if (operator === '/') {
+                // Ensure num1 is a multiple of num2 to avoid fractions like 3/4
+                let answer = Math.floor(Math.random() * 10) + 1; // Decide answer first (1-10)
+                num2 = Math.floor(Math.random() * 5) + 2;    // Divisor (2-6)
+                num1 = answer * num2;                        // Dividend
+            } else if (operator === '%') {
+                // Ensure meaningful modulo
+                num2 = Math.floor(Math.random() * 5) + 2;
+                num1 = Math.floor(Math.random() * 20) + num2;
+            }
+
+            let answer = 0;
+            switch (operator) {
+                case '+': answer = num1 + num2; break;
+                case '-': answer = num1 - num2; break;
+                case '*': answer = num1 * num2; break;
+                case '/': answer = num1 / num2; break;
+                case '%': answer = num1 % num2; break;
+            }
+
+            return {
+                equation: `${num1} ${operator} ${num2}`,
+                answer
+            };
         }
-
-        return { equation, answer };
     };
 
     const getBalloonPosition = (row: number, col: number) => {
@@ -190,11 +217,15 @@ const BalloonMathGame: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="font-mono bg-neutral-200 px-2 py-1 rounded">/</span>
-                                        <span>Division (e.g., 15 / 3 = 5)</span>
+                                        <span>Division (e.g., 12 / 3 = 4)</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="font-mono bg-neutral-200 px-2 py-1 rounded">%</span>
-                                        <span>Modulo/Remainder (e.g., 10 % 3 = 1)</span>
+                                        <span>Modulo (e.g., 10 % 3 = 1)</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-mono bg-neutral-200 px-2 py-1 rounded">*</span>
+                                        <span>Decimal (e.g., 0.7 * 3 = 2.1)</span>
                                     </div>
                                 </div>
                             </div>
