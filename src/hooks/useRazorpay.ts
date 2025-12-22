@@ -70,11 +70,37 @@ export function useRazorpay() {
                 "order_id": order.id, // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
                 // "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/", // We use handler instead for SPA
                 "handler": async function (response: any) {
-                    toast.success("Payment Successful! Welcome to Premium.");
-                    // In a real app, verify signature here by calling backend
-                    setTimeout(() => {
+                    try {
+                        const verifyRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-razorpay-payment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                            },
+                            body: JSON.stringify({
+                                order_id: response.razorpay_order_id,
+                                payment_id: response.razorpay_payment_id,
+                                signature: response.razorpay_signature,
+                                clerk_user_id: user.id
+                            })
+                        });
+
+                        if (verifyRes.ok) {
+                            toast.success("Payment Verified! Premium Unlocked. 🌟");
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toast.error("Payment successful but verification failed. Please contact support.");
+                            // Even if verification details fail, we reload just in case webhook worked
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    } catch (e) {
+                        console.error("Verification error", e);
                         window.location.reload();
-                    }, 1500);
+                    }
                 },
                 "prefill": {
                     "name": user.fullName || "", // your customer's name
