@@ -47,7 +47,7 @@ export function useRazorpay() {
                     'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
                 },
                 body: JSON.stringify({
-                    amount: 9, // Amount in INR
+                    amount: 59, // Amount in INR
                     clerk_user_id: user.id
                 })
             });

@@ -553,7 +553,7 @@ const HiddenMaze = () => {
                             disabled={isPaymentLoading}
                             className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
                         >
-                            {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹9)"}
+                            {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹59)"}
                         </Button>
                         <Button
                             variant="ghost"
