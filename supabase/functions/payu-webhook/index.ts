@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 import { encode as hex } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 
-serve(async (req) => {
+serve(async (req: Request) => {
     // PayU sends form data (application/x-www-form-urlencoded)
     const formData = await req.formData();
     const data: Record<string, string> = {};
@@ -60,13 +60,15 @@ serve(async (req) => {
     }).eq('txnid', txnid);
 
     if (status === 'success') {
-        // Update User Profile to Premium
-        // udf1 contains user_id
+        // Update User Profile to Premium (Upsert to handle new users)
+        // udf1 contains user_id, email is also available in data
         const userId = udf1;
-        await supabaseAdmin.from('profiles').update({
+        await supabaseAdmin.from('profiles').upsert({
+            user_id: userId,
+            email: email, // Ensure email is set/updated
             is_premium: true,
             updated_at: new Date()
-        }).eq('user_id', userId);
+        }, { onConflict: 'user_id' });
 
         // Redirect to success page on frontend
         return Response.redirect(`${Deno.env.get('SUPABASE_URL')?.replace('/functions/v1', '')}/dashboard?payment=success`, 303);

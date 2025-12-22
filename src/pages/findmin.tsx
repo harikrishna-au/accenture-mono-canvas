@@ -133,7 +133,7 @@ export default function FindMin() {
     }
 
     // CHECK PREMIUM STATUS
-    if (won && level === 2 && !isPremium) {
+    if (won && level === 3 && !isPremium) {
       setTimeout(() => {
         setShowLockModal(true);
       }, 1000);
@@ -333,9 +333,9 @@ export default function FindMin() {
               <Lock className="w-8 h-8 text-amber-500" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-neutral-900">Level 3 Locked</h2>
+              <h2 className="text-2xl font-black text-neutral-900">Level 4 Locked</h2>
               <p className="text-neutral-600 mt-2">
-                You've mastered the basics! Subscribe to <strong>Premium</strong> to unlock Levels 3-6 and challenge yourself with advanced puzzles.
+                You've mastered the basics! Subscribe to <strong>Premium</strong> to unlock Levels 4-6 and challenge yourself with advanced puzzles.
               </p>
             </div>
             <Button
@@ -343,7 +343,7 @@ export default function FindMin() {
               disabled={isPaymentLoading}
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
             >
-              {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹499)"}
+              {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹99)"}
             </Button>
             <Button
               variant="ghost"

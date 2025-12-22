@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { XCircle, Lock, Unlock } from "lucide-react";
+import { XCircle, Lock, Unlock, Crown } from "lucide-react";
 import { useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Youtube } from "lucide-react";
@@ -46,7 +46,7 @@ const Dashboard = () => {
       name: isPremium ? "Premium Active" : "Unlock All Levels",
       path: "#subscribe",
       special: true,
-      icon: isPremium ? <Unlock className="w-8 h-8 text-emerald-500" /> : <Lock className="w-8 h-8 text-amber-500" />
+      icon: isPremium ? <Crown className="w-8 h-8 text-amber-400 fill-amber-400/20" /> : <Lock className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
     },
     { id: 8, name: "", path: "" },
     { id: 9, name: "", path: "" },
@@ -95,6 +95,12 @@ const Dashboard = () => {
                   </span>
                   Building in Public
                 </div>
+                {isPremium && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/50 text-xs font-bold text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)] mb-2">
+                    <Crown className="w-3.5 h-3.5 fill-current" />
+                    PREMIUM MEMBER
+                  </div>
+                )}
                 <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
                   Join the Journey
                 </h1>
@@ -138,8 +144,8 @@ const Dashboard = () => {
                         ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
                         : (game as any).special
                           ? isPremium
-                            ? "bg-emerald-50 border-emerald-500 cursor-default"
-                            : "bg-amber-50 border-amber-500 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer animate-pulse"
+                            ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
+                            : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
                           : game.name
                             ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
                             : "bg-gray-50 border-black cursor-not-allowed"}
@@ -175,7 +181,7 @@ const Dashboard = () => {
                             className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
                           />
                         )}
-                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : (game as any).special ? (isPremium ? "text-emerald-900" : "text-amber-900") : ""}`}>
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : (game as any).special ? "text-white" : ""}`}>
                           {game.name}
                         </span>
                       </>

@@ -38,14 +38,26 @@ export function useRazorpay() {
             setIsLoading(true);
 
             // 1. Create Order
-            const { data: order, error } = await supabase.functions.invoke('create-razorpay-order', {
-                body: {
-                    amount: 499, // Amount in INR
+            const { data: { session } } = await supabase.auth.getSession();
+
+            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-razorpay-order`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                },
+                body: JSON.stringify({
+                    amount: 99, // Amount in INR
                     clerk_user_id: user.id
-                }
+                })
             });
 
-            if (error) throw error;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to create order');
+            }
+
+            const order = await response.json();
 
             // 2. Open Razorpay Options
             const options = {
