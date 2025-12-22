@@ -56,6 +56,7 @@ const Dashboard = () => {
     {
       id: 7,
       name: isPremium ? "Premium Active" : "Unlock All Levels",
+      subtitle: isPremium ? "" : "Early Access: Communication Round",
       path: "#subscribe",
       special: true,
       icon: isPremium ? <Crown className="w-8 h-8 text-amber-400 fill-amber-400/20" /> : <Lock className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
@@ -70,14 +71,7 @@ const Dashboard = () => {
     },
     { id: 9, name: "", path: "" },
     { id: 10, name: "", path: "" },
-    {
-      id: 11,
-      name: "Early Access: Communication Round",
-      path: "#survey",
-      special: true,
-      survey: true,
-      icon: <MessageSquare className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
-    },
+    { id: 11, name: "", path: "" },
     { id: 12, name: "", path: "" },
   ];
 
@@ -165,7 +159,7 @@ const Dashboard = () => {
                 {games.map((game) =>
                   <div
                     key={game.id}
-                    className={`relative h-32 border-2 rounded-xl flex items-center justify-center p-4 overflow-hidden transition-all duration-300
+                    className={`relative h-32 border-2 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden transition-all duration-300
                       ${game.name === "Connect with me"
                         ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
                         : (game as any).special
@@ -216,6 +210,11 @@ const Dashboard = () => {
                         <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : (game as any).special ? "text-white" : ""}`}>
                           {game.name}
                         </span>
+                        {(game as any).subtitle && (
+                          <span className="text-[10px] font-medium text-white/90 text-center uppercase tracking-wide mt-1 animate-pulse">
+                            {(game as any).subtitle}
+                          </span>
+                        )}
                       </>
                     ) : (
                       <span className="text-sm font-medium text-neutral-400 text-center italic">
