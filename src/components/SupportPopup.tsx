@@ -14,56 +14,73 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
     const { user } = useUser();
     const [isLoading, setIsLoading] = useState(false);
 
-    const handlePayU = async () => {
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleRazorpay = async () => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return;
         }
 
+        const res = await loadRazorpay();
+        if (!res) {
+            toast.error("Razorpay SDK failed to load. Are you online?");
+            return;
+        }
+
         try {
             setIsLoading(true);
-            const { data, error } = await supabase.functions.invoke('create-payment', {
+
+            // 1. Create Order
+            const { data: order, error } = await supabase.functions.invoke('create-razorpay-order', {
                 body: {
-                    amount: 499, // Example amount
-                    productinfo: "Premium Upgrade",
-                    firstname: user.firstName || "User",
-                    email: user.primaryEmailAddress?.emailAddress,
-                    phone: "9999999999", // PayU requires phone, maybe collect or dummy
+                    amount: 499, // Amount in INR
                     clerk_user_id: user.id
                 }
             });
 
             if (error) throw error;
 
-            // PayU requires a POST form submission
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = data.action;
+            // 2. Open Razorpay Options
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Frontend Key ID
+                amount: order.amount,
+                currency: order.currency,
+                name: "Accenture Mono Canvas",
+                description: "Premium Upgrade",
+                // image: "https://your-logo-url",
+                order_id: order.id, // This is the Order ID created in step 1
+                handler: async function (response: any) {
+                    // Payment Successful!
+                    // In a production app, verify signature on backend again just to be sure
+                    // But our Webhook will handle the actual DB upgrade safely.
+                    toast.success("Payment Successful! Upgrading your account...");
 
-            const fields = {
-                key: data.key,
-                txnid: data.txnid,
-                amount: data.amount,
-                productinfo: data.productinfo,
-                firstname: data.firstname,
-                email: data.email,
-                phone: data.phone,
-                surl: data.surl,
-                furl: data.furl,
-                hash: data.hash,
-                udf1: data.udf1
+                    // Optimistic update or reload could happen here
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                },
+                prefill: {
+                    name: user.fullName || "User",
+                    email: user.primaryEmailAddress?.emailAddress,
+                    contact: "9999999999"
+                },
+                theme: {
+                    color: "#0F172A"
+                }
             };
 
-            for (const key in fields) {
-                const input = document.createElement("input");
-                input.type = "hidden";
-                input.name = key;
-                input.value = fields[key as keyof typeof fields];
-                form.appendChild(input);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
+            const rzp1 = new (window as any).Razorpay(options);
+            rzp1.open();
 
         } catch (error: any) {
             console.error('Payment Error:', error);
@@ -109,14 +126,14 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
                         </a>
 
                         <button
-                            onClick={handlePayU}
+                            onClick={handleRazorpay}
                             disabled={isLoading}
-                            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1065b7] text-white rounded-xl font-bold hover:bg-[#0e5a9c] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center gap-2 w-full py-3 bg-[#3399cc] text-white rounded-xl font-bold hover:bg-[#287aa3] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <span className="text-xs uppercase tracking-wider">Pay Now via PayU</span>
+                                <span className="text-xs uppercase tracking-wider">Pay Now via Razorpay</span>
                             )}
                         </button>
                     </div>
