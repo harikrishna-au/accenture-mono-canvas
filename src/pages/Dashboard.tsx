@@ -70,7 +70,14 @@ const Dashboard = () => {
     },
     { id: 9, name: "", path: "" },
     { id: 10, name: "", path: "" },
-    { id: 11, name: "", path: "" },
+    {
+      id: 11,
+      name: "Early Access: Communication Round",
+      path: "#survey",
+      special: true,
+      survey: true,
+      icon: <MessageSquare className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
+    },
     { id: 12, name: "", path: "" },
   ];
 

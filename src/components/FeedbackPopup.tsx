@@ -27,7 +27,6 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     const [selectedRound, setSelectedRound] = useState("Not Sure");
     const [rating, setRating] = useState(5);
     const [techRoundExp, setTechRoundExp] = useState("");
-    const [expectedPrice, setExpectedPrice] = useState([499]); // Default mid-range
 
     if (!isOpen) return null;
 
@@ -48,8 +47,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                 college: college,
                 selected_round: selectedRound,
                 rating: rating,
-                technical_round_exp: techRoundExp,
-                expected_price: expectedPrice[0]
+                technical_round_exp: techRoundExp
             });
 
             if (error) throw error;
