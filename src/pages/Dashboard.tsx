@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { XCircle, Lock, Unlock, Crown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Youtube } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
@@ -8,7 +8,7 @@ import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
 import qrCode from "@/lib/qr-code.png";
 import FeedbackPopup from "@/components/FeedbackPopup";
-import { Coffee, MessageSquare } from "lucide-react";
+import { Coffee, MessageSquare, ClipboardList } from "lucide-react";
 
 import Header from "@/components/Header";
 import SupportPopup from "@/components/SupportPopup";
@@ -25,6 +25,18 @@ const Dashboard = () => {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
+
+  // Auto-show feedback popup once
+  useEffect(() => {
+    const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
+    if (!hasSeenFeedback && !premiumLoading) {
+      const timer = setTimeout(() => {
+        setShowFeedbackPopup(true);
+        localStorage.setItem('has_seen_feedback_v1', 'true');
+      }, 3000); // Show after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [premiumLoading]);
 
   const handleSubscribe = async () => {
     if (isPremium) {
@@ -48,7 +60,14 @@ const Dashboard = () => {
       special: true,
       icon: isPremium ? <Crown className="w-8 h-8 text-amber-400 fill-amber-400/20" /> : <Lock className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
     },
-    { id: 8, name: "", path: "" },
+    {
+      id: 8,
+      name: "Take Survey",
+      path: "#survey",
+      special: true,
+      survey: true,
+      icon: <ClipboardList className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
+    },
     { id: 9, name: "", path: "" },
     { id: 10, name: "", path: "" },
     { id: 11, name: "", path: "" },
@@ -143,15 +162,21 @@ const Dashboard = () => {
                       ${game.name === "Connect with me"
                         ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
                         : (game as any).special
-                          ? isPremium
-                            ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
-                            : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                          ? (game as any).survey
+                            ? "bg-gradient-to-br from-emerald-500 to-teal-600 border-transparent shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                            : isPremium
+                              ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
+                              : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
                           : game.name
                             ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
                             : "bg-gray-50 border-black cursor-not-allowed"}
                       ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
                     `}
                     onClick={() => {
+                      if ((game as any).survey) {
+                        setShowFeedbackPopup(true);
+                        return;
+                      }
                       if ((game as any).special && !isPremium) {
                         handleSubscribe();
                         return;
