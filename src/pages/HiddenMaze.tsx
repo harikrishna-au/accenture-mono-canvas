@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer, LogOut } from 'lucide-react';
+import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer, LogOut, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from "@/components/Header";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useRazorpay } from "@/hooks/useRazorpay";
 
 // Grid Types
 type CellType = 'EMPTY' | 'KEY' | 'GOAL' | 'START';
@@ -156,6 +158,12 @@ const HiddenMaze = () => {
     const [isGameActive, setIsGameActive] = useState(true);
     const [gameFinished, setGameFinished] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
+    const [showLockModal, setShowLockModal] = useState(false);
+
+    // Hooks
+    const { isPremium } = usePremiumStatus();
+    const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
+
 
     // Level State
     const [playerPos, setPlayerPos] = useState<Position>({ row: 0, col: 0 });
@@ -182,7 +190,7 @@ const HiddenMaze = () => {
 
     // Timer Logic
     useEffect(() => {
-        if (!isGameActive || gameFinished) return;
+        if (!isGameActive || gameFinished || showLockModal) return;
 
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
@@ -196,11 +204,19 @@ const HiddenMaze = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [isGameActive, gameFinished, level]);
+    }, [isGameActive, gameFinished, level, showLockModal]);
 
     const handleLevelComplete = (won: boolean) => {
         if (won) {
             setLevelsWon(prev => prev + 1);
+        }
+
+        // CHECK PREMIUM STATUS
+        if (won && level === 2 && !isPremium) {
+            setTimeout(() => {
+                setShowLockModal(true);
+            }, 500);
+            return;
         }
 
         if (level < 6) {
@@ -248,7 +264,7 @@ const HiddenMaze = () => {
     }, []);
 
     const handleMove = useCallback((dRow: number, dCol: number) => {
-        if (!isGameActive || gameFinished) return;
+        if (!isGameActive || gameFinished || showLockModal) return;
 
         const newRow = playerPos.row + dRow;
         const newCol = playerPos.col + dCol;
@@ -312,7 +328,7 @@ const HiddenMaze = () => {
             }
         }
 
-    }, [playerPos, isGameActive, gameFinished, collectedKeys, totalKeys, currentMap, currentEdges, gridSize, resetOnDeath]);
+    }, [playerPos, isGameActive, gameFinished, collectedKeys, totalKeys, currentMap, currentEdges, gridSize, resetOnDeath, showLockModal]);
 
     // Click to Move Logic
     const handleCellClick = (row: number, col: number) => {
@@ -519,6 +535,36 @@ const HiddenMaze = () => {
                 })}
             </div>
 
+            {/* PREMIUM LOCK MODAL */}
+            {showLockModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full relative animate-in zoom-in-95 duration-200 text-center space-y-6">
+                        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+                            <Lock className="w-8 h-8 text-amber-500" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-neutral-900">Level 3 Locked</h2>
+                            <p className="text-neutral-600 mt-2">
+                                You've mastered the basics! Subscribe to <strong>Premium</strong> to unlock Levels 3-6 and challenge yourself with advanced puzzles.
+                            </p>
+                        </div>
+                        <Button
+                            onClick={() => initiatePayment()}
+                            disabled={isPaymentLoading}
+                            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
+                        >
+                            {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹499)"}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            onClick={() => window.location.href = "/dashboard"}
+                            className="text-neutral-400 hover:text-neutral-600"
+                        >
+                            Maybe Later
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

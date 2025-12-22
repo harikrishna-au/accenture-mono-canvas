@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { XCircle } from "lucide-react";
+import { XCircle, Lock, Unlock } from "lucide-react";
 import { useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Youtube } from "lucide-react";
@@ -15,11 +15,24 @@ import SupportPopup from "@/components/SupportPopup";
 
 import accentureLogo from "@/lib/accenture-svgrepo-com.svg";
 import SEO from "@/components/SEO";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useRazorpay } from "@/hooks/useRazorpay";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
+  const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
+
+  const handleSubscribe = async () => {
+    if (isPremium) {
+      toast.success("You are already a Premium member!");
+      return;
+    }
+    await initiatePayment();
+  };
 
   const games = [
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
@@ -28,7 +41,13 @@ const Dashboard = () => {
     { id: 4, name: "Communication Round", path: "/game/communication", disabled: true },
     { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
-    { id: 7, name: "", path: "" },
+    {
+      id: 7,
+      name: isPremium ? "Premium Active" : "Unlock All Levels",
+      path: "#subscribe",
+      special: true,
+      icon: isPremium ? <Unlock className="w-8 h-8 text-emerald-500" /> : <Lock className="w-8 h-8 text-amber-500" />
+    },
     { id: 8, name: "", path: "" },
     { id: 9, name: "", path: "" },
     { id: 10, name: "", path: "" },
@@ -80,7 +99,9 @@ const Dashboard = () => {
                   Join the Journey
                 </h1>
                 <p className="text-lg text-neutral-300 max-w-xl">
-                  I'm building this platform from scratch. Watch the process, learn with me, and be a part of the story.
+                  {isPremium
+                    ? "Thank you for being a Premium Member! You have unlimited access to all levels."
+                    : "I'm building this platform from scratch. Watch the process, learn with me, and be a part of the story."}
                 </p>
               </div>
 
@@ -115,13 +136,21 @@ const Dashboard = () => {
                     className={`relative h-32 border-2 rounded-xl flex items-center justify-center p-4 overflow-hidden transition-all duration-300
                       ${game.name === "Connect with me"
                         ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
-                        : game.name
-                          ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
-                          : "bg-gray-50 border-black cursor-not-allowed"}
+                        : (game as any).special
+                          ? isPremium
+                            ? "bg-emerald-50 border-emerald-500 cursor-default"
+                            : "bg-amber-50 border-amber-500 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer animate-pulse"
+                          : game.name
+                            ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
+                            : "bg-gray-50 border-black cursor-not-allowed"}
                       ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
                     `}
                     onClick={() => {
-                      if (!game.disabled && game.path) {
+                      if ((game as any).special && !isPremium) {
+                        handleSubscribe();
+                        return;
+                      }
+                      if (!game.disabled && game.path && !((game as any).special)) {
                         if ((game as any).isExternal) {
                           window.open(game.path, '_blank', 'noopener,noreferrer');
                         } else {
@@ -137,6 +166,8 @@ const Dashboard = () => {
                       <>
                         {game.name === "Connect with me" ? (
                           <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
+                        ) : (game as any).special ? (
+                          <div className="mb-1">{(game as any).icon}</div>
                         ) : (
                           <img
                             src={accentureLogo}
@@ -144,7 +175,7 @@ const Dashboard = () => {
                             className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
                           />
                         )}
-                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : ""}`}>
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : (game as any).special ? (isPremium ? "text-emerald-900" : "text-amber-900") : ""}`}>
                           {game.name}
                         </span>
                       </>
@@ -153,7 +184,7 @@ const Dashboard = () => {
                         Coming Soon
                       </span>
                     )}
-                    {game.disabled && (
+                    {game.disabled && !((game as any).special) && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="relative">
                           <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">

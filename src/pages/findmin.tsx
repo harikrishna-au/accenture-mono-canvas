@@ -12,7 +12,8 @@ import {
   ArrowRight,
   Youtube,
   Trophy,
-  LogOut
+  LogOut,
+  Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createShape } from "@/puzzle/matrix/createShape";
@@ -21,6 +22,8 @@ import { TileState, EvaluationResult } from "@/puzzle/matrix/types";
 import { evaluateBoard } from "@/puzzle/matrix/validation";
 import { FlowTile } from "@/components/matrix/FlowTile";
 import Header from "@/components/Header";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useRazorpay } from "@/hooks/useRazorpay";
 
 const createTileId = (row: number, col: number) => `${String.fromCharCode(65 + row)}${col + 1}`;
 
@@ -43,6 +46,10 @@ export default function FindMin() {
   const [validation, setValidation] = useState<EvaluationResult | null>(null);
   const [timeLeft, setTimeLeft] = useState(240); // 4:00 in seconds
   const [gameComplete, setGameComplete] = useState(false);
+  const [showLockModal, setShowLockModal] = useState(false);
+
+  const { isPremium } = usePremiumStatus();
+  const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
 
   useEffect(() => {
     setTiles(buildBoard(level));
@@ -50,7 +57,7 @@ export default function FindMin() {
 
   // Timer logic
   useEffect(() => {
-    if (gameComplete) return;
+    if (gameComplete || showLockModal) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -62,14 +69,14 @@ export default function FindMin() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [gameComplete]);
+  }, [gameComplete, showLockModal]);
 
   // Handle Timeout
   useEffect(() => {
-    if (timeLeft === 0 && !gameComplete) {
+    if (timeLeft === 0 && !gameComplete && !showLockModal) {
       handleLevelComplete(false);
     }
-  }, [timeLeft, gameComplete]);
+  }, [timeLeft, gameComplete, showLockModal]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -125,7 +132,15 @@ export default function FindMin() {
       setLevelsWon(prev => prev + 1);
     }
 
-    if (level < 3) {
+    // CHECK PREMIUM STATUS
+    if (won && level === 2 && !isPremium) {
+      setTimeout(() => {
+        setShowLockModal(true);
+      }, 1000);
+      return;
+    }
+
+    if (level < 6) {
       setTimeout(() => {
         setLevel(l => l + 1);
         setValidation(null);
@@ -149,7 +164,7 @@ export default function FindMin() {
 
   const handleNextLevel = () => {
     // Deprecated in favor of auto-advance, but kept for safety if needed
-    if (level < 3) {
+    if (level < 6) {
       setLevel(l => l + 1);
       setValidation(null);
       setSelectedIndex(null);
@@ -173,7 +188,7 @@ export default function FindMin() {
           <Trophy className="h-24 w-24 text-yellow-500 mx-auto animate-bounce" />
           <h1 className="text-4xl font-extrabold text-neutral-900">Assessment Complete!</h1>
           <p className="text-xl text-neutral-600">
-            {levelsWon === 3 && "Outstanding! Your spatial reasoning is top-notch. You can visualize complex patterns easily."}
+            {levelsWon >= 3 && "Outstanding! Your spatial reasoning is top-notch. You can visualize complex patterns easily."}
             {levelsWon === 2 && "Great job! You have a solid grasp of logic. Practice rotating shapes mentally to improve speed."}
             {levelsWon === 1 && "Good start! Focus on tracing the path from Start to End before moving tiles."}
             {levelsWon === 0 && "Keep practicing! Try breaking the path down into smaller segments and solving them one by one."}
@@ -307,6 +322,37 @@ export default function FindMin() {
               Reset Level
             </Button>
           )}
+        </div>
+      )}
+
+      {/* PREMIUM LOCK MODAL */}
+      {showLockModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full relative animate-in zoom-in-95 duration-200 text-center space-y-6">
+            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+              <Lock className="w-8 h-8 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-neutral-900">Level 3 Locked</h2>
+              <p className="text-neutral-600 mt-2">
+                You've mastered the basics! Subscribe to <strong>Premium</strong> to unlock Levels 3-6 and challenge yourself with advanced puzzles.
+              </p>
+            </div>
+            <Button
+              onClick={() => initiatePayment()}
+              disabled={isPaymentLoading}
+              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
+            >
+              {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹499)"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => window.location.href = "/dashboard"}
+              className="text-neutral-400 hover:text-neutral-600"
+            >
+              Maybe Later
+            </Button>
+          </div>
         </div>
       )}
 
