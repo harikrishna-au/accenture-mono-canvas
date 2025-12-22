@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X, MessageSquare, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,7 +52,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
 
             setIsSubmitting(false);
             setIsSent(true);
-            toast.success("Feedback Recieved! Thank you.");
+            toast.success("Feedback Received! Thank you.");
 
             // Reset after showing success message
             setTimeout(() => {
@@ -132,27 +130,6 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                                         <Label htmlFor="r3" className="cursor-pointer font-medium">Not Sure</Label>
                                     </div>
                                 </RadioGroup>
-                            </div>
-
-                            <div className="space-y-3 p-4 bg-amber-50 rounded-2xl border border-amber-100/50">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-sm font-bold text-amber-900">Fair Price for Comm. Round?</Label>
-                                    <span className="text-lg font-black text-amber-600 bg-white px-3 py-1 rounded-lg shadow-sm border border-amber-100">
-                                        ₹{expectedPrice[0]}
-                                    </span>
-                                </div>
-                                <Slider
-                                    value={expectedPrice}
-                                    onValueChange={setExpectedPrice}
-                                    max={1000}
-                                    step={10}
-                                    className="py-2 cursor-pointer"
-                                />
-                                <div className="flex justify-between text-xs font-medium text-amber-700/60 px-1">
-                                    <span>₹0</span>
-                                    <span>₹500</span>
-                                    <span>₹1000</span>
-                                </div>
                             </div>
 
                             <div className="space-y-2">
