@@ -49,25 +49,31 @@ export function useRazorpay() {
 
             // 2. Open Razorpay Options
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                amount: order.amount,
-                currency: order.currency,
-                name: "Accenture Mono Canvas",
-                description: "Premium Upgrade",
-                order_id: order.id,
-                handler: async function (response: any) {
-                    toast.success("Payment Successful! Upgrading your account...");
+                "key": import.meta.env.VITE_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
+                "amount": order.amount.toString(), // Amount is in currency subunits.
+                "currency": order.currency,
+                "name": "Harry The Blaze", // your business name
+                "description": "Premium Subscription",
+                "image": "https://avatars.githubusercontent.com/u/12345678?v=4", // Use a valid logo URL or placeholder
+                "order_id": order.id, // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                // "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/", // We use handler instead for SPA
+                "handler": async function (response: any) {
+                    toast.success("Payment Successful! Welcome to Premium.");
+                    // In a real app, verify signature here by calling backend
                     setTimeout(() => {
                         window.location.reload();
-                    }, 2000);
+                    }, 1500);
                 },
-                prefill: {
-                    name: user.fullName || "User",
-                    email: user.primaryEmailAddress?.emailAddress,
-                    contact: "9999999999"
+                "prefill": {
+                    "name": user.fullName || "", // your customer's name
+                    "email": user.primaryEmailAddress?.emailAddress || "",
+                    "contact": "" // Provide the customer's phone number for better conversion rates 
                 },
-                theme: {
-                    color: "#0F172A"
+                "notes": {
+                    "address": "Accenture Mono Canvas Office"
+                },
+                "theme": {
+                    "color": "#3399cc" // Matching the requested snippet color
                 }
             };
 
