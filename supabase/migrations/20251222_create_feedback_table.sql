@@ -7,7 +7,6 @@ create table if not exists public.feedback (
   selected_round text not null, -- 'Yes', 'No', 'Not Sure'
   rating integer not null check (rating >= 1 and rating <= 5),
   technical_round_exp text,
-  expected_price integer not null,
   created_at timestamptz not null default now()
 );
 
