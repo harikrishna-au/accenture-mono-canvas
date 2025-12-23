@@ -13,6 +13,9 @@ import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { CommunicationRounds } from "./pages/communication-rounds";
+import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
+import AboutUs from "./pages/AboutUs";
 import MobileRestriction from "@/components/MobileRestriction";
 
 import { useState } from "react";
@@ -48,6 +51,9 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/refund" element={<RefundPolicy />} />
+              <Route path="/about" element={<AboutUs />} />
 
               {/* Matrix Flow Game */}
               <Route path="/game/matrix" element={<Guidelines />} />

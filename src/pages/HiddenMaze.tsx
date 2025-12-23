@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer, LogOut } from 'lucide-react';
+import { Key, DoorOpen, User, UserCheck, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Timer, LogOut, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from "@/components/Header";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useRazorpay } from "@/hooks/useRazorpay";
 
 // Grid Types
 type CellType = 'EMPTY' | 'KEY' | 'GOAL' | 'START';
@@ -66,10 +68,83 @@ const LEVEL_3_EDGES = new Set([
     '6,2|6,1', '6,1|6,0' // Goal
 ]);
 
+const LEVEL_4_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_4_EDGES = new Set([
+    '0,0|0,1', '0,1|0,2', '0,2|0,3', '0,3|1,3',
+    '1,3|1,2', '1,2|1,1', '1,1|2,1',
+    '2,1|2,2', '2,2|2,3', '2,3|2,4', '2,4|3,4',
+    '3,4|3,3', '3,3|3,2', '3,2|4,2',
+    '4,2|4,3', '4,3|4,4', '4,4|4,5', '4,5|5,5',
+    '5,5|5,4', // Key
+    '5,4|6,4', '6,4|6,3', '6,3|6,2', '6,2|6,1', '6,1|6,0'
+]);
+
+const LEVEL_5_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_5_EDGES = new Set([
+    // Spiral In
+    '0,0|0,1', '0,1|0,2', '0,2|0,3', '0,3|0,4', '0,4|1,4',
+    '1,4|2,4', '2,4|2,3', // Key 1
+
+    // Redirect inward
+    '2,3|2,2', '2,2|2,1', '2,1|3,1',
+    '3,1|4,1', '4,1|4,2', // Key 2
+
+    // Long escape path
+    '4,2|4,3', '4,3|4,4', '4,4|5,4', '5,4|6,4',
+    '6,4|6,3', '6,3|6,2', '6,2|6,1', '6,1|6,0'
+]);
+
+const LEVEL_6_MAP: CellType[][] = [
+    ['START', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'KEY', 'EMPTY', 'KEY', 'EMPTY', 'EMPTY'],
+    ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+    ['GOAL', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY'],
+];
+
+const LEVEL_6_EDGES = new Set([
+    // False progression
+    '0,0|1,0', '1,0|2,0', '2,0|3,0', '3,0|3,1',
+    '3,1|3,2', '3,2|2,2', '2,2|1,2',
+
+    // Key 1
+    '1,2|1,3', '1,3|2,3', '2,3|3,3', '3,3|4,3',
+
+    // Forced reroute
+    '4,3|4,2', // Key 2
+    '4,2|5,2', '5,2|6,2',
+
+    // Final descent
+    '6,2|6,1', '6,1|6,0'
+]);
+
 const LEVELS = [
     { map: LEVEL_1_MAP, edges: LEVEL_1_EDGES },
     { map: LEVEL_2_MAP, edges: LEVEL_2_EDGES },
-    { map: LEVEL_3_MAP, edges: LEVEL_3_EDGES }
+    { map: LEVEL_3_MAP, edges: LEVEL_3_EDGES },
+    { map: LEVEL_4_MAP, edges: LEVEL_4_EDGES },
+    { map: LEVEL_5_MAP, edges: LEVEL_5_EDGES },
+    { map: LEVEL_6_MAP, edges: LEVEL_6_EDGES }
 ];
 const TIME_LIMIT = 300; // 5 minutes in seconds
 
@@ -83,6 +158,12 @@ const HiddenMaze = () => {
     const [isGameActive, setIsGameActive] = useState(true);
     const [gameFinished, setGameFinished] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
+    const [showLockModal, setShowLockModal] = useState(false);
+
+    // Hooks
+    const { isPremium } = usePremiumStatus();
+    const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
+
 
     // Level State
     const [playerPos, setPlayerPos] = useState<Position>({ row: 0, col: 0 });
@@ -109,7 +190,7 @@ const HiddenMaze = () => {
 
     // Timer Logic
     useEffect(() => {
-        if (!isGameActive || gameFinished) return;
+        if (!isGameActive || gameFinished || showLockModal) return;
 
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
@@ -123,14 +204,22 @@ const HiddenMaze = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [isGameActive, gameFinished, level]);
+    }, [isGameActive, gameFinished, level, showLockModal]);
 
     const handleLevelComplete = (won: boolean) => {
         if (won) {
             setLevelsWon(prev => prev + 1);
         }
 
-        if (level < 3) {
+        // CHECK PREMIUM STATUS
+        if (won && level === 3 && !isPremium) {
+            setTimeout(() => {
+                setShowLockModal(true);
+            }, 500);
+            return;
+        }
+
+        if (level < 6) {
             // Next Level
             setLevel(prev => prev + 1);
             resetLevelState();
@@ -175,7 +264,7 @@ const HiddenMaze = () => {
     }, []);
 
     const handleMove = useCallback((dRow: number, dCol: number) => {
-        if (!isGameActive || gameFinished) return;
+        if (!isGameActive || gameFinished || showLockModal) return;
 
         const newRow = playerPos.row + dRow;
         const newCol = playerPos.col + dCol;
@@ -239,7 +328,7 @@ const HiddenMaze = () => {
             }
         }
 
-    }, [playerPos, isGameActive, gameFinished, collectedKeys, totalKeys, currentMap, currentEdges, gridSize, resetOnDeath]);
+    }, [playerPos, isGameActive, gameFinished, collectedKeys, totalKeys, currentMap, currentEdges, gridSize, resetOnDeath, showLockModal]);
 
     // Click to Move Logic
     const handleCellClick = (row: number, col: number) => {
@@ -325,7 +414,7 @@ const HiddenMaze = () => {
                     <UserCheck className="w-24 h-24 text-neutral-900 mx-auto" />
                     <h2 className="text-3xl font-bold text-neutral-900">Assessment Complete</h2>
                     <p className="text-xl text-neutral-600">
-                        {levelsWon === 3 && "Outstanding! Your spatial memory is elite. You navigated the invisible paths flawlessly."}
+                        {levelsWon >= 3 && "Outstanding! Your spatial memory is elite. You navigated the invisible paths flawlessly."}
                         {levelsWon === 2 && "Great job! You have strong spatial awareness. Try to visualize the entire path to master the final level."}
                         {levelsWon === 1 && "Good effort! You're getting the hang of it. Focus on memorizing key turning points."}
                         {levelsWon === 0 && "Keep practicing! Try to map out the path step-by-step and learn from each reset."}
@@ -446,6 +535,36 @@ const HiddenMaze = () => {
                 })}
             </div>
 
+            {/* PREMIUM LOCK MODAL */}
+            {showLockModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full relative animate-in zoom-in-95 duration-200 text-center space-y-6">
+                        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+                            <Lock className="w-8 h-8 text-amber-500" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-neutral-900">Level 4 Locked</h2>
+                            <p className="text-neutral-600 mt-2">
+                                You've mastered the basics! Subscribe to <strong>Premium</strong> to unlock Levels 4-6 and challenge yourself with advanced puzzles.
+                            </p>
+                        </div>
+                        <Button
+                            onClick={() => initiatePayment()}
+                            disabled={isPaymentLoading}
+                            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
+                        >
+                            {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹59)"}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            onClick={() => window.location.href = "/dashboard"}
+                            className="text-neutral-400 hover:text-neutral-600"
+                        >
+                            Maybe Later
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

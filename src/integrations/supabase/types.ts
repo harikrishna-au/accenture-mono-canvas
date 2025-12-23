@@ -14,6 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
+<<<<<<< HEAD
       communication_questions_v2: {
         Row: {
           id: string
@@ -76,7 +77,6 @@ export type Database = {
           correct_answer?: string | null
           time_limit?: number | null
           sub_questions?: Json | null
-          created_at?: string
         }
         Update: {
           id?: string
@@ -88,6 +88,71 @@ export type Database = {
           correct_answer?: string | null
           time_limit?: number | null
           sub_questions?: Json | null
+        }
+        Relationships: []
+      },
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_premium: boolean
+          premium_expires_at: string | null
+          stripe_customer_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_premium?: boolean
+          premium_expires_at?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_premium?: boolean
+          premium_expires_at?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      },
+      feedback: {
+        Row: {
+          id: string
+          user_id: string | null
+          name: string
+          college: string
+          selected_round: string
+          rating: number
+          technical_round_exp: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          name: string
+          college: string
+          selected_round: string
+          rating: number
+          technical_round_exp: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          name?: string
+          college?: string
+          selected_round?: string
+          rating?: number
+          technical_round_exp?: string
           created_at?: string
         }
         Relationships: []

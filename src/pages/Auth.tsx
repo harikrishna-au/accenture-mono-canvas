@@ -118,6 +118,20 @@ const Auth = () => {
             {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
           </button>
         </div>
+
+        <div className="mt-8 pt-8 border-t border-border flex justify-center gap-4 text-xs text-foreground/50">
+          <a href="/about" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+            About Us
+          </a>
+          <span>•</span>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+            Terms of Service
+          </a>
+          <span>•</span>
+          <a href="/refund" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+            Refund Policy
+          </a>
+        </div>
       </div>
     </PageWrapper>
   );

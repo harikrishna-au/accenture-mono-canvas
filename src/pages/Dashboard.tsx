@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { XCircle } from "lucide-react";
-import { useState } from "react";
+import { XCircle, Lock, Unlock, Crown } from "lucide-react";
+import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Youtube } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
@@ -8,28 +8,100 @@ import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
 import qrCode from "@/lib/qr-code.png";
 import FeedbackPopup from "@/components/FeedbackPopup";
-import { Coffee, MessageSquare } from "lucide-react";
+import { Coffee, MessageSquare, ClipboardList } from "lucide-react";
 
 import Header from "@/components/Header";
 import SupportPopup from "@/components/SupportPopup";
 
 import accentureLogo from "@/lib/accenture-svgrepo-com.svg";
 import SEO from "@/components/SEO";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useRazorpay } from "@/hooks/useRazorpay";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
+  const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
 
-  const games: { id: number; name: string; path: string; disabled?: boolean }[] = [
+  // Release Timer Logic
+  const TARGET_DATE =
+    new Date('2025-12-23T20:00:00+05:30').getTime() + (60 * 60 * 1000);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [isReleased, setIsReleased] = useState(false);
+
+  useEffect(() => {
+    const calculateTimeRemaining = () => {
+      const now = new Date().getTime();
+      const distance = TARGET_DATE - now;
+
+      if (distance < 0) {
+        setIsReleased(true);
+        setTimeRemaining("00:00:00");
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeRemaining(
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      );
+      setIsReleased(false);
+    };
+
+    calculateTimeRemaining();
+    const timer = setInterval(calculateTimeRemaining, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Auto-show feedback popup once
+  useEffect(() => {
+    const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
+    if (!hasSeenFeedback && !premiumLoading) {
+      const timer = setTimeout(() => {
+        setShowFeedbackPopup(true);
+        localStorage.setItem('has_seen_feedback_v1', 'true');
+      }, 3000); // Show after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [premiumLoading]);
+
+  const handleSubscribe = async () => {
+    if (isPremium) {
+      toast.success("You are already a Premium member!");
+      return;
+    }
+    await initiatePayment();
+  };
+
+  const games: { id: number; name: string; path: string; disabled?: boolean; isExternal?: boolean; subtitle?: string; special?: boolean; icon?: any; survey?: boolean }[] = [
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
-    { id: 4, name: "Communication Round", path: "/game/communication" },
-    { id: 5, name: "", path: "" },
-    { id: 6, name: "", path: "" },
-    { id: 7, name: "", path: "" },
-    { id: 8, name: "", path: "" },
+    { id: 4, name: "Communication Round", path: "/game/communication", disabled: !isReleased },
+    { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
+    { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
+    {
+      id: 7,
+      name: isPremium ? "Premium Active" : "Unlock All Levels",
+      subtitle: isPremium ? "" : "Early Access: Communication Round",
+      path: "#subscribe",
+      special: true,
+      icon: isPremium ? <Crown className="w-8 h-8 text-amber-400 fill-amber-400/20" /> : <Lock className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
+    },
+    {
+      id: 8,
+      name: "Take Survey",
+      path: "#survey",
+      special: true,
+      survey: true,
+      icon: <ClipboardList className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
+    },
     { id: 9, name: "", path: "" },
     { id: 10, name: "", path: "" },
     { id: 11, name: "", path: "" },
@@ -76,11 +148,19 @@ const Dashboard = () => {
                   </span>
                   Building in Public
                 </div>
+                {isPremium && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/50 text-xs font-bold text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)] mb-2">
+                    <Crown className="w-3.5 h-3.5 fill-current" />
+                    PREMIUM MEMBER
+                  </div>
+                )}
                 <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
                   Join the Journey
                 </h1>
                 <p className="text-lg text-neutral-300 max-w-xl">
-                  I'm building this platform from scratch. Watch the process, learn with me, and be a part of the story.
+                  {isPremium
+                    ? "Thank you for being a Premium Member! You have unlimited access to all levels."
+                    : "I'm building this platform from scratch. Watch the process, learn with me, and be a part of the story."}
                 </p>
               </div>
 
@@ -112,36 +192,84 @@ const Dashboard = () => {
                 {games.map((game) =>
                   <div
                     key={game.id}
-                    className={`relative h-32 border-2 border-black rounded-xl flex items-center justify-center p-4 overflow-hidden ${game.name
-                      ? "bg-white hover:bg-black hover:text-white cursor-pointer transition-colors group"
-                      : "bg-gray-50 cursor-not-allowed"}
-                        ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
-                      `}
-                    onClick={() => !game.disabled && game.path && navigate(game.path)}
+                    className={`relative h-32 border-2 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden transition-all duration-300
+                      ${game.name === "Connect with me"
+                        ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
+                        : (game as any).special
+                          ? (game as any).survey
+                            ? "bg-gradient-to-br from-emerald-500 to-teal-600 border-transparent shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                            : isPremium
+                              ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
+                              : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                          : game.name
+                            ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
+                            : "bg-gray-50 border-black cursor-not-allowed"}
+                      ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
+                    `}
+                    onClick={() => {
+                      if ((game as any).survey) {
+                        setShowFeedbackPopup(true);
+                        return;
+                      }
+                      if ((game as any).special && !isPremium) {
+                        handleSubscribe();
+                        return;
+                      }
+                      if (!game.disabled && game.path && !((game as any).special)) {
+                        if ((game as any).isExternal) {
+                          window.open(game.path, '_blank', 'noopener,noreferrer');
+                        } else {
+                          navigate(game.path);
+                        }
+                      }
+                    }}
                   >
+                    {game.name === "Connect with me" && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[200%] group-hover:animate-shine pointer-events-none z-10" />
+                    )}
                     {game.name ? (
                       <>
-                        <img
-                          src={accentureLogo}
-                          alt="Accenture"
-                          className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
-                        />
-                        <span className="text-lg font-bold text-center leading-tight mt-2">
+                        {game.name === "Connect with me" ? (
+                          <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
+                        ) : (game as any).special ? (
+                          <div className="mb-1">{(game as any).icon}</div>
+                        ) : (
+                          <img
+                            src={accentureLogo}
+                            alt="Accenture"
+                            className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
+                          />
+                        )}
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : (game as any).special ? "text-white" : ""}`}>
                           {game.name}
                         </span>
+                        {(game as any).subtitle && (
+                          <span className="text-[10px] font-medium text-white/90 text-center uppercase tracking-wide mt-1 animate-pulse">
+                            {(game as any).subtitle}
+                          </span>
+                        )}
                       </>
                     ) : (
                       <span className="text-sm font-medium text-neutral-400 text-center italic">
                         Coming Soon
                       </span>
                     )}
-                    {game.disabled && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="relative">
-                          <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
-                            <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
+                    {game.disabled && !((game as any).special) && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {game.name === "Communication Round" ? (
+                          <div className="flex flex-col items-center gap-2 bg-black/60 backdrop-blur-sm w-full h-full justify-center transition-all animate-fade-in">
+                            <span className="text-white/90 font-bold text-xs tracking-[0.2em] uppercase drop-shadow-md">Launching In</span>
+                            <div className="text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-xl font-mono">
+                              {timeRemaining}
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="relative pointer-events-none">
+                            <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
+                              <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
