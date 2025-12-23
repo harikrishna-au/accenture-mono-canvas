@@ -23,12 +23,22 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment Variables
+.env
+backend/.env
+.env.*
+
+# AWS SAM
+.aws-sam/
+samconfig.toml
+template.yaml.bak
+
 # Python
 communication-backend/venv/
 communication-backend/__pycache__/
 __pycache__/
 *.pyc
+venv/
+.venv/
+.pytest_cache/
 
-# Environment Variables
-.env
-backend/.env

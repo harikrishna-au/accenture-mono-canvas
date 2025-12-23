@@ -7,14 +7,30 @@ from typing import List, Optional
 import uvicorn
 import os
 from dotenv import load_dotenv
+from mangum import Mangum # Adapter for AWS Lambda
 
 # Load env variables including Azure keys
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
 
-from backend.data import DATA_BANK
-from backend.services.azure_grading import grade_submission
-from backend.services.azure_speech import generate_speech
+try:
+    from backend.data import DATA_BANK
+    from backend.services.azure_speech import generate_speech
+    from backend.services.bedrock_analysis import analyze_overall_performance, grade_submission
+except ImportError:
+    # Lambda environment where backend/ contents are at root
+    from data import DATA_BANK
+    from services.azure_speech import generate_speech
+    from services.bedrock_analysis import analyze_overall_performance, grade_submission
+
+class GameHistoryItem(BaseModel):
+    question: str
+    answer: str
+    score: Optional[int] = 0
+    section: Optional[str] = "General"
+
+class GameHistoryRequest(BaseModel):
+    history: List[GameHistoryItem]
 
 app = FastAPI()
 
@@ -26,6 +42,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.post("/api/analyze-game")
+def analyze_game(request: GameHistoryRequest):
+    # Flatten history to dicts
+    history_data = [item.dict() for item in request.history]
+    return analyze_overall_performance(history_data)
+
+# Lambda Handler
+handler = Mangum(app)
 
 class QuestionOption(BaseModel):
     id: str
@@ -51,6 +76,10 @@ class GradeResponse(BaseModel):
 class AudioSubmission(BaseModel):
     questionId: str
     transcript: str
+
+class WrittenSubmission(BaseModel):
+    questionId: str
+    text: str
 
 class TTSRequest(BaseModel):
     text: str
@@ -81,55 +110,151 @@ def get_random_sentence():
         "questions": questions_clean
     }
 
+import boto3
+from boto3.dynamodb.conditions import Key
+
+# DynamoDB Setup
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('communication_questions')
+
+def find_question_in_dynamo(q_id: str):
+    # 1. Try finding directly (Primary Key)
+    try:
+        response = table.get_item(Key={'id': q_id})
+        if 'Item' in response:
+            item = response['Item']
+            return {
+                "text": item.get("prompt_text") or item.get("audio_src") or "Question",
+                "correct_answer": item.get("correct_answer")
+            }
+    except Exception as e:
+        print(f"DynamoDB Direct Get Error: {e}")
+
+    # 2. If not found, scan for sub-questions (Small dataset allows this)
+    try:
+        # Scan only items that have sub_questions
+        response = table.scan(FilterExpression="attribute_exists(sub_questions)")
+        for item in response.get('Items', []):
+            subs = item.get("sub_questions", [])
+            if isinstance(subs, list):
+                for sub in subs:
+                    if sub.get("id") == q_id:
+                        return {
+                            "text": sub.get("audioSrc") or "Question", 
+                            "correct_answer": sub.get("correctAnswer")
+                        }
+    except Exception as e:
+        print(f"DynamoDB Sub-question Scan Error: {e}")
+        
+    return None
+
+from decimal import Decimal
+
+def snake_to_camel(snake_str):
+    """Convert snake_case to camelCase"""
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+def convert_to_camel_case(obj):
+    """Recursively convert all keys in a dict/list from snake_case to camelCase"""
+    if isinstance(obj, dict):
+        new_obj = {}
+        for k, v in obj.items():
+            # Convert Decimal to int/float
+            if isinstance(v, Decimal):
+                v = int(v) if v % 1 == 0 else float(v)
+            # Recursively convert nested objects
+            v = convert_to_camel_case(v)
+            # Convert key to camelCase
+            new_key = snake_to_camel(k)
+            new_obj[new_key] = v
+        return new_obj
+    elif isinstance(obj, list):
+        return [convert_to_camel_case(item) for item in obj]
+    else:
+        return obj
+
+@app.get("/api/questions")
+def get_questions(section: str):
+    try:
+        # Use Scan with FilterExpression (works without GSI)
+        response = table.scan(
+            FilterExpression=Key('section').eq(section)
+        )
+        items = response.get('Items', [])
+        
+        # Transform to camelCase recursively
+        transformed_items = [convert_to_camel_case(item) for item in items]
+                    
+        return transformed_items
+    except Exception as e:
+        print(f"DynamoDB Query Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/submit/audio")
 def submit_audio(submission: AudioSubmission):
-    # Search for question across all sentences
     target_question = None
-    target_sentence_text = ""
-    
-    for sentence in DATA_BANK:
-        for q in sentence["questions"]:
-            if q["id"] == submission.questionId:
-                target_question = q
-                target_sentence_text = sentence["text"]
+
+    # Try DynamoDB
+    found = find_question_in_dynamo(submission.questionId)
+    if found:
+        target_question = found
+        print(f"Found question in DynamoDB: {found}")
+
+    # Fallback to local DATA_BANK (legacy support)
+    if not target_question:
+        for sentence in DATA_BANK:
+            for q in sentence["questions"]:
+                if q["id"] == submission.questionId:
+                    target_question = {"text": q["text"], "correct_answer": q["correct_answer"]}
+                    break
+            if target_question:
                 break
-        if target_question:
-            break
             
     if not target_question:
         return {
             "score": 0,
-            "feedback": "Question not found in bank."
+            "feedback": "Question not found (checked DynamoDB and Local Bank)."
         }
     
-    # Use Azure OpenAI for grading if keys exist, else fallback
-    if os.getenv("AZURE_OPENAI_API_KEY"):
-        print(f"Grading with Azure OpenAI: {submission.transcript}")
-        result = grade_submission(target_question["text"], target_question["correct_answer"], submission.transcript)
-        return result
-    else:
-        # Fallback Logic (same as before)
-        correct_answer = target_question["correct_answer"].lower()
-        user_answer = submission.transcript.lower()
-        score = 0
-        feedback = ""
-        keywords = correct_answer.split()
-        matched_keywords = [k for k in keywords if k in user_answer]
-        
-        if len(matched_keywords) >= len(keywords) * 0.5:
-            score = 85
-            feedback = "Good answer! (Fallback grading used)"
-        elif len(matched_keywords) > 0:
-            score = 60
-            feedback = f"Partially correct. The expected answer was related to: {target_question['correct_answer']}"
-        else:
-            score = 40
-            feedback = f"Incorrect. The correct answer was: {target_question['correct_answer']}"
+    # Use Bedrock Grading (Claude 3.5 Sonnet)
+    print(f"Grading with Bedrock: {submission.transcript}")
+    # Note: bedrock_analysis.grade_submission only needs question + answer
+    # It does not strictly need correct_answer but we can pass it if we update the function signature
+    # checking bedrock_analysis.py, grade_submission(question_text, user_transcript)
+    result = grade_submission(target_question["text"], submission.transcript)
+    return result
 
+@app.post("/submit/written")
+def submit_written(submission: WrittenSubmission):
+    target_question = None
+
+    # Try DynamoDB
+    found = find_question_in_dynamo(submission.questionId)
+    if found:
+        target_question = found
+        print(f"Found question in DynamoDB: {found}")
+
+    # Fallback to local DATA_BANK (legacy support)
+    if not target_question:
+        for sentence in DATA_BANK:
+            for q in sentence["questions"]:
+                if q["id"] == submission.questionId:
+                    target_question = {"text": q["text"], "correct_answer": q["correct_answer"]}
+                    break
+            if target_question:
+                break
+            
+    if not target_question:
         return {
-            "score": score,
-            "feedback": feedback
+            "score": 0,
+            "feedback": "Question not found (checked DynamoDB and Local Bank)."
         }
+    
+    # Use Bedrock Grading (Claude 3.5 Sonnet)
+    print(f"Grading written response with Bedrock: {submission.text}")
+    result = grade_submission(target_question["text"], submission.text)
+    return result
 
 @app.post("/api/tts")
 def get_tts_audio(request: TTSRequest):

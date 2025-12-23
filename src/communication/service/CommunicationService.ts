@@ -1,57 +1,31 @@
 import { Question, SectionType, SECTIONS } from "../data/types";
+// import { supabase } from "@/integrations/supabase/client"; // Removed for DynamoDB migration
 
-// Types matching Backend Response
-interface BackendQuestion {
-    id: string;
-    text: string;
-    options: string[];
-}
-
-interface BackendSentence {
-    id: string;
-    text: string;
-    voice_type: string;
-    questions: BackendQuestion[];
-}
-
-
+// ... (keep interface definitions if needed, or remove if unused)
 
 export class CommunicationBackendService {
 
-    private backendUrl = "http://localhost:8000";
+    // Use env var or fallback to localhost
+    private backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-    // Round 1: Get Random Sentence
-    async getRound1Content(): Promise<Question | undefined> {
+    async getQuestionsForSection(section: SectionType): Promise<Question[]> {
+        console.log(`🔌 Fetching questions for section ${section} from ${this.backendUrl}`);
+
         try {
-            const response = await fetch(`${this.backendUrl}/api/round1/sentence`);
-            if (!response.ok) return undefined;
+            const response = await fetch(`${this.backendUrl}/api/questions?section=${section}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch questions: ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log('✅ Received questions:', data);
 
-            const data: BackendSentence = await response.json();
+            // Backend now returns camelCase directly
+            return data || [];
 
-            // Map backend response to frontend Question format
-            return {
-                id: data.id,
-                section: 'A',
-                promptText: data.text,
-                audioSrc: data.text, // For TTS to read
-                voiceType: data.voice_type,
-                subQuestions: data.questions
-            };
         } catch (error) {
-            console.error("Failed to fetch round 1 content:", error);
-            return undefined;
+            console.error('Error fetching questions from backend:', error);
+            return [];
         }
-    }
-
-    // Legacy/Other sections (keep existing or mock for now)
-    async getQuestionForSection(section: SectionType): Promise<Question | undefined> {
-        // For now, if Section is A (Listening), use the new Round 1 logic
-        if (section === 'A') {
-            return this.getRound1Content();
-        }
-
-        // Fallback or other sections implementation
-        return undefined;
     }
 
     // Submit an audio response (grading)
@@ -70,6 +44,26 @@ export class CommunicationBackendService {
         } catch (error) {
             console.error("Failed to submit audio:", error);
             return { score: 0, feedback: "Network error" };
+        }
+    }
+
+    // New: Analyze full game history
+    async analyzeGame(history: { question: string, answer: string, score: number, section: string }[]): Promise<any> {
+        try {
+            console.log("Analyzing full game...", history);
+            const response = await fetch(`${this.backendUrl}/api/analyze-game`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ history })
+            });
+
+            if (!response.ok) {
+                throw new Error("Analysis failed");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Analysis Error:", error);
+            return null;
         }
     }
 

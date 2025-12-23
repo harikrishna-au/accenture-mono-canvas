@@ -12,7 +12,7 @@ import BalloonMathGame from "./pages/BalloonMath";
 import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import CommunicationGame from "./pages/CommunicationGame";
+import { CommunicationRounds } from "./pages/communication-rounds";
 import MobileRestriction from "@/components/MobileRestriction";
 
 import { useState } from "react";
@@ -59,8 +59,8 @@ const App = () => {
               {/* Hidden Maze Game */}
               <Route path="/game/hidden-maze" element={<HiddenMaze />} />
 
-              {/* Communication Game */}
-              <Route path="/game/communication" element={<CommunicationGame />} />
+              {/* Communication Game - Refactored */}
+              <Route path="/game/communication" element={<CommunicationRounds />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

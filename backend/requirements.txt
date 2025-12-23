@@ -1,3 +1,9 @@
 fastapi
 uvicorn
 pydantic
+mangum
+azure-cognitiveservices-speech
+openai
+supabase
+boto3
+python-dotenv
