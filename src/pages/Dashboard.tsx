@@ -26,6 +26,38 @@ const Dashboard = () => {
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
   const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
 
+  // Release Timer Logic
+  const TARGET_DATE = new Date('2025-12-23T20:00:00+05:30').getTime();
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [isReleased, setIsReleased] = useState(false);
+
+  useEffect(() => {
+    const calculateTimeRemaining = () => {
+      const now = new Date().getTime();
+      const distance = TARGET_DATE - now;
+
+      if (distance < 0) {
+        setIsReleased(true);
+        setTimeRemaining("00:00:00");
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeRemaining(
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      );
+      setIsReleased(false);
+    };
+
+    calculateTimeRemaining();
+    const timer = setInterval(calculateTimeRemaining, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   // Auto-show feedback popup once
   useEffect(() => {
     const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
@@ -50,7 +82,7 @@ const Dashboard = () => {
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
-    { id: 4, name: "Communication Round", path: "/game/communication", disabled: true },
+    { id: 4, name: "Communication Round", path: "/game/communication", disabled: !isReleased },
     { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {
@@ -222,12 +254,21 @@ const Dashboard = () => {
                       </span>
                     )}
                     {game.disabled && !((game as any).special) && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="relative">
-                          <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
-                            <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {game.name === "Communication Round" ? (
+                          <div className="flex flex-col items-center gap-2 bg-black/60 backdrop-blur-sm w-full h-full justify-center transition-all animate-fade-in">
+                            <span className="text-white/90 font-bold text-xs tracking-[0.2em] uppercase drop-shadow-md">Launching In</span>
+                            <div className="text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-xl font-mono">
+                              {timeRemaining}
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="relative pointer-events-none">
+                            <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
+                              <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
