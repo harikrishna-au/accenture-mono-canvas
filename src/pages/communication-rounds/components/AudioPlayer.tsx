@@ -21,7 +21,9 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8000/api/tts', {
+            // Use environment variable for backend URL
+            const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
+            const response = await fetch(`${backendUrl}/api/tts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, voice_type: voiceType })
@@ -43,6 +45,22 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
             setIsLoading(false);
         }
     };
+
+    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+    useEffect(() => {
+        const loadVoices = () => {
+            const available = window.speechSynthesis.getVoices();
+            setVoices(available);
+        };
+
+        loadVoices();
+
+        // Safari loads voices asynchronously
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+    }, []);
 
     useEffect(() => {
         // Reset state when text changes (new question)
@@ -71,12 +89,14 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
         const utterance = new SpeechSynthesisUtterance(text);
 
         // Try to match voice type
-        const voices = window.speechSynthesis.getVoices();
+        // Use loaded voices from state, or fallback to direct call if state empty
+        const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
+
         if (voiceType.includes('female')) {
-            const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria'));
+            const femaleVoice = availableVoices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Google US English'));
             if (femaleVoice) utterance.voice = femaleVoice;
         } else {
-            const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Daniel') || v.name.includes('Alex'));
+            const maleVoice = availableVoices.find(v => v.name.includes('Male') || v.name.includes('Daniel') || v.name.includes('Alex') || v.name.includes('Google UK English Male'));
             if (maleVoice) utterance.voice = maleVoice;
         }
 
@@ -112,7 +132,12 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
                 onPlayComplete?.();
             };
 
-            audio.play();
+            audio.play().catch(e => {
+                console.error("Audio playback interrupted/failed:", e);
+                setIsPlaying(false);
+                // Try fallback if play fails (e.g., format not supported)
+                playWithBrowserTTS();
+            });
         }
     };
 
@@ -128,10 +153,10 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
                 disabled={isDisabled}
                 size="lg"
                 className={`h-16 px-8 rounded-full ${isPlaying
-                        ? 'bg-blue-500 hover:bg-blue-600'
-                        : (playOnce && hasPlayed)
-                            ? 'bg-neutral-300 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
+                    ? 'bg-blue-500 hover:bg-blue-600'
+                    : (playOnce && hasPlayed)
+                        ? 'bg-neutral-300 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
                     }`}
             >
                 {isLoading ? (
