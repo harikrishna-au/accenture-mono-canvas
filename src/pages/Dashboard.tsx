@@ -83,7 +83,7 @@ const Dashboard = () => {
     { id: 1, name: "Matrix Flow", path: "/game/matrix" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze" },
-    { id: 4, name: "Communication Round", path: "/game/communication", disabled: !isReleased },
+    { id: 4, name: "Communication Round", path: "/game/communication", disabled: !isReleased || !isPremium, subtitle: !isPremium ? "Premium Only" : undefined, icon: !isPremium ? <Lock className="w-4 h-4" /> : undefined },
     { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {

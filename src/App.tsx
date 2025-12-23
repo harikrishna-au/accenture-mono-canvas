@@ -17,6 +17,7 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
 import MobileRestriction from "@/components/MobileRestriction";
+import PremiumRoute from "@/components/PremiumRoute";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
@@ -66,7 +67,14 @@ const App = () => {
               <Route path="/game/hidden-maze" element={<HiddenMaze />} />
 
               {/* Communication Game - Refactored */}
-              <Route path="/game/communication" element={<CommunicationRounds />} />
+              <Route
+                path="/game/communication"
+                element={
+                  <PremiumRoute>
+                    <CommunicationRounds />
+                  </PremiumRoute>
+                }
+              />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
