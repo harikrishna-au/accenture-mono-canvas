@@ -27,7 +27,8 @@ const Dashboard = () => {
   const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
 
   // Release Timer Logic
-  const TARGET_DATE = new Date('2025-12-23T20:00:00+05:30').getTime();
+const TARGET_DATE =
+  new Date('2025-12-23T20:00:00+05:30').getTime() + (60 * 60 * 1000);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [isReleased, setIsReleased] = useState(false);
 
