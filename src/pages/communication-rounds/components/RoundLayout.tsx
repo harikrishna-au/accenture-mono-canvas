@@ -43,37 +43,16 @@ export function RoundLayout({
                 </Card>
 
                 {/* Navigation */}
-                <div className="flex justify-between items-center">
-                    <Button
-                        onClick={onPrevious}
-                        variant="outline"
-                        disabled={currentRoundIndex === 0}
-                        className="flex items-center gap-2"
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                        Previous
-                    </Button>
-
-                    <div className="flex gap-2">
+                <div className="flex justify-end items-center">
+                    {showNavigation && (
                         <Button
-                            onClick={nextRound}
-                            variant="outline"
-                            className="flex items-center gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+                            onClick={onNext}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                         >
-                            <SkipForward className="w-4 h-4" />
-                            Skip (Testing)
+                            {isLastRound ? 'Finish' : 'Next Round'}
+                            {!isLastRound && <ChevronRight className="w-4 h-4" />}
                         </Button>
-
-                        {showNavigation && (
-                            <Button
-                                onClick={onNext}
-                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                            >
-                                {isLastRound ? 'Finish' : 'Next Round'}
-                                {!isLastRound && <ChevronRight className="w-4 h-4" />}
-                            </Button>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

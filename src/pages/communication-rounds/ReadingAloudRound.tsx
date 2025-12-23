@@ -119,8 +119,8 @@ export function ReadingAloudRound() {
                 {transcript && (
                     <div className="w-full space-y-4">
                         <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-                            <p className="text-sm text-neutral-600 mb-1">Your recording:</p>
-                            <p className="text-neutral-900">{transcript}</p>
+                            <p className="text-sm text-neutral-600 mb-1">Status:</p>
+                            <p className="text-neutral-900 italic">Recording captured...</p>
                         </div>
                         <Button onClick={handleSubmit} className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg">
                             Submit & Continue
