@@ -52,6 +52,27 @@ def analyze_overall_performance(history: list) -> dict:
             transcript_text += f"Q: {item.get('question', 'Unknown')}\n"
             transcript_text += f"A: {item.get('answer', 'No answer')}\n"
 
+    system_prompt = """You are an expert communication coach. 
+    Analyze the user's performance in a multi-section speaking test.
+    
+    1. Overall Scores (0-100): Fluency, Grammar, Vocabulary, Pronunciation.
+    2. Section-wise Feedback: Specific advice for each section found in the transcript.
+    
+    Return ONLY valid JSON:
+    {
+        "fluency_score": int,
+        "grammar_score": int,
+        "vocabulary_score": int,
+        "pronunciation_score": int,
+        "overall_feedback": "string",
+        "strengths": ["str"],
+        "improvements": ["str"],
+        "section_feedback": [
+            { "section": "Name of Section", "feedback": "Specific feedback for this section." }
+        ]
+    }
+    """
+
     # Amazon Nova Schema
     system_list = [{"text": system_prompt}]
     
