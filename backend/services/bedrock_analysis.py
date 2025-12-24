@@ -73,32 +73,34 @@ def analyze_overall_performance(history: list) -> dict:
     }
     """
 
-    # Amazon Nova Schema
-    system_list = [{"text": system_prompt}]
+    # Meta Llama 3 Schema
+    # Llama 3 uses a specific prompt format:
+    # <|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{user_content}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n
     
-    user_message = {
-        "role": "user",
-        "content": [{"text": f"Here is the test transcript:\n{transcript_text}"}]
-    }
+    user_content = f"Here is the test transcript:\n{transcript_text}"
+    
+    final_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+{user_content}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
 
     payload = {
-        "system": system_list,
-        "messages": [user_message],
-        "inferenceConfig": {
-            "max_new_tokens": 1000,
-            "temperature": 0.1
-        }
+        "prompt": final_prompt,
+        "max_gen_len": 1000,
+        "temperature": 0.1,
+        "top_p": 0.9
     }
 
     try:
         response = bedrock.invoke_model(
-            modelId="amazon.nova-lite-v1:0",
+            modelId="meta.llama3-8b-instruct-v1:0",
             body=json.dumps(payload)
         )
         
         result_body = json.loads(response['body'].read())
-        # Nova Response: output.message.content[0].text
-        ai_response_text = result_body['output']['message']['content'][0]['text']
+        # Llama Response: 'generation'
+        ai_response_text = result_body['generation']
         
         # Parse JSON from response
         start = ai_response_text.find('{')
@@ -107,6 +109,7 @@ def analyze_overall_performance(history: list) -> dict:
             json_str = ai_response_text[start:end]
             return json.loads(json_str)
         else:
+             print(f"Llama Raw Output: {ai_response_text}")
              return _mock_feedback_error("AI response format error.")
 
     except ClientError as e:
@@ -147,24 +150,28 @@ def grade_submission(question_text: str, user_transcript: str) -> dict:
 
         bedrock = boto3.client(**boto_config)
         
-        # Amazon Nova Payload
+        # Meta Llama 3 Payload
+        final_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+{user_content}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+
         payload = {
-            "system": [{"text": system_prompt}],
-            "messages": [{"role": "user", "content": [{"text": user_content}]}],
-            "inferenceConfig": {
-                "max_new_tokens": 500,
-                "temperature": 0.1
-            }
+            "prompt": final_prompt,
+            "max_gen_len": 500,
+            "temperature": 0.1,
+            "top_p": 0.9
         }
         
         response = bedrock.invoke_model(
-            modelId="amazon.nova-lite-v1:0",
+            modelId="meta.llama3-8b-instruct-v1:0",
             body=json.dumps(payload)
         )
         
         result = json.loads(response['body'].read())
-        # Nova Response: output.message.content[0].text
-        text = result['output']['message']['content'][0]['text']
+        # Llama Response: 'generation'
+        text = result['generation']
         
         # Extract JSON
         s = text.find('{')
