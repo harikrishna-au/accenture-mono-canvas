@@ -112,8 +112,9 @@ export class CommunicationBackendService {
             };
 
             audio.play().catch(e => {
-                console.error("Audio playback failed:", e);
-                if (onEnd) onEnd();
+                console.error("Audio playback failed, falling back to browser TTS:", e);
+                URL.revokeObjectURL(url); // Cleanup
+                this.speakFallback(text, voiceType, onEnd);
             });
 
         } catch (error) {
