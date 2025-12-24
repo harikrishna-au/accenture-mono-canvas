@@ -206,16 +206,29 @@ const Dashboard = () => {
                             : "bg-gray-50 border-black cursor-not-allowed"}
                       ${game.disabled && !(game.name === "Communication Round" && isReleased && !isPremium) ? "cursor-not-allowed opacity-60" : ""}
                     `}
-                    onClick={() => {
+                    onClick={async () => {
                       if ((game as any).survey) {
                         setShowFeedbackPopup(true);
                         return;
                       }
 
                       // Special handling for Communication Round unlock
-                      if (game.name === "Communication Round" && isReleased && !isPremium) {
-                        handleSubscribe();
-                        return;
+                      if (game.name === "Communication Round") {
+                        if (isReleased && !isPremium) {
+                          handleSubscribe();
+                          return;
+                        }
+
+                        // Check permissions for premium users
+                        if (!game.disabled) {
+                          try {
+                            await navigator.mediaDevices.getUserMedia({ audio: true });
+                            navigate(game.path);
+                          } catch (error) {
+                            toast.error("Microphone access is required for this round. Please allow access in your browser settings.");
+                          }
+                          return;
+                        }
                       }
 
                       if ((game as any).special && !isPremium) {
