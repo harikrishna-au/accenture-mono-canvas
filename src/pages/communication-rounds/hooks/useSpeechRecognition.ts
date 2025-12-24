@@ -63,6 +63,9 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
                 case 'audio-capture':
                     errorMessage = "No microphone found. Ensure your microphone is plugged in and set up correctly.";
                     break;
+                case 'aborted':
+                    errorMessage = "Speech recognition aborted. Please allow microphone access permissions and try again.";
+                    break;
                 default:
                     errorMessage = `Error occurred: ${event.error}`;
             }
