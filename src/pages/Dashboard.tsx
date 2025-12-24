@@ -202,15 +202,22 @@ const Dashboard = () => {
                               ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
                               : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
                           : game.name
-                            ? "bg-white border-black hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
+                            ? "bg-white border-black" + (game.name === "Communication Round" && isReleased && !isPremium ? " hover:bg-black hover:text-white cursor-pointer group hover:scale-105" : " hover:bg-black hover:text-white cursor-pointer group hover:scale-105")
                             : "bg-gray-50 border-black cursor-not-allowed"}
-                      ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
+                      ${game.disabled && !(game.name === "Communication Round" && isReleased && !isPremium) ? "cursor-not-allowed opacity-60" : ""}
                     `}
                     onClick={() => {
                       if ((game as any).survey) {
                         setShowFeedbackPopup(true);
                         return;
                       }
+
+                      // Special handling for Communication Round unlock
+                      if (game.name === "Communication Round" && isReleased && !isPremium) {
+                        handleSubscribe();
+                        return;
+                      }
+
                       if ((game as any).special && !isPremium) {
                         handleSubscribe();
                         return;
