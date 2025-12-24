@@ -22,6 +22,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     // Form Stats
     const [name, setName] = useState("");
     const [college, setCollege] = useState("");
+    const [mobileNumber, setMobileNumber] = useState("");
     const [selectedRound, setSelectedRound] = useState("Not Sure");
     const [rating, setRating] = useState(5);
     const [techRoundExp, setTechRoundExp] = useState("");
@@ -43,6 +44,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                 user_id: user?.id || null, // Capture auth user if available
                 name: name,
                 college: college,
+                mobile_number: mobileNumber,
                 selected_round: selectedRound,
                 rating: rating,
                 technical_round_exp: techRoundExp
@@ -91,7 +93,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                     {!isSent ? (
                         <form onSubmit={handleSubmit} className="space-y-5">
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="name" className="text-xs font-bold text-neutral-500 uppercase">Name</Label>
                                     <Input
@@ -109,6 +111,17 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                                         placeholder="College Name"
                                         value={college}
                                         onChange={(e) => setCollege(e.target.value)}
+                                        className="h-11 bg-neutral-50 border-neutral-200"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <Label htmlFor="mobile" className="text-xs font-bold text-neutral-500 uppercase">Mobile Number</Label>
+                                    <Input
+                                        id="mobile"
+                                        placeholder="Your Mobile Number"
+                                        type="tel"
+                                        value={mobileNumber}
+                                        onChange={(e) => setMobileNumber(e.target.value)}
                                         className="h-11 bg-neutral-50 border-neutral-200"
                                     />
                                 </div>
