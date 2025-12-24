@@ -47,7 +47,27 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
 
         recognition.onerror = (event: any) => {
             console.error('Speech recognition error:', event.error);
-            setError(`Recognition error: ${event.error}`);
+            let errorMessage = `Recognition error: ${event.error}`;
+
+            switch (event.error) {
+                case 'network':
+                    errorMessage = "Network error. Please check your internet connection. Note: Speech recognition requires HTTPS.";
+                    break;
+                case 'not-allowed':
+                case 'service-not-allowed':
+                    errorMessage = "Microphone access denied. Please allow microphone permissions in your browser settings.";
+                    break;
+                case 'no-speech':
+                    errorMessage = "No speech detected. Please try again and speak clearly.";
+                    break;
+                case 'audio-capture':
+                    errorMessage = "No microphone found. Ensure your microphone is plugged in and set up correctly.";
+                    break;
+                default:
+                    errorMessage = `Error occurred: ${event.error}`;
+            }
+
+            setError(errorMessage);
             setIsRecording(false);
         };
 
