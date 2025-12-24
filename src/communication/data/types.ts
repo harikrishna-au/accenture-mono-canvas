@@ -8,7 +8,8 @@ export type SectionType =
     | 'E' // Fill the Missing Word
     | 'F' // Error Correction
     | 'G' // Speaking on a Topic (Monologue)
-    | 'WRITTEN'; // Email Writing (Optional/Extra)
+    | 'WRITTEN' // Email Writing (Optional/Extra)
+    | 'SUMMARY'; // Final Analysis
 
 export interface Question {
     id: string;

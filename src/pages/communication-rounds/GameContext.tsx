@@ -33,7 +33,8 @@ const ROUNDS: SectionType[] = [
     'E', // Fill Blank
     'F', // Error Correction
     'G', // Monologue
-    'WRITTEN'
+    'WRITTEN',
+    'SUMMARY'
 ];
 
 export function GameProvider({ children }: { children: ReactNode }) {
