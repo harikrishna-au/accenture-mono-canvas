@@ -52,52 +52,34 @@ def analyze_overall_performance(history: list) -> dict:
             transcript_text += f"Q: {item.get('question', 'Unknown')}\n"
             transcript_text += f"A: {item.get('answer', 'No answer')}\n"
 
-    system_prompt = """You are an expert communication coach. 
-    Analyze the user's performance in a multi-section speaking test.
+    # Amazon Nova Schema
+    system_list = [{"text": system_prompt}]
     
-    1. Overall Scores (0-100): Fluency, Grammar, Vocabulary, Pronunciation.
-    2. Section-wise Feedback: Specific advice for each section found in the transcript.
-    
-    Return ONLY valid JSON:
-    {
-        "fluency_score": int,
-        "grammar_score": int,
-        "vocabulary_score": int,
-        "pronunciation_score": int,
-        "overall_feedback": "string",
-        "strengths": ["str"],
-        "improvements": ["str"],
-        "section_feedback": [
-            { "section": "Name of Section", "feedback": "Specific feedback for this section." }
-        ]
-    }
-    """
-
     user_message = {
         "role": "user",
-        "content": f"Here is the test transcript:\n{transcript_text}"
+        "content": [{"text": f"Here is the test transcript:\n{transcript_text}"}]
     }
 
     payload = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 1000,
+        "system": system_list,
         "messages": [user_message],
-        "system": system_prompt,
-        "temperature": 0.1
+        "inferenceConfig": {
+            "max_new_tokens": 1000,
+            "temperature": 0.1
+        }
     }
 
     try:
         response = bedrock.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+            modelId="amazon.nova-lite-v1:0",
             body=json.dumps(payload)
         )
         
         result_body = json.loads(response['body'].read())
-        # Claude response is in content[0].text
-        ai_response_text = result_body['content'][0]['text']
+        # Nova Response: output.message.content[0].text
+        ai_response_text = result_body['output']['message']['content'][0]['text']
         
         # Parse JSON from response
-        # Claude is usually good at returning just JSON if prompted, but we add safety
         start = ai_response_text.find('{')
         end = ai_response_text.rfind('}') + 1
         if start != -1 and end != -1:
@@ -144,21 +126,24 @@ def grade_submission(question_text: str, user_transcript: str) -> dict:
 
         bedrock = boto3.client(**boto_config)
         
+        # Amazon Nova Payload
         payload = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 500,
-            "messages": [{"role": "user", "content": user_content}],
-            "system": system_prompt,
-            "temperature": 0.1
+            "system": [{"text": system_prompt}],
+            "messages": [{"role": "user", "content": [{"text": user_content}]}],
+            "inferenceConfig": {
+                "max_new_tokens": 500,
+                "temperature": 0.1
+            }
         }
         
         response = bedrock.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+            modelId="amazon.nova-lite-v1:0",
             body=json.dumps(payload)
         )
         
         result = json.loads(response['body'].read())
-        text = result['content'][0]['text']
+        # Nova Response: output.message.content[0].text
+        text = result['output']['message']['content'][0]['text']
         
         # Extract JSON
         s = text.find('{')
