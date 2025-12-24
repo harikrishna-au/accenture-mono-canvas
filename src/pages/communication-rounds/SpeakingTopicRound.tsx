@@ -46,7 +46,9 @@ export function SpeakingTopicRound() {
     const loadQuestions = async () => {
         try {
             const qs = await service.getQuestionsForSection('G');
-            setQuestions(qs);
+            // Shuffle questions to ensure variety
+            const shuffled = [...qs].sort(() => 0.5 - Math.random());
+            setQuestions(shuffled.slice(0, 1)); // Limit to 1 random question
         } catch (error) {
             console.error('Failed to load questions:', error);
         } finally {
