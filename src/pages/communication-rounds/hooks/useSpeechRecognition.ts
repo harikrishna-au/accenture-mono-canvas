@@ -58,14 +58,16 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
                     errorMessage = "Microphone access denied. Please allow microphone permissions in your browser settings.";
                     break;
                 case 'no-speech':
-                    errorMessage = "No speech detected. Please try again and speak clearly.";
-                    break;
+                    // Silently stop recording without error
+                    setIsRecording(false);
+                    return;
                 case 'audio-capture':
                     errorMessage = "No microphone found. Ensure your microphone is plugged in and set up correctly.";
                     break;
                 case 'aborted':
-                    errorMessage = "Speech recognition stopped. Please click Record to try again.";
-                    break;
+                    // Silently stop recording without error
+                    setIsRecording(false);
+                    return;
                 default:
                     errorMessage = `Error occurred: ${event.error}`;
             }
