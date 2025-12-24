@@ -257,12 +257,20 @@ const Dashboard = () => {
                     {game.disabled && !((game as any).special) && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         {game.name === "Communication Round" ? (
-                          <div className="flex flex-col items-center gap-2 bg-black/60 backdrop-blur-sm w-full h-full justify-center transition-all animate-fade-in">
-                            <span className="text-white/90 font-bold text-xs tracking-[0.2em] uppercase drop-shadow-md">Launching In</span>
-                            <div className="text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-xl font-mono">
-                              {timeRemaining}
+                          !isReleased ? (
+                            <div className="flex flex-col items-center gap-2 bg-black/60 backdrop-blur-sm w-full h-full justify-center transition-all animate-fade-in">
+                              <span className="text-white/90 font-bold text-xs tracking-[0.2em] uppercase drop-shadow-md">Launching In</span>
+                              <div className="text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-xl font-mono">
+                                {timeRemaining}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="relative pointer-events-none">
+                              <div className="w-[600px] h-10 bg-amber-500 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-amber-300/50">
+                                <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNLOCK WITH PREMIUM</span>
+                              </div>
+                            </div>
+                          )
                         ) : (
                           <div className="relative pointer-events-none">
                             <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
