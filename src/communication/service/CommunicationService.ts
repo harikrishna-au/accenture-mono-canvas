@@ -112,7 +112,7 @@ export class CommunicationBackendService {
             };
 
             audio.play().catch(e => {
-                console.error("Audio playback failed, falling back to browser TTS:", e);
+                console.warn("Audio playback failed (likely Safari/Autoplay restriction). Switching to browser TTS fallback.", e);
                 URL.revokeObjectURL(url); // Cleanup
                 this.speakFallback(text, voiceType, onEnd);
             });
