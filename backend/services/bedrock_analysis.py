@@ -18,12 +18,20 @@ def analyze_overall_performance(history: list) -> dict:
     
     # Initialize Bedrock Client
     try:
-        bedrock = boto3.client(
-            'bedrock-runtime',
-            region_name=os.getenv('AWS_DEFAULT_REGION', 'ap-south-1'),
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        )
+        boto_config = {
+            'service_name': 'bedrock-runtime',
+            'region_name': os.getenv('AWS_DEFAULT_REGION', 'ap-south-1')
+        }
+        
+        # Only explicitly pass keys if they are present in env (Local Dev)
+        # On Lambda, we skip this to let boto3 use the attached IAM Role
+        if os.getenv('AWS_ACCESS_KEY_ID'):
+            boto_config['aws_access_key_id'] = os.getenv('AWS_ACCESS_KEY_ID')
+            boto_config['aws_secret_access_key'] = os.getenv('AWS_SECRET_ACCESS_KEY')
+            if os.getenv('AWS_SESSION_TOKEN'):
+                boto_config['aws_session_token'] = os.getenv('AWS_SESSION_TOKEN')
+
+        bedrock = boto3.client(**boto_config)
     except Exception as e:
         print(f"Bedrock Init Error: {e}")
         return _mock_feedback_error("Could not initialize AI service.")
@@ -123,12 +131,18 @@ def grade_submission(question_text: str, user_transcript: str) -> dict:
     # Reuse the same invocation logic...
     # (Simplified for brevity, ensuring robustness)
     try:
-        bedrock = boto3.client(
-            'bedrock-runtime',
-            region_name=os.getenv('AWS_DEFAULT_REGION', 'ap-south-1'),
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        )
+        boto_config = {
+            'service_name': 'bedrock-runtime',
+            'region_name': os.getenv('AWS_DEFAULT_REGION', 'ap-south-1')
+        }
+        
+        if os.getenv('AWS_ACCESS_KEY_ID'):
+            boto_config['aws_access_key_id'] = os.getenv('AWS_ACCESS_KEY_ID')
+            boto_config['aws_secret_access_key'] = os.getenv('AWS_SECRET_ACCESS_KEY')
+            if os.getenv('AWS_SESSION_TOKEN'):
+                boto_config['aws_session_token'] = os.getenv('AWS_SESSION_TOKEN')
+
+        bedrock = boto3.client(**boto_config)
         
         payload = {
             "anthropic_version": "bedrock-2023-05-31",

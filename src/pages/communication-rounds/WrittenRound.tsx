@@ -142,12 +142,11 @@ export function WrittenRound() {
                 )}
 
                 {feedback && (
-                    <div className="bg-green-50 border-2 border-green-200 p-6 rounded-xl space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-green-900">Email Submitted!</h3>
-                            <div className="text-3xl font-black text-green-700">{feedback.score}/100</div>
+                    <div className="bg-green-50 border-2 border-green-200 p-6 rounded-xl space-y-4 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                            <h3 className="text-xl font-bold text-green-900">Email Submitted!</h3>
+                            <p className="text-neutral-600">Your response has been recorded for analysis.</p>
                         </div>
-                        <p className="text-neutral-700 leading-relaxed">{feedback.feedback}</p>
                     </div>
                 )}
             </div>

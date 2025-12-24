@@ -112,7 +112,7 @@ export function ListeningComprehensionRound() {
                     <div className="space-y-4">
                         <div className="text-center">
                             <h3 className="text-lg font-bold text-purple-900 mb-2">📖 Listen to the Context</h3>
-                            <p className="text-sm text-neutral-600">{currentQuestion.promptText}</p>
+                            <p className="text-sm text-neutral-600">(Listen carefully to the passage)</p>
                         </div>
                         <AudioPlayer
                             text={currentQuestion.contextAudioSrc}
@@ -141,8 +141,8 @@ export function ListeningComprehensionRound() {
                         </div>
 
                         <div className="bg-purple-50 p-6 rounded-xl">
-                            <p className="text-lg text-neutral-800 text-center">
-                                {currentSubQuestion.audioSrc || currentSubQuestion.text}
+                            <p className="text-lg text-neutral-800 text-center italic">
+                                (Listen to the audio to hear the question)
                             </p>
                         </div>
 

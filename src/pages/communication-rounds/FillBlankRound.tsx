@@ -90,15 +90,15 @@ export function FillBlankRound() {
                         <p className="text-sm text-neutral-600">Fill in the missing word and repeat the full sentence</p>
                     </div>
                     <AudioPlayer
-                        text={currentQuestion?.audioSrc || ''}
+                        text={currentQuestion?.audioSrc?.replace(/_+/g, ' blank ') || ''}
                         voiceType={currentQuestion?.voiceType || 'male_1'}
                         playOnce={false}
                     />
                 </div>
 
                 <div className="bg-orange-50 p-6 rounded-xl border-2 border-orange-200">
-                    <p className="text-lg text-neutral-800 text-center">
-                        {currentQuestion?.audioSrc?.replace(/_+/g, '_')}
+                    <p className="text-lg text-neutral-800 text-center italic">
+                        (Listen to the audio to hear the sentence)
                     </p>
                 </div>
 
