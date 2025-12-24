@@ -149,7 +149,7 @@ export function ListeningComprehensionRound() {
                         <div className="flex flex-col items-center gap-4">
                             {speechError && (
                                 <div className="w-full bg-red-50 border border-red-200 p-4 rounded-lg text-red-700 text-sm">
-                                    ⚠️ Microphone error: {speechError}. Please allow microphone access.
+                                    ⚠️ {speechError}
                                 </div>
                             )}
 
@@ -175,10 +175,6 @@ export function ListeningComprehensionRound() {
 
                         {transcript && (
                             <div className="w-full space-y-4">
-                                <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-                                    <p className="text-sm text-neutral-600 mb-1">Your answer:</p>
-                                    <p className="text-neutral-900">{transcript}</p>
-                                </div>
                                 <Button onClick={handleSubmit} className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg">
                                     Submit & Continue
                                 </Button>

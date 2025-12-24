@@ -97,15 +97,15 @@ export function ErrorCorrectionRound() {
                 </div>
 
                 <div className="bg-red-50 p-6 rounded-xl border-2 border-red-200">
-                    <p className="text-lg text-neutral-800 text-center">
-                        {currentQuestion?.audioSrc}
+                    <p className="text-lg text-neutral-800 text-center italic">
+                        (Listen to the audio to identify the error)
                     </p>
                 </div>
 
                 <div className="flex flex-col items-center gap-4">
                     {speechError && (
                         <div className="w-full bg-red-50 border border-red-200 p-4 rounded-lg text-red-700 text-sm">
-                            ⚠️ Microphone error: {speechError}. Please allow microphone access.
+                            ⚠️ {speechError}
                         </div>
                     )}
 
@@ -131,10 +131,6 @@ export function ErrorCorrectionRound() {
 
                 {transcript && (
                     <div className="w-full space-y-4">
-                        <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-                            <p className="text-sm text-neutral-600 mb-1">Your corrected sentence:</p>
-                            <p className="text-neutral-900">{transcript}</p>
-                        </div>
                         <Button onClick={handleSubmit} className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg">
                             Submit & Continue
                         </Button>
