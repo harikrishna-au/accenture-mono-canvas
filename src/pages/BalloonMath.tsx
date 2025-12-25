@@ -24,6 +24,7 @@ const BalloonMathGame: React.FC = () => {
     const [gameOver, setGameOver] = useState(false);
     const [started, setStarted] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
+    const [roundPerfect, setRoundPerfect] = useState(true);
 
     const TOTAL_ROUNDS = 25;
     const TIME_PER_ROUND = 10; // Reduced time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
@@ -130,6 +131,7 @@ const BalloonMathGame: React.FC = () => {
         setScore(0);
         setTimeLeft(TIME_PER_ROUND);
         setGameOver(false);
+        setRoundPerfect(true);
         generateBalloons();
     };
 
@@ -149,23 +151,31 @@ const BalloonMathGame: React.FC = () => {
         const unpoppedBalloons = balloons.filter(b => !b.popped);
         const smallestAnswer = Math.min(...unpoppedBalloons.map(b => b.answer));
 
-        if (clickedBalloon.answer === smallestAnswer) {
-            // Correct click: "Pop" the bubble
-            const updatedBalloons = balloons.map(b =>
-                b.id === clickedBalloon.id ? { ...b, popped: true } : b
-            );
-            setBalloons(updatedBalloons);
+        const isCorrect = clickedBalloon.answer === smallestAnswer;
 
-            // Check if all popped
-            if (updatedBalloons.every(b => b.popped)) {
-                // Round Complete
-                setScore(prev => prev + 1); // Only increment score if full round completed? Or per bubble? Implementation map implies "Round completes". Let's give 1 point per round cleared.
-                // Small delay before next round to show empty state/success
-                setTimeout(() => nextRound(true), 200);
+        // If incorrect, mark round as not perfect
+        if (!isCorrect) {
+            setRoundPerfect(false);
+        }
+
+        // Pop the balloon regardless of correctness (as per user request explicitly "remove that and start evaluation")
+        // Logic: If correct -> Good, pop it. If incorrect -> Pop it (penalty is just no score for round), continue playing.
+        const updatedBalloons = balloons.map(b =>
+            b.id === clickedBalloon.id ? { ...b, popped: true } : b
+        );
+        setBalloons(updatedBalloons);
+
+        // Check if all popped
+        if (updatedBalloons.every(b => b.popped)) {
+            // Round Complete
+            // Increment score ONLY if the round was perfect AND this last click was also correct (though roundPerfect handles previous clicks)
+            // Wait: If I click wrong now (last one?), it's impossible (last one is always smallest remaining).
+            // But if I clicked wrong earlier, roundPerfect is false.
+            if (roundPerfect && isCorrect) {
+                setScore(prev => prev + 1);
             }
-        } else {
-            // Incorrect order -> Fail round immediately
-            nextRound(false);
+            // Small delay before next round to show empty state/success
+            setTimeout(() => nextRound(true), 200);
         }
     };
 
@@ -178,6 +188,7 @@ const BalloonMathGame: React.FC = () => {
         } else {
             setRound(prev => prev + 1);
             setTimeLeft(TIME_PER_ROUND);
+            setRoundPerfect(true);
             generateBalloons();
         }
     };
