@@ -14,6 +14,7 @@ interface GameCardProps {
         special?: boolean;
         icon?: any;
         survey?: boolean;
+        premiumBottomBarText?: string;
     };
     isPremium: boolean;
     onSubscribe: () => void;
@@ -128,11 +129,11 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
                 </div>
             )}
 
-            {/* Communication Round Premium Banner (Bottom Strip) */}
-            {game.name === "Communication Round" && !isPremium && (
+            {/* Premium Banner (Bottom Strip) */}
+            {game.premiumBottomBarText && !isPremium && (
                 <div className="absolute inset-x-0 bottom-0 pointer-events-none">
                     <div className="w-full h-6 bg-amber-500 shadow-md flex items-center justify-center border-t border-amber-300/50">
-                        <span className="text-white font-bold text-[10px] tracking-widest uppercase drop-shadow-sm">UNLOCK WITH PREMIUM</span>
+                        <span className="text-white font-bold text-[10px] tracking-widest uppercase drop-shadow-sm">{game.premiumBottomBarText}</span>
                     </div>
                 </div>
             )}
