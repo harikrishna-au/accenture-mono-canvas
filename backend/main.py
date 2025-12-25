@@ -45,9 +45,13 @@ app.add_middleware(
 
 @app.post("/api/analyze-game")
 def analyze_game(request: GameHistoryRequest):
-    # Flatten history to dicts
-    history_data = [item.dict() for item in request.history]
-    return analyze_overall_performance(history_data)
+    try:
+        # Flatten history to dicts
+        history_data = [item.dict() for item in request.history]
+        return analyze_overall_performance(history_data)
+    except Exception as e:
+        print(f"Bedrock Error in analyze_game: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
 # Lambda Handler
 handler = Mangum(app)
@@ -219,11 +223,12 @@ def submit_audio(submission: AudioSubmission):
     
     # Use Bedrock Grading (Claude 3.5 Sonnet)
     print(f"Grading with Bedrock: {submission.transcript}")
-    # Note: bedrock_analysis.grade_submission only needs question + answer
-    # It does not strictly need correct_answer but we can pass it if we update the function signature
-    # checking bedrock_analysis.py, grade_submission(question_text, user_transcript)
-    result = grade_submission(target_question["text"], submission.transcript)
-    return result
+    try:
+        result = grade_submission(target_question["text"], submission.transcript)
+        return result
+    except Exception as e:
+        print(f"Bedrock Error in submit_audio: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
 @app.post("/submit/written")
 def submit_written(submission: WrittenSubmission):
@@ -253,8 +258,12 @@ def submit_written(submission: WrittenSubmission):
     
     # Use Bedrock Grading (Claude 3.5 Sonnet)
     print(f"Grading written response with Bedrock: {submission.text}")
-    result = grade_submission(target_question["text"], submission.text)
-    return result
+    try:
+        result = grade_submission(target_question["text"], submission.text)
+        return result
+    except Exception as e:
+        print(f"Bedrock Error in submit_written: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
 @app.post("/api/tts")
 def get_tts_audio(request: TTSRequest):

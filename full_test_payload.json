@@ -1,0 +1,58 @@
+{
+    "history": [
+        {
+            "question": "What is the primary cause of the delay?",
+            "answer": "The main reason for the two-week delay is unexpected server downtime during the migration phase.",
+            "score": 10,
+            "section": "Project Updates"
+        },
+        {
+            "question": "How do you plan to catch up?",
+            "answer": "We are optimizing the testing schedule and allocating two additional engineers to parallelize the workload.",
+            "score": 10,
+            "section": "Project Updates"
+        },
+        {
+            "question": "What are the risks if we rush?",
+            "answer": "If we rush, we might miss critical bugs, which could lead to stability issues in production.",
+            "score": 10,
+            "section": "Project Updates"
+        },
+        {
+            "question": "Explain the latency spike.",
+            "answer": "The latency spike appears to be caused by unoptimized database queries doing full table scans instead of using the index.",
+            "score": 10,
+            "section": "Technical Deep Dive"
+        },
+        {
+            "question": "How did you fix the cache miss?",
+            "answer": "I haven't fixed it yet, I think maybe we restart the redis server or something.",
+            "score": 5,
+            "section": "Technical Deep Dive"
+        },
+        {
+            "question": "What is the backup strategy?",
+            "answer": "We take daily snapshots and store them in S3 with versioning enabled.",
+            "score": 10,
+            "section": "Technical Deep Dive"
+        },
+        {
+            "question": "How would you handle the angry client?",
+            "answer": "I would tell him to calm down and that it's not our fault the server crashed.",
+            "score": 0,
+            "section": "Client Communication"
+        },
+        {
+            "question": "Propose a new timeline.",
+            "answer": "We propose a revised timeline extending the deadline by one week, ensuring all features are fully tested.",
+            "score": 10,
+            "section": "Client Communication"
+        },
+        {
+            "question": "Summarize the incident report.",
+            "answer": "The incident was caused by a memory leak in the microservice which has now been patched.",
+            "score": 10,
+            "section": "Client Communication"
+        }
+    ]
+}

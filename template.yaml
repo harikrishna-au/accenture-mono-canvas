@@ -4,7 +4,7 @@ Description: Communication Assessment Backend API
 
 Globals:
   Function:
-    Timeout: 30
+    Timeout: 60
     MemorySize: 512
     Runtime: python3.12
     Environment:
@@ -19,13 +19,18 @@ Resources:
       CodeUri: backend/
       Handler: main.handler
       Description: FastAPI backend for Communication Assessment
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: communication_questions
+          BEDROCK_REGION: us-east-1
       Policies:
         - DynamoDBCrudPolicy:
             TableName: communication_questions
         - Statement:
           - Effect: Allow
             Action:
-              - bedrock:InvokeModel
+              - bedrock:*
+              - aws-marketplace:*
             Resource: '*'
       Events:
         ApiRoot:
@@ -38,9 +43,28 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: communication_questions
+
+
+  CommunicationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: communication_questions
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: section
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: SectionIndex
+          KeySchema:
+            - AttributeName: section
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
 
 Outputs:
   CommunicationApiUrl:
