@@ -10,7 +10,6 @@ import Header from "@/components/Header";
 import SupportPopup from "@/components/SupportPopup";
 import SEO from "@/components/SEO";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
-import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { toast } from "sonner";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
@@ -23,6 +22,7 @@ const Dashboard = () => {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
+  // useRazorpay removed to force popup flow
   const [isFooterHovered, setIsFooterHovered] = useState(false);
 
   // Auto-show feedback popup once
@@ -55,7 +55,6 @@ const Dashboard = () => {
       path: "/game/communication",
       // Removed isReleased check; effectively enabled (free trial)
       disabled: false,
-      icon: !isPremium ? <Lock className="w-4 h-4 text-amber-500" /> : undefined,
       premiumBottomBarText: "UNLOCK WITH PREMIUM"
     },
     { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
