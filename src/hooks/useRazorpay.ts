@@ -22,7 +22,7 @@ export function useRazorpay() {
         });
     };
 
-    const initiatePayment = async () => {
+    const initiatePayment = async (amount: number = 69) => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return;
@@ -47,7 +47,7 @@ export function useRazorpay() {
                     'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
                 },
                 body: JSON.stringify({
-                    amount: 59, // Amount in INR
+                    amount: amount, // Amount in INR
                     clerk_user_id: user.id
                 })
             });
