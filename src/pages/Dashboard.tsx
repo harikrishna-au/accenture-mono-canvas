@@ -10,17 +10,19 @@ import Header from "@/components/Header";
 import SupportPopup from "@/components/SupportPopup";
 import SEO from "@/components/SEO";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
-import { useRazorpay } from "@/hooks/useRazorpay";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { toast } from "sonner";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { GameCard } from "@/components/dashboard/GameCard";
 
+import PaymentPopup from "@/components/PaymentPopup";
+
 const Dashboard = () => {
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
-  const { initiatePayment, isLoading: paymentLoading } = useRazorpay();
   const [isFooterHovered, setIsFooterHovered] = useState(false);
 
   // Auto-show feedback popup once
@@ -40,7 +42,7 @@ const Dashboard = () => {
       toast.success("You are already a Premium member!");
       return;
     }
-    await initiatePayment();
+    setShowPaymentPopup(true);
   };
 
   const games = [
@@ -99,6 +101,7 @@ const Dashboard = () => {
       <CompletionPopup />
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
+      <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
 
       <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
