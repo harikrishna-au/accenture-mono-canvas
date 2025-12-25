@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Header from "@/components/Header";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useRazorpay } from "@/hooks/useRazorpay";
+import PaymentPopup from "@/components/PaymentPopup";
 
 // Grid Types
 type CellType = 'EMPTY' | 'KEY' | 'GOAL' | 'START';
@@ -159,10 +160,12 @@ const HiddenMaze = () => {
     const [gameFinished, setGameFinished] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
     const [showLockModal, setShowLockModal] = useState(false);
+    const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
     // Hooks
     const { isPremium } = usePremiumStatus();
-    const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
+    // Removed direct useRazorpay usage for popup 
+    // const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
 
 
     // Level State
@@ -549,11 +552,10 @@ const HiddenMaze = () => {
                             </p>
                         </div>
                         <Button
-                            onClick={() => initiatePayment()}
-                            disabled={isPaymentLoading}
+                            onClick={() => setShowPaymentPopup(true)}
                             className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
                         >
-                            {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹59)"}
+                            Unlock All Levels
                         </Button>
                         <Button
                             variant="ghost"
@@ -565,6 +567,7 @@ const HiddenMaze = () => {
                     </div>
                 </div>
             )}
+            <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
         </div>
     );
 };

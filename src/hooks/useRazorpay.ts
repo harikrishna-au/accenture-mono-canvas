@@ -22,7 +22,7 @@ export function useRazorpay() {
         });
     };
 
-    const initiatePayment = async (amount: number = 69) => {
+    const initiatePayment = async (amount: number = 120) => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return;

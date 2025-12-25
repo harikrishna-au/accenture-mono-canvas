@@ -24,6 +24,7 @@ import { FlowTile } from "@/components/matrix/FlowTile";
 import Header from "@/components/Header";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useRazorpay } from "@/hooks/useRazorpay";
+import PaymentPopup from "@/components/PaymentPopup";
 
 const createTileId = (row: number, col: number) => `${String.fromCharCode(65 + row)}${col + 1}`;
 
@@ -47,9 +48,10 @@ export default function FindMin() {
   const [timeLeft, setTimeLeft] = useState(240); // 4:00 in seconds
   const [gameComplete, setGameComplete] = useState(false);
   const [showLockModal, setShowLockModal] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
   const { isPremium } = usePremiumStatus();
-  const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
+  // const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
 
   useEffect(() => {
     setTiles(buildBoard(level));
@@ -339,11 +341,10 @@ export default function FindMin() {
               </p>
             </div>
             <Button
-              onClick={() => initiatePayment()}
-              disabled={isPaymentLoading}
+              onClick={() => setShowPaymentPopup(true)} // Changed to use ShowPopup
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-200"
             >
-              {isPaymentLoading ? "Processing..." : "Unlock All Levels (₹59)"}
+              Unlock All Levels
             </Button>
             <Button
               variant="ghost"
@@ -355,6 +356,7 @@ export default function FindMin() {
           </div>
         </div>
       )}
+      <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
 
     </div>
   );

@@ -24,7 +24,7 @@ const simpleHash = (str: string) => {
 
 // Hashed Coupon Codes (Obfuscated)
 const COUPONS: Record<string, number> = {
-    "1406405223": 49, // EARLYACCESS (Discounts to 49)
+    "1406405223": 69, // EARLYACCESS (Discounts to 69)
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
@@ -35,8 +35,7 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
 
     if (!isOpen) return null;
 
-    const displayPrice = 120; // shown crossed out
-    const originalAmount = 69; // effective base price
+    const originalAmount = 120; // Base price
     const finalAmount = appliedAmount ?? originalAmount;
 
     const handleApplyCoupon = () => {
@@ -79,15 +78,11 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                         <div className="flex flex-col items-end">
                             {appliedAmount ? (
                                 <>
-                                    <span className="text-neutral-400 line-through text-xs">₹{displayPrice}</span>
                                     <span className="text-neutral-400 line-through text-sm">₹{originalAmount}</span>
                                     <span className="text-2xl font-bold text-green-600">₹{finalAmount}</span>
                                 </>
                             ) : (
-                                <>
-                                    <span className="text-neutral-400 line-through text-sm">₹{displayPrice}</span>
-                                    <span className="text-2xl font-bold text-neutral-900">₹{originalAmount}</span>
-                                </>
+                                <span className="text-2xl font-bold text-neutral-900">₹{originalAmount}</span>
                             )}
                         </div>
                     </div>
