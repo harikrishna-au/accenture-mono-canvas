@@ -31,6 +31,10 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
 
             if (response.ok) {
                 const blob = await response.blob();
+                console.log("TTS Audio Blob received:", blob.type, blob.size, "bytes");
+                if (blob.size < 100) {
+                    console.warn("TTS Audio Blob is suspiciously small, likely text error response masquerading as 200 OK");
+                }
                 const url = URL.createObjectURL(blob);
                 setAudioUrl(url);
                 setUseFallback(false);

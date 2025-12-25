@@ -187,6 +187,24 @@ def get_questions(section: str):
         )
         items = response.get('Items', [])
         
+        # Define required counts per section (Updated per requirements)
+        SECTION_COUNTS = {
+            'A': 3,  # 3 Scenarios (approx 6 questions)
+            'B': 2,  # 2 Passages (approx 6 questions)
+            'C': 12, # Reading Aloud
+            'D': 10, # Listen & Repeat
+            'E': 8,  # Fill in Missing Word
+            'F': 5,  # Error Correction
+            'G': 1,  # Speaking Topic
+            'WRITTEN': 1
+        }
+        
+        required_count = SECTION_COUNTS.get(section, len(items))
+        
+        # Randomly sample unique items if pool is larger than required
+        if len(items) > required_count:
+            items = random.sample(items, required_count)
+            
         # Transform to camelCase recursively
         transformed_items = [convert_to_camel_case(item) for item in items]
                     

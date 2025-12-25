@@ -20,6 +20,9 @@ fi
 echo "✅ Credentials loaded for account ending in: ...${AWS_ACCESS_KEY_ID: -4}"
 echo "🌏 Region: $AWS_DEFAULT_REGION"
 
+export AZURE_SPEECH_KEY=$(grep AZURE_SPEECH_KEY backend/.env | cut -d '#' -f1 | awk -F= '{print $2}' | tr -d ' "[:space:]')
+export AZURE_SPEECH_REGION=$(grep AZURE_SPEECH_REGION backend/.env | cut -d '#' -f1 | awk -F= '{print $2}' | tr -d ' "[:space:]')
+
 echo ""
 echo "📦 Building project (Clean Build)..."
 rm -rf .aws-sam
@@ -28,8 +31,15 @@ sam build
 echo ""
 echo "🚀 Deploying to NEW ACCOUNT..."
 # We use --resolve-s3 to let SAM manage the bucket in the new account
-sam deploy --guided
+sam deploy \
+    --stack-name communication-backend \
+    --region $AWS_DEFAULT_REGION \
+    --capabilities CAPABILITY_IAM \
+    --resolve-s3 \
+    --no-confirm-changeset \
+    --no-fail-on-empty-changeset \
+    --parameter-overrides AzureSpeechKey=$AZURE_SPEECH_KEY AzureSpeechRegion=$AZURE_SPEECH_REGION
 
 echo ""
 echo "🌱 Seeding Database..."
-python3 seed_dynamodb.py
+# python3 backend/seed_dynamo.py

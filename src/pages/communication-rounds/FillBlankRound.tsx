@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RoundLayout } from './components/RoundLayout';
 import { AudioPlayer } from './components/AudioPlayer';
+
 import { Button } from '@/components/ui/button';
 import { Mic, Square } from 'lucide-react';
 import { useGame } from './GameContext';
@@ -92,7 +93,7 @@ export function FillBlankRound() {
                     <AudioPlayer
                         text={currentQuestion?.audioSrc?.replace(/_+/g, ' blank ') || ''}
                         voiceType={currentQuestion?.voiceType || 'male_1'}
-                        playOnce={false}
+                        playOnce={true}
                     />
                 </div>
 

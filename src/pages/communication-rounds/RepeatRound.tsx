@@ -91,7 +91,7 @@ export function RepeatRound() {
                     <AudioPlayer
                         text={currentQuestion?.audioSrc || ''}
                         voiceType={currentQuestion?.voiceType || 'female_1'}
-                        playOnce={false}
+                        playOnce={true}
                     />
                 </div>
 

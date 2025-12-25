@@ -11,6 +11,15 @@ Globals:
       Variables:
         DYNAMODB_TABLE: communication_questions
 
+Parameters:
+  AzureSpeechKey:
+    Type: String
+    Description: Azure Speech Resource Key
+  AzureSpeechRegion:
+    Type: String
+    Description: Azure Speech Resource Region
+    Default: eastus
+
 Resources:
   CommunicationAPI:
     Type: AWS::Serverless::Function
@@ -23,6 +32,8 @@ Resources:
         Variables:
           DYNAMODB_TABLE: communication_questions
           BEDROCK_REGION: us-east-1
+          AZURE_SPEECH_KEY: !Ref AzureSpeechKey
+          AZURE_SPEECH_REGION: !Ref AzureSpeechRegion
       Policies:
         - DynamoDBCrudPolicy:
             TableName: communication_questions

@@ -31,25 +31,27 @@ def analyze_overall_performance(history: list) -> dict:
             transcript_text += f"Q: {item.get('question', 'Unknown')}\n"
             transcript_text += f"A: {item.get('answer', 'No answer')}\n"
 
-    prompt = f"""You are an expert communication coach. Analyze the user's performance in this speaking test.
+    prompt = f"""You are an encouraging, expert Native English Communication Coach. Your goal is to motivate the learner while providing specific, actionable feedback to help them improve.
 
-TRANSCRIPT:
+TRANSCRIPT OF USER ANSWERS:
 {transcript_text}
 
 INSTRUCTIONS:
-1. Rate Fluency, Grammar, Vocabulary, and Pronunciation (0-100).
-2. Provide specific feedback for each section.
-3. Return ONLY a valid JSON object in this format:
+1. Analyze the user's responses for Fluency, Grammar, Vocabulary, and Pronunciation.
+2. Be HIGHLY MOTIVATIONAL in your "overall_feedback". Acknowledge their effort, tell them they are doing great, but also gently point out areas to focus on. Explicitly encourage them to "take time to practice more" and "analyze their answers".
+3. For "section_feedback", do NOT use generic names like "Body" or "Conclusion" unless they match the transcript sections. Use the actual section names provided (e.g., "Section A", "Listening").
+4. Provide concrete examples of how to improve in the "feedback" fields.
+5. Return ONLY a valid JSON object in this format:
 {{
-    "fluency_score": int,
-    "grammar_score": int,
-    "vocabulary_score": int,
-    "pronunciation_score": int,
-    "overall_feedback": "string",
-    "strengths": ["str", "str"],
-    "improvements": ["str", "str"],
+    "fluency_score": int (0-100),
+    "grammar_score": int (0-100),
+    "vocabulary_score": int (0-100),
+    "pronunciation_score": int (0-100),
+    "overall_feedback": "A detailed, encouraging paragraph (approx 3-4 sentences). Start with praise, then constructive advice, and end with a motivating call to action to practice.",
+    "strengths": ["specific strength 1", "specific strength 2"],
+    "improvements": ["specific actionable improvement 1", "specific actionable improvement 2"],
     "section_feedback": [
-        {{ "section": "Name", "feedback": "Specific advice" }}
+        {{ "section": "Section Name", "feedback": "Specific, encouraging advice for this section." }}
     ]
 }}
 JSON Response:
@@ -61,7 +63,7 @@ JSON Response:
         "textGenerationConfig": {
             "maxTokenCount": 1024,
             "stopSequences": [],
-            "temperature": 0.1,
+            "temperature": 0.7,
             "topP": 0.9
         }
     }
