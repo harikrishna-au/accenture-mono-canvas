@@ -24,8 +24,8 @@ const simpleHash = (str: string) => {
 
 // Hashed Coupon Codes (Obfuscated)
 const COUPONS: Record<string, number> = {
-    "1406405223": 69, // EARLYACCESS (Discounts to 69)
-    "84788870": 79, // YT_79 (Discounts to 79)
+    "1406405223": 69,
+    "84788870": 79,
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
