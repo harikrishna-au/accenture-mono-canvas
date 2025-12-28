@@ -11,6 +11,15 @@ Globals:
       Variables:
         DYNAMODB_TABLE: communication_questions
 
+  Api:
+    BinaryMediaTypes:
+      - "*/*"
+      - "audio/mpeg"
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
+
 Parameters:
   AzureSpeechKey:
     Type: String

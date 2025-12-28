@@ -12,8 +12,8 @@ def get_speech_config():
         return None
         
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    # Set output format to MP3
-    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
+    # Set output format to standard high-quality MP3 (better compatibility)
+    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio24Khz160KBitRateMonoMp3)
     return speech_config
 
 def generate_speech(text: str, voice_name: str = "en-US-GuyNeural") -> Optional[bytes]:
