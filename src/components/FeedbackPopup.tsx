@@ -24,7 +24,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     const [college, setCollege] = useState("");
     const [mobileNumber, setMobileNumber] = useState("");
     const [selectedRound, setSelectedRound] = useState("Not Sure");
-    const [placementType, setPlacementType] = useState("On-Campus");
+    const [placementType, setPlacementType] = useState("Off-Campus");
     const [rating, setRating] = useState(5);
     const [techRoundExp, setTechRoundExp] = useState("");
 
@@ -131,7 +131,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
 
                             <div className="space-y-2">
                                 <Label className="text-sm font-bold text-neutral-800">Placement Type</Label>
-                                <RadioGroup defaultValue="On-Campus" value={placementType} onValueChange={setPlacementType} className="flex gap-4">
+                                <RadioGroup defaultValue="Off-Campus" value={placementType} onValueChange={setPlacementType} className="flex gap-4">
                                     <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
                                         <RadioGroupItem value="On-Campus" id="p1" />
                                         <Label htmlFor="p1" className="cursor-pointer font-medium">On-Campus</Label>
