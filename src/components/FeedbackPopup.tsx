@@ -24,7 +24,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     const [college, setCollege] = useState("");
     const [mobileNumber, setMobileNumber] = useState("");
     const [graduatingYear, setGraduatingYear] = useState("");
-    const [placementType, setPlacementType] = useState("Off-Campus");
+    const [placementType, setPlacementType] = useState("");
     const [techRoundExp, setTechRoundExp] = useState("");
 
     if (!isOpen) return null;
@@ -34,6 +34,11 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
 
         if (!name.trim() || !college.trim()) {
             toast.error("Please fill in your name and college.");
+            return;
+        }
+
+        if (!placementType) {
+            toast.error("Please select your placement type.");
             return;
         }
 
@@ -140,7 +145,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
 
                             <div className="space-y-2">
                                 <Label className="text-sm font-bold text-neutral-800">Placement Type</Label>
-                                <RadioGroup defaultValue="Off-Campus" value={placementType} onValueChange={setPlacementType} className="flex gap-4">
+                                <RadioGroup value={placementType} onValueChange={setPlacementType} className="flex gap-4">
                                     <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
                                         <RadioGroupItem value="On-Campus" id="p1" />
                                         <Label htmlFor="p1" className="cursor-pointer font-medium">On-Campus</Label>
