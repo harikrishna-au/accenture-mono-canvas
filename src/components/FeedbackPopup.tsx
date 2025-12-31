@@ -105,7 +105,10 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                             </div>
                             <div className="flex flex-col gap-3 pt-4">
                                 <Button
-                                    onClick={() => setShowCampusConfirmation(false)}
+                                    onClick={() => {
+                                        setPlacementType("On-Campus");
+                                        setShowCampusConfirmation(false);
+                                    }}
                                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-200"
                                 >
                                     🔵 Yes, Accenture is coming to my campus
