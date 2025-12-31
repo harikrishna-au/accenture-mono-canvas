@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X, MessageSquare, Send } from "lucide-react";
+import { X, MessageSquare, Send, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     const { user } = useUser();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSent, setIsSent] = useState(false);
+    const [showCampusConfirmation, setShowCampusConfirmation] = useState(true);
 
     // Form Stats
     const [name, setName] = useState("");
@@ -85,110 +86,147 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                 </button>
 
                 <div className="space-y-6">
-                    <div className="text-center space-y-2">
-                        <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <MessageSquare className="w-7 h-7 text-indigo-600 fill-indigo-600/20" />
+                    {showCampusConfirmation ? (
+                        <div className="text-center space-y-6">
+                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+                                <GraduationCap className="w-9 h-9 text-blue-600" />
+                            </div>
+                            <div className="space-y-3">
+                                <h2 className="text-2xl font-black text-neutral-900 leading-tight">Important for On-Campus Students</h2>
+                                <p className="text-neutral-600 text-sm leading-relaxed">
+                                    If Accenture is visiting your college for on-campus placements, this is crucial.
+                                </p>
+                                <p className="text-neutral-600 text-sm leading-relaxed">
+                                    Please connect with us and fill the feedback form. Your input helps us bring this game-based practice directly to your campus before the real assessment.
+                                </p>
+                                <p className="text-neutral-500 text-xs italic mt-4">
+                                    Thank you for supporting student preparation.
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-3 pt-4">
+                                <Button
+                                    onClick={() => setShowCampusConfirmation(false)}
+                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-200"
+                                >
+                                    🔵 Yes, Accenture is coming to my campus
+                                </Button>
+                                <Button
+                                    onClick={onClose}
+                                    variant="outline"
+                                    className="w-full h-12 border-2 border-neutral-200 hover:bg-neutral-50 text-neutral-700 rounded-xl text-base font-medium"
+                                >
+                                    ⚪ Not sure / Later
+                                </Button>
+                            </div>
                         </div>
-                        <h2 className="text-2xl font-black text-neutral-900 leading-tight">Quick Survey</h2>
-                        <p className="text-neutral-500 text-sm font-medium">
-                            Help us design the Communication Round tailored for you.
-                        </p>
-                    </div>
-
-                    {!isSent ? (
-                        <form onSubmit={handleSubmit} className="space-y-5">
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="name" className="text-xs font-bold text-neutral-500 uppercase">Name</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="Your Name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        className="h-11 bg-neutral-50 border-neutral-200"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="college" className="text-xs font-bold text-neutral-500 uppercase">College</Label>
-                                    <Input
-                                        id="college"
-                                        placeholder="College Name"
-                                        value={college}
-                                        onChange={(e) => setCollege(e.target.value)}
-                                        className="h-11 bg-neutral-50 border-neutral-200"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="mobile" className="text-xs font-bold text-neutral-500 uppercase">Mobile Number</Label>
-                                    <Input
-                                        id="mobile"
-                                        placeholder="Your Mobile Number"
-                                        type="tel"
-                                        value={mobileNumber}
-                                        onChange={(e) => setMobileNumber(e.target.value)}
-                                        className="h-11 bg-neutral-50 border-neutral-200"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="gradYear" className="text-xs font-bold text-neutral-500 uppercase">Graduating Year</Label>
-                                    <Input
-                                        id="gradYear"
-                                        placeholder="e.g., 2024"
-                                        type="text"
-                                        value={graduatingYear}
-                                        onChange={(e) => setGraduatingYear(e.target.value)}
-                                        className="h-11 bg-neutral-50 border-neutral-200"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-sm font-bold text-neutral-800">Placement Type</Label>
-                                <RadioGroup value={placementType} onValueChange={setPlacementType} className="flex gap-4">
-                                    <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
-                                        <RadioGroupItem value="On-Campus" id="p1" />
-                                        <Label htmlFor="p1" className="cursor-pointer font-medium">On-Campus</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
-                                        <RadioGroupItem value="Off-Campus" id="p2" />
-                                        <Label htmlFor="p2" className="cursor-pointer font-medium">Off-Campus</Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-sm font-bold text-neutral-800">How was your Technical Round?</Label>
-                                <Textarea
-                                    placeholder="Briefly describe your experience..."
-                                    className="min-h-[80px] bg-neutral-50 border-neutral-200 resize-none"
-                                    value={techRoundExp}
-                                    onChange={(e) => setTechRoundExp(e.target.value)}
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 mt-2"
-                            >
-                                {isSubmitting ? "Submitting..." : (
-                                    <>
-                                        Submit Survey <Send className="w-4 h-4 ml-1" />
-                                    </>
-                                )}
-                            </Button>
-                        </form>
                     ) : (
-                        <div className="bg-green-50 p-8 rounded-3xl border border-green-100 text-center space-y-3 animate-in fade-in slide-in-from-bottom-4">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <span className="text-3xl">🎉</span>
+                        <>
+                            <div className="text-center space-y-2">
+                                <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <MessageSquare className="w-7 h-7 text-indigo-600 fill-indigo-600/20" />
+                                </div>
+                                <h2 className="text-2xl font-black text-neutral-900 leading-tight">Quick Survey</h2>
+                                <p className="text-neutral-500 text-sm font-medium">
+                                    Help us design the Communication Round tailored for you.
+                                </p>
                             </div>
-                            <h3 className="text-xl font-bold text-green-900">Thank You!</h3>
-                            <p className="text-green-800 font-medium">
-                                Your feedback helps us build better tools for you.
-                            </p>
-                        </div>
+
+                            {!isSent ? (
+                                <form onSubmit={handleSubmit} className="space-y-5">
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="name" className="text-xs font-bold text-neutral-500 uppercase">Name</Label>
+                                            <Input
+                                                id="name"
+                                                placeholder="Your Name"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="h-11 bg-neutral-50 border-neutral-200"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="college" className="text-xs font-bold text-neutral-500 uppercase">College</Label>
+                                            <Input
+                                                id="college"
+                                                placeholder="College Name"
+                                                value={college}
+                                                onChange={(e) => setCollege(e.target.value)}
+                                                className="h-11 bg-neutral-50 border-neutral-200"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="mobile" className="text-xs font-bold text-neutral-500 uppercase">Mobile Number</Label>
+                                            <Input
+                                                id="mobile"
+                                                placeholder="Your Mobile Number"
+                                                type="tel"
+                                                value={mobileNumber}
+                                                onChange={(e) => setMobileNumber(e.target.value)}
+                                                className="h-11 bg-neutral-50 border-neutral-200"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="gradYear" className="text-xs font-bold text-neutral-500 uppercase">Graduating Year</Label>
+                                            <Input
+                                                id="gradYear"
+                                                placeholder="e.g., 2024"
+                                                type="text"
+                                                value={graduatingYear}
+                                                onChange={(e) => setGraduatingYear(e.target.value)}
+                                                className="h-11 bg-neutral-50 border-neutral-200"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-bold text-neutral-800">Placement Type</Label>
+                                        <RadioGroup value={placementType} onValueChange={setPlacementType} className="flex gap-4">
+                                            <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
+                                                <RadioGroupItem value="On-Campus" id="p1" />
+                                                <Label htmlFor="p1" className="cursor-pointer font-medium">On-Campus</Label>
+                                            </div>
+                                            <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
+                                                <RadioGroupItem value="Off-Campus" id="p2" />
+                                                <Label htmlFor="p2" className="cursor-pointer font-medium">Off-Campus</Label>
+                                            </div>
+                                        </RadioGroup>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-bold text-neutral-800">How was your Technical Round?</Label>
+                                        <Textarea
+                                            placeholder="Briefly describe your experience..."
+                                            className="min-h-[80px] bg-neutral-50 border-neutral-200 resize-none"
+                                            value={techRoundExp}
+                                            onChange={(e) => setTechRoundExp(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 mt-2"
+                                    >
+                                        {isSubmitting ? "Submitting..." : (
+                                            <>
+                                                Submit Survey <Send className="w-4 h-4 ml-1" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </form>
+                            ) : (
+                                <div className="bg-green-50 p-8 rounded-3xl border border-green-100 text-center space-y-3 animate-in fade-in slide-in-from-bottom-4">
+                                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <span className="text-3xl">🎉</span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-green-900">Thank You!</h3>
+                                    <p className="text-green-800 font-medium">
+                                        Your feedback helps us build better tools for you.
+                                    </p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
