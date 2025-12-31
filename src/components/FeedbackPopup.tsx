@@ -46,14 +46,14 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
 
         try {
             const { error } = await supabase.from('feedback').insert({
-                user_id: user?.id || null, // Capture auth user if available
+                user_id: user?.id || null,
                 name: name,
                 college: college,
                 mobile_number: mobileNumber,
                 graduating_year: graduatingYear,
                 placement_type: placementType,
                 technical_round_exp: techRoundExp
-            });
+            } as any);
 
             if (error) throw error;
 
@@ -119,7 +119,7 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                                         className="h-11 bg-neutral-50 border-neutral-200"
                                     />
                                 </div>
-                                <div className="space-y-1.5 md:col-span-2">
+                                <div className="space-y-1.5">
                                     <Label htmlFor="mobile" className="text-xs font-bold text-neutral-500 uppercase">Mobile Number</Label>
                                     <Input
                                         id="mobile"
