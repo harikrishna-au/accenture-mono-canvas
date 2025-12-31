@@ -23,9 +23,8 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
     const [name, setName] = useState("");
     const [college, setCollege] = useState("");
     const [mobileNumber, setMobileNumber] = useState("");
-    const [selectedRound, setSelectedRound] = useState("Not Sure");
+    const [graduatingYear, setGraduatingYear] = useState("");
     const [placementType, setPlacementType] = useState("Off-Campus");
-    const [rating, setRating] = useState(5);
     const [techRoundExp, setTechRoundExp] = useState("");
 
     if (!isOpen) return null;
@@ -46,9 +45,8 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                 name: name,
                 college: college,
                 mobile_number: mobileNumber,
+                graduating_year: graduatingYear,
                 placement_type: placementType,
-                selected_round: selectedRound,
-                rating: rating,
                 technical_round_exp: techRoundExp
             });
 
@@ -127,6 +125,17 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                                         className="h-11 bg-neutral-50 border-neutral-200"
                                     />
                                 </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="gradYear" className="text-xs font-bold text-neutral-500 uppercase">Graduating Year</Label>
+                                    <Input
+                                        id="gradYear"
+                                        placeholder="e.g., 2024"
+                                        type="text"
+                                        value={graduatingYear}
+                                        onChange={(e) => setGraduatingYear(e.target.value)}
+                                        className="h-11 bg-neutral-50 border-neutral-200"
+                                    />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -144,24 +153,6 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-sm font-bold text-neutral-800">Did you clear selected for Communication Round?</Label>
-                                <RadioGroup defaultValue="Not Sure" value={selectedRound} onValueChange={setSelectedRound} className="flex gap-4">
-                                    <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
-                                        <RadioGroupItem value="Yes" id="r1" />
-                                        <Label htmlFor="r1" className="cursor-pointer font-medium">Yes</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
-                                        <RadioGroupItem value="No" id="r2" />
-                                        <Label htmlFor="r2" className="cursor-pointer font-medium">No</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 border rounded-xl px-4 py-2 hover:bg-neutral-50 cursor-pointer w-full">
-                                        <RadioGroupItem value="Not Sure" id="r3" />
-                                        <Label htmlFor="r3" className="cursor-pointer font-medium">Not Sure</Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-
-                            <div className="space-y-2">
                                 <Label className="text-sm font-bold text-neutral-800">How was your Technical Round?</Label>
                                 <Textarea
                                     placeholder="Briefly describe your experience..."
@@ -169,22 +160,6 @@ const FeedbackPopup = ({ isOpen, onClose }: FeedbackPopupProps) => {
                                     value={techRoundExp}
                                     onChange={(e) => setTechRoundExp(e.target.value)}
                                 />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-sm font-bold text-neutral-800">Rate this Application</Label>
-                                <div className="flex gap-2 justify-center py-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            type="button"
-                                            onClick={() => setRating(star)}
-                                            className={`text-3xl transition-transform hover:scale-110 focus:outline-none ${star <= rating ? 'text-yellow-400' : 'text-neutral-200'}`}
-                                        >
-                                            ★
-                                        </button>
-                                    ))}
-                                </div>
                             </div>
 
                             <Button
