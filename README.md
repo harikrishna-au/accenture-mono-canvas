@@ -35,10 +35,14 @@ High-level data flow demonstrating the integration between the Client, API, and 
 graph TD
     Client[React Client] -->|HTTP/REST| API[Python Backend API]
     Client -->|Direct Query| DB[(Supabase/PostgreSQL)]
+    Client -->|Secure Order| Edge[Supabase Edge Functions]
     
     API -->|Validation & Logic| Logic{Service Layer}
     Logic -->|GenAI Request| Bedrock[AWS Bedrock]
     Logic -->|Data Persistence| DynamoDB[(AWS DynamoDB)]
+    
+    Edge -->|Payment Intent| Razorpay[Razorpay API]
+    Razorpay -->|Webhook| Edge
     
     Bedrock -->|Analysis Result| Logic
     Logic -->|JSON Response| Client
@@ -50,12 +54,14 @@ graph TD
     subgraph "Backend Layer"
         API
         Logic
+        Edge
     end
     
     subgraph "Data & AI Layer"
         DB
         DynamoDB
         Bedrock
+        Razorpay
     end
 ```
 
@@ -72,6 +78,10 @@ graph TD
 ### Latency Optimization: AI Feedback
 **Decision**: Asynchronous Processing for Bedrock Calls.
 -   **Why**: Generative AI calls can be latent. We architected the "Communication Round" to handle the user's speech-to-text input effectively, providing immediate UI feedback ("Processing...") while the Python backend manages the rigorous handshake with AWS Bedrock, preventing UI freezes.
+
+### Serverless Payment Architecture
+**Decision**: Razorpay via Supabase Edge Functions.
+-   **Why**: Security is paramount. Instead of processing payments directly on the client, we use **Supabase Edge Functions** (TypeScript/Deno) to act as a secure middleware. This prevents exposing API secrets, validates transaction integrity, and handles asynchronous webhooks for payment confirmations reliably.
 
 ## 📂 Project Structure
 
@@ -97,9 +107,9 @@ accenture-mono-canvas/
 | Category | Technologies |
 |----------|--------------|
 | **Frontend** | React 18, TypeScript, Tailwind CSS, Shadcn UI, Vite, Framer Motion |
-| **Backend** | Python, AWS Bedrock (GenAI), RESTful APIs |
-| **Database** | Supabase / DynamoDB |
-| **DevOps & Tools** | Git, Vercel, npm, ESLint |
+| **Backend** | Python, AWS Bedrock (GenAI), RESTful APIs, Supabase Edge Functions |
+| **Database** | Supabase (PostgreSQL), DynamoDB |
+| **DevOps & Tools** | Git, Vercel, Razorpay (Payments), ESLint |
 
 ## 🏁 Getting Started
 
