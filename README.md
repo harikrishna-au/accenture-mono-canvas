@@ -1,101 +1,150 @@
 # Accenture Assessment Simulator
 
-# Accenture Assessment Simulator
-
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-HarryTheBlaze.site-2ea44f?style=for-the-badge&logo=vercel)](https://www.harrytheblaze.site/)
 [![React](https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61dafb)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007acc?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Users](https://img.shields.io/badge/Users-Growing_Fast-blue?style=for-the-badge&logo=clerk)](https://www.harrytheblaze.site/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 
-![Project Banner](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80)
+![Project Banner](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)
 
-## ❓ Why This Exists
+## 🚀 About The Project
 
-Recruitment assessments for top-tier companies like Accenture are designed to be high-pressure and cognitively demanding. Many qualified candidates fail not because of a lack of skill, but due to **unfamiliarity with the format** and **performance anxiety**.
+**Accenture Assessment Simulator** is a full-stack educational platform designed to help students prepare for high-pressure recruitment assessments. Unlike standard quiz apps, this project focuses on **psychological conditioning** by replicating the exact UI/UX, time constraints, and cognitive load of real-world enterprise assessments.
 
-I built this platform to solve that problem. It is not just a collection of games; it is a **psychological training ground**. By providing a pixel-perfect replica of the actual "Communication Round" and "Cognitive Assessment" interfaces, this tool allows candidates to desensitize themselves to the pressure and focus entirely on showcasing their abilities.
+I built this project to demonstrate **end-to-end full-stack engineering skills**, combining a high-performance React frontend with a robust Python/AWS backend to deliver a seamless, low-latency user experience.
 
-## ⚙️ How It Works
+## ✨ Key Features
 
-The application replicates the core cognitive challenges using advanced web algorithms:
+### 🎨 Advanced Frontend Engineering (React + TypeScript)
+-   **Complex State Management**: Implemented custom hooks and context providers to manage global assessment state, timers, and user progress across multiple rounds without prop drilling.
+-   **Real-time Performance**: Utilized `requestAnimationFrame` for smooth, 60fps animations in the "Balloon Math" cognitive game, ensuring precise hit-testing and physics interactions.
+-   **Graph Algorithms for UI**: Applied Depth-First Search (DFS) algorithms in the "Matrix Flow" game to validate complex pathfinding logic directly in the browser.
+-   **Responsive & Accessible**: Built with **Tailwind CSS** and **Shadcn UI** to ensure a pixel-perfect, accessible experience across devices.
 
-1.  **Immersive Simulation**:
-    *   The interface mimics the enterprise software aesthetic found in actual testing centers, conditioning users to the visual environment.
-    *   Live audio visualization and strict timing constraints replicate the stress factors of the real exam.
+### ⚙️ Backend & Cloud Architecture (Python + AWS)
+-   **Scalable API**: Developed a RESTful API using **Python** (FastAPI/Flask equivalent logic) to handle assessment data and user sessions.
+-   **AI Integration**: Integrated **AWS Bedrock** to power the "Communication Round," using LLMs to analyze user inputs and provide intelligent feedback.
+-   **Database Design**: Structured data models to efficiently store complex hierarchical data for assessment questions, results, and analytics.
 
-2.  **Algorithmic Grading (The "Brain")**:
-    *   **Spatial Reasoning (Matrix Flow)**: Uses graph traversal algorithms (DFS) to validate complex routing paths in real-time.
-    *   **Cognitive Speed (Balloon Math)**: Leverages `requestAnimationFrame` for high-frequency physics interactions to test reaction times without lag.
-    *   **Memory (Hidden Maze)**: Implements state-heavy "Fog of War" logic to test short-term memory retention under uncertainty.
+## 🏗️ System Architecture
 
-## 🚀 Significance & Impact
+High-level data flow demonstrating the integration between the Client, API, and External Services.
 
-This project demonstrates that **web applications can be more than just CRUD interfaces**—they can be sophisticated training simulators.
+```mermaid
+graph TD
+    Client[React Client] -->|HTTP/REST| API[Python Backend API]
+    Client -->|Direct Query| DB[(Supabase/PostgreSQL)]
+    
+    API -->|Validation & Logic| Logic{Service Layer}
+    Logic -->|GenAI Request| Bedrock[AWS Bedrock]
+    Logic -->|Data Persistence| DynamoDB[(AWS DynamoDB)]
+    
+    Bedrock -->|Analysis Result| Logic
+    Logic -->|JSON Response| Client
+    
+    subgraph "Frontend Layer"
+        Client
+    end
+    
+    subgraph "Backend Layer"
+        API
+        Logic
+    end
+    
+    subgraph "Data & AI Layer"
+        DB
+        DynamoDB
+        Bedrock
+    end
+```
 
-*   **For Candidates**: It democratizes access to high-quality preparation material, leveling the playing field for students from all backgrounds.
-*   **Engineering Value**: It showcases the capability of modern React (v18) to handle complex, real-time interactive state management without the need for heavy game engines like Unity.
-*   **Scalability**: Built with a modular architecture, new assessment modules can be "plugged in" purely as React components, making the platform adaptable for other companies' assessment styles.
+## 🧠 Engineering Decisions & Trade-offs
 
----
+### State Management: React Context vs. Redux
+**Decision**: Utilized React Context + Custom Hooks.
+-   **Why**: For this specific application complexity, Redux would introduce unnecessary boilerplate. Context API provides sufficient global state handling for user sessions and assessment progress without the overhead of a flux pattern library, reducing bundle size and maintenance cost.
+
+### Performance: The "Balloon Math" Game Loop
+**Decision**: `requestAnimationFrame` over `setInterval`.
+-   **Why**: To ensure a buttery-smooth 60fps experience on varying hardware, `requestAnimationFrame` allows the browser to optimize reflows and repaints. This aligns physics calculations with the display refresh rate, preventing the "jitter" often seen with `setInterval` based loops.
+
+### Latency Optimization: AI Feedback
+**Decision**: Asynchronous Processing for Bedrock Calls.
+-   **Why**: Generative AI calls can be latent. We architected the "Communication Round" to handle the user's speech-to-text input effectively, providing immediate UI feedback ("Processing...") while the Python backend manages the rigorous handshake with AWS Bedrock, preventing UI freezes.
+
+## 📂 Project Structure
+
+A hybrid monorepo approach for clear separation of concerns.
+
+```bash
+accenture-mono-canvas/
+├── src/                  # Frontend Application (React)
+│   ├── components/       # Reusable UI Components (Shadcn)
+│   ├── pages/            # Feature Pages (Assessment Rounds)
+│   ├── hooks/            # Custom Logic & State Management
+│   └── lib/              # Utilities & Helpers
+├── backend/              # Backend Logic (Python)
+│   ├── communication-backend/  # Dedicated Service for GenAI
+│   └── main.py           # API Entry Point
+├── supabase/             # Database Migrations & Types
+└── public/               # Static Assets
+```
 
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| **Frontend** | React 18, TypeScript, Tailwind CSS, Shadcn UI, Vite, Framer Motion |
+| **Backend** | Python, AWS Bedrock (GenAI), RESTful APIs |
+| **Database** | Supabase / DynamoDB |
+| **DevOps & Tools** | Git, Vercel, npm, ESLint |
+
+## 🏁 Getting Started
+
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+-   Node.js (v18+)
+-   Python (v3.9+)
+
+### Frontend Setup
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/accenture-mono-canvas.git
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the development server
 npm run dev
 ```
 
-### Running the Python Backend (Communication Round)
-
-The "Communication Round" features require a Python backend.
-
-```sh
-# Step 1: Navigate to backend directory
+### Backend Setup
+```bash
+# 1. Navigate to backend directory
 cd communication-backend
 
-# Step 2: Install Python dependencies
+# 2. Install Python dependencies
 pip install -r requirements.txt
 
-# Step 3: Start the server
+# 3. Start the server
 python3 main.py
 ```
-The backend runs on `http://localhost:8000`.
 
+## 🔮 Future Improvements
 
-**Edit a file directly in GitHub**
+-   **Real-time Analytics Dashboard**: Implementing WebSockets for live proctoring features.
+-   **Multi-tenant Support**: Refactoring for SaaS capabilities to allow multiple organizations to host their own assessments.
+-   **Enhanced AI Models**: Fine-tuning Bedrock models for more specific feedback personalities.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📬 Contact
 
-**Use GitHub Codespaces**
+**Hari Krishna** - Full Stack Developer
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit_Site-blue?style=for-the-badge)](https://www.harrytheblaze.site/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/hari-krishna-aaaa8425b/)
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/19b1cf7a-58e8-4aa5-8a49-81e6f31ca1f0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-**Built by Hari Krishna**  
-*A demonstration of Full-Stack Engineering applied to EdTech.*
-
+---
+*Built with ❤️ to help students succeed.*
