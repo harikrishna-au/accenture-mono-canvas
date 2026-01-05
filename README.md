@@ -122,7 +122,7 @@ Follow these instructions to set up the project locally.
 ### Frontend Setup
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/accenture-mono-canvas.git
+git clone https://github.com/harikrishna-au/accenture-mono-canvas.git
 
 # 2. Install dependencies
 npm install
@@ -143,18 +143,12 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-## 🔮 Future Improvements
-
--   **Real-time Analytics Dashboard**: Implementing WebSockets for live proctoring features.
--   **Multi-tenant Support**: Refactoring for SaaS capabilities to allow multiple organizations to host their own assessments.
--   **Enhanced AI Models**: Fine-tuning Bedrock models for more specific feedback personalities.
-
-## 📬 Contact
+##  Contact
 
 **Hari Krishna** - Full Stack Developer
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-Visit_Site-blue?style=for-the-badge)](https://www.harrytheblaze.site/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/hari-krishna-aaaa8425b/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/hari-krishna-nallana-33949b277/)
 
 ---
 *Built with ❤️ to help students succeed.*
