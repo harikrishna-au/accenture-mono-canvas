@@ -57,14 +57,14 @@ const Dashboard = () => {
       disabled: false,
       premiumBottomBarText: "UNLOCK WITH PREMIUM"
     },
-    { id: 5, name: "Connect with me", path: "https://topmate.io/hari_krishna_nallana/", isExternal: true },
     {
-      id: 13,
-      name: "Accenture Interview Guidance Paid 1-on-1 Session",
-      path: "https://topmate.io/hari_krishna_nallana/1381223", // Using specific service link if possible, otherwise generic
+      id: 5,
+      name: "Connect with me",
+      subtitle: "Accenture Interview Guidance – Paid 1-on-1 Session",
+      path: "https://topmate.io/hari_krishna_nallana/",
       isExternal: true,
       typingHighlight: true,
-      icon: <span className="text-4xl">🎯</span>
+      typingText: "BOOK 1:1 SESSION"
     },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {

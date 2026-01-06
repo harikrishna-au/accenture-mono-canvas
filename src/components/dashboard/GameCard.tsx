@@ -16,6 +16,7 @@ interface GameCardProps {
         survey?: boolean;
         premiumBottomBarText?: string;
         typingHighlight?: boolean;
+        typingText?: string;
     };
     isPremium: boolean;
     onSubscribe: () => void;
@@ -144,12 +145,17 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
                     <div className="relative">
                         <span className="text-4xl absolute -top-12 left-1/2 -translate-x-1/2 mb-4 animate-bounce">👇</span>
                         <div className="overflow-hidden whitespace-nowrap border-r-4 border-orange-500 animate-typing text-sm font-bold text-white tracking-widest uppercase">
-                            BOOK NOW
+                            {game.typingText || "BOOK NOW"}
                         </div>
                     </div>
                     <span className={`text-lg font-bold text-center leading-tight mt-6 text-white`}>
                         {game.name}
                     </span>
+                    {game.subtitle && (
+                        <span className="text-xs text-center text-neutral-400 mt-2 font-medium">
+                            {game.subtitle}
+                        </span>
+                    )}
                 </div>
             )}
         </div>
