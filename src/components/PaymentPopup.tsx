@@ -26,6 +26,7 @@ const simpleHash = (str: string) => {
 const COUPONS: Record<string, number> = {
     "1406405223": 69,
     "84788870": 79,
+    "14110599": 59,
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
