@@ -15,6 +15,7 @@ interface GameCardProps {
         icon?: any;
         survey?: boolean;
         premiumBottomBarText?: string;
+        typingHighlight?: boolean;
     };
     isPremium: boolean;
     onSubscribe: () => void;
@@ -135,6 +136,20 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
                     <div className="w-full h-6 bg-amber-500 shadow-md flex items-center justify-center border-t border-amber-300/50">
                         <span className="text-white font-bold text-[10px] tracking-widest uppercase drop-shadow-sm">{game.premiumBottomBarText}</span>
                     </div>
+                </div>
+            )}
+            {/* Typing Highlight Effect */}
+            {game.typingHighlight && (
+                <div className="absolute inset-0 bg-neutral-900 flex flex-col items-center justify-center p-4">
+                    <div className="relative">
+                        <span className="text-4xl absolute -top-12 left-1/2 -translate-x-1/2 mb-4 animate-bounce">👇</span>
+                        <div className="overflow-hidden whitespace-nowrap border-r-4 border-orange-500 animate-typing text-sm font-bold text-white tracking-widest uppercase">
+                            BOOK NOW
+                        </div>
+                    </div>
+                    <span className={`text-lg font-bold text-center leading-tight mt-6 text-white`}>
+                        {game.name}
+                    </span>
                 </div>
             )}
         </div>
