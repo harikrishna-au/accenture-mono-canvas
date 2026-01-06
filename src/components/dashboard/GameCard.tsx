@@ -141,18 +141,18 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
             )}
             {/* Typing Highlight Effect */}
             {game.typingHighlight && (
-                <div className="absolute inset-0 bg-neutral-900 flex flex-col items-center justify-center p-4">
+                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-all duration-300 group-hover:bg-white/95">
                     <div className="relative">
                         <span className="text-4xl absolute -top-12 left-1/2 -translate-x-1/2 mb-4 animate-bounce">👇</span>
-                        <div className="overflow-hidden whitespace-nowrap border-r-4 border-orange-500 animate-typing text-sm font-bold text-white tracking-widest uppercase">
+                        <div className="overflow-hidden whitespace-nowrap border-r-4 border-amber-600 animate-typing text-sm font-bold text-amber-900 tracking-widest uppercase">
                             {game.typingText || "BOOK NOW"}
                         </div>
                     </div>
-                    <span className={`text-lg font-bold text-center leading-tight mt-6 text-white`}>
+                    <span className={`text-lg font-bold text-center leading-tight mt-6 text-amber-950`}>
                         {game.name}
                     </span>
                     {game.subtitle && (
-                        <span className="text-xs text-center text-neutral-400 mt-2 font-medium">
+                        <span className="text-xs text-center text-amber-700/80 mt-2 font-medium">
                             {game.subtitle}
                         </span>
                     )}
@@ -161,3 +161,4 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
         </div>
     );
 };
+
