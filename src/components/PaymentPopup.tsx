@@ -27,6 +27,8 @@ const COUPONS: Record<string, number> = {
     "1406405223": 69,
     "84788870": 79,
     "14110599": 59,
+    "390045773": 79, // SRAVANTHI_79
+    "2072602638": 99, // K.P.R_99
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
