@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList, Send, Users } from "lucide-react";
+import { Lock, Crown, ClipboardList, Users } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -84,20 +84,13 @@ const Dashboard = () => {
     },
     {
       id: 9,
-      name: "Join Community",
-      subtitle: "Join our Telegram Channel for updates",
-      path: "https://t.me/%2BfVak9BHY0lgxMTA1",
-      isExternal: true,
-      icon: <div className="p-2 bg-blue-100 rounded-full"><Send className="w-6 h-6 text-blue-600 ml-0.5" /></div>
-    },
-    {
-      id: 10,
       name: "WhatsApp Group",
       subtitle: "Join our WhatsApp Group for discussions",
       path: "https://chat.whatsapp.com/CapPklRuxIC8c1H5xAhnri",
       isExternal: true,
       icon: <div className="p-2 bg-green-100 rounded-full"><Users className="w-6 h-6 text-green-600" /></div>
     },
+    { id: 10, name: "", path: "" },
     { id: 11, name: "", path: "" },
     { id: 12, name: "", path: "" },
   ];
