@@ -151,7 +151,7 @@ const Dashboard = () => {
 
       <DashboardFooter
         onFeedbackClick={() => setShowFeedbackPopup(true)}
-        onSupportClick={() => setShowSupportPopup(false)}
+        onSupportClick={() => setShowSupportPopup(true)}
         onMouseEnter={() => setIsFooterHovered(true)}
         onMouseLeave={() => setIsFooterHovered(false)}
       />

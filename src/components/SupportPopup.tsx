@@ -116,7 +116,7 @@ const SupportPopup = ({ isOpen, onClose }: SupportPopupProps) => {
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 space-y-4">
                         <a
-                            href="https://buymeachai.ezee.li/harrytheblaze"
+                            href="https://razorpay.me/@nallanaharikrishna"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 w-full py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition-colors"

@@ -71,7 +71,7 @@ const CompletionPopup = () => {
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100">
                         <p className="text-sm font-medium text-neutral-500 mb-4">Support my work</p>
                         <a
-                            href="https://buymeachai.ezee.li/harrytheblaze"
+                            href="https://razorpay.me/@nallanaharikrishna"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-yellow-600 font-bold hover:underline"
