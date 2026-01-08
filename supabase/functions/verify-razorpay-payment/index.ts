@@ -14,7 +14,7 @@ serve(async (req: Request) => {
     }
 
     try {
-        const { order_id, payment_id, signature, clerk_user_id } = await req.json();
+        const { order_id, payment_id, signature, clerk_user_id, coupon_code } = await req.json();
 
         if (!order_id || !payment_id || !signature || !clerk_user_id) {
             throw new Error("Missing required fields");
@@ -55,9 +55,22 @@ serve(async (req: Request) => {
             provider_reference_id: payment_id
         }).eq('txnid', order_id);
 
+        // Track Coupon Usage if provided
+        if (coupon_code) {
+            try {
+                await supabaseAdmin.from('coupon_usages').insert({
+                    coupon_code: coupon_code,
+                    amount: null // We default to tracking just the usage count for now
+                });
+            } catch (couponError) {
+                console.warn("Failed to track coupon usage (ignoring to prevent payment failure):", couponError);
+            }
+        }
+
         return new Response(JSON.stringify({ success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
+
 
     } catch (error: any) {
         console.error(error);

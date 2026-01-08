@@ -14,7 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-<<<<<<< HEAD
       communication_questions_v2: {
         Row: {
           id: string
@@ -153,6 +152,27 @@ export type Database = {
           selected_round?: string
           rating?: number
           technical_round_exp?: string
+          created_at?: string
+        }
+        Relationships: []
+      },
+      coupon_usages: {
+        Row: {
+          id: string
+          coupon_code: string
+          amount: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coupon_code: string
+          amount?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coupon_code?: string
+          amount?: number | null
           created_at?: string
         }
         Relationships: []

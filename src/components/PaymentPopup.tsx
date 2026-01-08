@@ -27,13 +27,14 @@ const COUPONS: Record<string, number> = {
     "1406405223": 69,
     "84788870": 79,
     "14110599": 59,
-    "390045773": 79, // SRAVANTHI_79
-    "2072602638": 99, // K.P.R_99
+    "390045773": 79,
+    "2072602638": 99,
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
     const [coupon, setCoupon] = useState("");
     const [appliedAmount, setAppliedAmount] = useState<number | null>(null);
+    const [appliedCouponHash, setAppliedCouponHash] = useState<string | undefined>();
     const [error, setError] = useState("");
     const { initiatePayment, isLoading } = useRazorpay();
 
@@ -48,16 +49,18 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
 
         if (COUPONS[hashedCode]) {
             setAppliedAmount(COUPONS[hashedCode]);
+            setAppliedCouponHash(hashedCode);
             setError("");
             toast.success(`Coupon applied!`);
         } else {
             setError("Invalid coupon code");
             setAppliedAmount(null);
+            setAppliedCouponHash(undefined);
         }
     };
 
     const handlePayment = async () => {
-        await initiatePayment(finalAmount);
+        await initiatePayment(finalAmount, appliedCouponHash);
         onClose();
     };
 

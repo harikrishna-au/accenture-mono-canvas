@@ -22,7 +22,7 @@ export function useRazorpay() {
         });
     };
 
-    const initiatePayment = async (amount: number = 120) => {
+    const initiatePayment = async (amount: number = 120, couponCode?: string) => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return;
@@ -81,7 +81,8 @@ export function useRazorpay() {
                                 order_id: response.razorpay_order_id,
                                 payment_id: response.razorpay_payment_id,
                                 signature: response.razorpay_signature,
-                                clerk_user_id: user.id
+                                clerk_user_id: user.id,
+                                coupon_code: couponCode // Pass the coupon code for tracking (hashed)
                             })
                         });
 
