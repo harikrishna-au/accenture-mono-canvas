@@ -16,7 +16,6 @@ import { CommunicationRounds } from "./pages/communication-rounds";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
-import MobileRestriction from "@/components/MobileRestriction";
 import CouponDashboard from "./pages/CouponDashboard";
 import PremiumRoute from "@/components/PremiumRoute";
 
@@ -40,7 +39,6 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-          <MobileRestriction />
           <Toaster />
           <Sonner />
           <BrowserRouter
