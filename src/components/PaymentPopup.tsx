@@ -29,6 +29,7 @@ const COUPONS: Record<string, number> = {
     "14110599": 59,
     "390045773": 79,
     "2072602638": 99,
+    "720926759": 69, // ROSIN_69
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
