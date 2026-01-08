@@ -5,9 +5,11 @@ import OutlineButton from "./OutlineButton";
 interface TelegramPopupProps {
     isOpen: boolean;
     onClose: () => void;
+    onJoin: () => void;
+    onAlreadyJoined: () => void;
 }
 
-const TelegramPopup = ({ isOpen, onClose }: TelegramPopupProps) => {
+const TelegramPopup = ({ isOpen, onClose, onJoin, onAlreadyJoined }: TelegramPopupProps) => {
     const [shouldRender, setShouldRender] = useState(false);
 
     useEffect(() => {
@@ -50,12 +52,19 @@ const TelegramPopup = ({ isOpen, onClose }: TelegramPopupProps) => {
                         Get exclusive updates, discuss interview strategies, and connect with other aspirants in our official Telegram group.
                     </p>
 
-                    <div className="w-full pt-2">
-                        <a href="https://t.me/+fVak9BHY0lgxMTA1" target="_blank" rel="noopener noreferrer" className="w-full block">
-                            <OutlineButton onClick={onClose} variant="large" className="w-full">
+                    <div className="w-full pt-2 space-y-3">
+                        <a href="https://t.me/%2BfVak9BHY0lgxMTA1" target="_blank" rel="noopener noreferrer" className="w-full block" onClick={onJoin}>
+                            <OutlineButton variant="large" className="w-full">
                                 JOIN NOW
                             </OutlineButton>
                         </a>
+
+                        <button
+                            onClick={onAlreadyJoined}
+                            className="text-sm text-neutral-500 hover:text-neutral-800 underline decoration-neutral-300 hover:decoration-neutral-500 transition-colors"
+                        >
+                            I've already joined
+                        </button>
                     </div>
                 </div>
             </div>
