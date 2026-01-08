@@ -68,6 +68,14 @@ const Dashboard = () => {
     },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {
+      id: 11, // Using specific ID to fit in grid? No, just next ID
+      name: "Join Community",
+      subtitle: "Join our WhatsApp Group for updates and discussions",
+      path: "https://chat.whatsapp.com/CapPklRuxIC8c1H5xAhnri",
+      isExternal: true,
+      icon: <div className="p-2 bg-green-100 rounded-full"><Crown className="w-6 h-6 text-green-600" /></div> // Reusing Crown for now, or maybe just simple text/icon
+    },
+    {
       id: 7,
       name: isPremium ? "Premium Active" : "Unlock All Levels",
       subtitle: isPremium ? "" : "Early Access: Communication Round",
