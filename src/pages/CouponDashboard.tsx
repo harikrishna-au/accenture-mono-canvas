@@ -5,12 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Mapping hashes to readable labels/amounts based on the PaymentPopup file
 const COUPON_MAP: Record<string, string> = {
-    "1406405223": "₹69 Coupon",
-    "84788870": "₹79 Coupon",
-    "14110599": "₹59 Coupon",
     "390045773": "SRAVANTHI (₹79)",
     "2072602638": "K.P.R (₹99)",
-    "720926759": "ROSIN (Legacy)", // Keeping just in case
     "869997654": "ROISIN (₹69)",
 };
 
