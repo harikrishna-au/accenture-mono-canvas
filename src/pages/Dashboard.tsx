@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList } from "lucide-react";
+import { Lock, Crown, ClipboardList, Send, Users } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -14,13 +14,14 @@ import { toast } from "sonner";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { GameCard } from "@/components/dashboard/GameCard";
-
 import PaymentPopup from "@/components/PaymentPopup";
+import TelegramPopup from "@/components/TelegramPopup";
 
 const Dashboard = () => {
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [showTelegramPopup, setShowTelegramPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
   // useRazorpay removed to force popup flow
   const [isFooterHovered, setIsFooterHovered] = useState(false);
@@ -36,6 +37,32 @@ const Dashboard = () => {
       return () => clearTimeout(timer);
     }
   }, [premiumLoading]);
+
+  // Telegram Popup Logic
+  useEffect(() => {
+    const checkTelegramPopup = () => {
+      const lastSeen = localStorage.getItem('last_seen_telegram_popup');
+      const now = Date.now();
+      const ONE_DAY = 24 * 60 * 60 * 1000;
+
+      // If never seen or seen more than 24 hours ago
+      if (!lastSeen || (now - parseInt(lastSeen) > ONE_DAY)) {
+        // 30% chance to show
+        if (Math.random() < 0.3) {
+          const timer = setTimeout(() => {
+            setShowTelegramPopup(true);
+            localStorage.setItem('last_seen_telegram_popup', now.toString());
+          }, 2000);
+          return () => clearTimeout(timer);
+        }
+      }
+    };
+
+    // Only run if not showing feedback popup to avoid overlap
+    if (!showFeedbackPopup) {
+      checkTelegramPopup();
+    }
+  }, [showFeedbackPopup]);
 
   const handleSubscribe = async () => {
     if (isPremium) {
@@ -68,14 +95,6 @@ const Dashboard = () => {
     },
     { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {
-      id: 11, // Using specific ID to fit in grid? No, just next ID
-      name: "Join Community",
-      subtitle: "Join our WhatsApp Group for updates and discussions",
-      path: "https://chat.whatsapp.com/CapPklRuxIC8c1H5xAhnri",
-      isExternal: true,
-      icon: <div className="p-2 bg-green-100 rounded-full"><Crown className="w-6 h-6 text-green-600" /></div> // Reusing Crown for now, or maybe just simple text/icon
-    },
-    {
       id: 7,
       name: isPremium ? "Premium Active" : "Unlock All Levels",
       subtitle: isPremium ? "" : "Early Access: Communication Round",
@@ -91,8 +110,22 @@ const Dashboard = () => {
       survey: true,
       icon: <ClipboardList className="w-8 h-8 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
     },
-    { id: 9, name: "", path: "" },
-    { id: 10, name: "", path: "" },
+    {
+      id: 9,
+      name: "Join Community",
+      subtitle: "Join our Telegram Channel for updates",
+      path: "https://t.me/+fVak9BHY0lgxMTA1",
+      isExternal: true,
+      icon: <div className="p-2 bg-blue-100 rounded-full"><Send className="w-6 h-6 text-blue-600 ml-0.5" /></div>
+    },
+    {
+      id: 10,
+      name: "WhatsApp Group",
+      subtitle: "Join our WhatsApp Group for discussions",
+      path: "https://chat.whatsapp.com/CapPklRuxIC8c1H5xAhnri",
+      isExternal: true,
+      icon: <div className="p-2 bg-green-100 rounded-full"><Users className="w-6 h-6 text-green-600" /></div>
+    },
     { id: 11, name: "", path: "" },
     { id: 12, name: "", path: "" },
   ];
@@ -117,6 +150,7 @@ const Dashboard = () => {
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
+      <TelegramPopup isOpen={showTelegramPopup} onClose={() => setShowTelegramPopup(false)} />
 
       <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
