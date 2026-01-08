@@ -29,8 +29,7 @@ const COUPONS: Record<string, number> = {
     "14110599": 59,
     "390045773": 79,
     "2072602638": 99,
-    "720926759": 69, // ROSIN_69 - keep for backward compat if needed? No, user said it was wrong.
-    "869997654": 69, // ROISIN_69
+    "869997654": 69,
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {

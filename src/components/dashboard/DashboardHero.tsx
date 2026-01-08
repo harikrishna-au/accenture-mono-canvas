@@ -7,7 +7,7 @@ interface DashboardHeroProps {
 
 export const DashboardHero = ({ isPremium }: DashboardHeroProps) => {
     return (
-        <div className="w-full mb-12 relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="w-full mb-8 md:mb-12 relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-2xl p-6 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1 text-center md:text-left space-y-4 z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-xs font-medium text-white/90 mb-2">
                     <span className="relative flex h-2 w-2">

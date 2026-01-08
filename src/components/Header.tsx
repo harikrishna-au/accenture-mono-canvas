@@ -29,10 +29,10 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
         <button
           onClick={() => navigate("/")}
-          className="text-neutral-900 text-xl font-black tracking-tight hover:opacity-70 transition-opacity"
+          className="text-neutral-900 text-lg md:text-xl font-black tracking-tight hover:opacity-70 transition-opacity"
         >
           HARRY THE BLAZE
         </button>

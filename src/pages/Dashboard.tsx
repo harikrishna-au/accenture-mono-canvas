@@ -116,13 +116,13 @@ const Dashboard = () => {
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
 
-      <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-4 pt-20 md:p-8 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
           <div className="flex flex-col items-center w-full max-w-5xl flex-1">
             <DashboardHero isPremium={isPremium} />
 
             <div className="w-full mb-12">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {games.map((game) => (
                   <GameCard
                     key={game.id}
