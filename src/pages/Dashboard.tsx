@@ -15,13 +15,11 @@ import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { GameCard } from "@/components/dashboard/GameCard";
 import PaymentPopup from "@/components/PaymentPopup";
-import TelegramPopup from "@/components/TelegramPopup";
 
 const Dashboard = () => {
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-  const [showTelegramPopup, setShowTelegramPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
   // useRazorpay removed to force popup flow
   const [isFooterHovered, setIsFooterHovered] = useState(false);
@@ -37,54 +35,6 @@ const Dashboard = () => {
       return () => clearTimeout(timer);
     }
   }, [premiumLoading]);
-
-  // Telegram Popup Logic
-  // Telegram Popup Logic
-  useEffect(() => {
-    const checkTelegramPopup = () => {
-      // PERMANENT CHECK: If user already joined, never show again
-      const hasJoined = localStorage.getItem('telegram_joined');
-      if (hasJoined) return;
-
-      const lastSeen = localStorage.getItem('last_seen_telegram_popup');
-      const now = Date.now();
-      const ONE_DAY = 24 * 60 * 60 * 1000;
-
-      // TEMPORARY CHECK: If never seen or seen more than 24 hours ago
-      if (!lastSeen || (now - parseInt(lastSeen) > ONE_DAY)) {
-        // 30% chance to show
-        if (Math.random() < 0.3) {
-          const timer = setTimeout(() => {
-            setShowTelegramPopup(true);
-          }, 2000);
-          return () => clearTimeout(timer);
-        }
-      }
-    };
-
-    // Only run if not showing feedback popup to avoid overlap
-    if (!showFeedbackPopup) {
-      checkTelegramPopup();
-    }
-  }, [showFeedbackPopup]);
-
-  const handleTelegramClose = () => {
-    // Just temporarily hide. Update timestamp so it doesn't show again immediately.
-    localStorage.setItem('last_seen_telegram_popup', Date.now().toString());
-    setShowTelegramPopup(false);
-  };
-
-  const handleTelegramJoin = () => {
-    // User clicked Join. Mark as permanently joined.
-    localStorage.setItem('telegram_joined', 'true');
-    setShowTelegramPopup(false);
-  };
-
-  const handleTelegramAlreadyJoined = () => {
-    // User said they already joined. Mark as permanently joined.
-    localStorage.setItem('telegram_joined', 'true');
-    setShowTelegramPopup(false);
-  };
 
   const handleSubscribe = async () => {
     if (isPremium) {
@@ -172,12 +122,6 @@ const Dashboard = () => {
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
-      <TelegramPopup
-        isOpen={showTelegramPopup}
-        onClose={handleTelegramClose}
-        onJoin={handleTelegramJoin}
-        onAlreadyJoined={handleTelegramAlreadyJoined}
-      />
 
       <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-8 pt-20 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
