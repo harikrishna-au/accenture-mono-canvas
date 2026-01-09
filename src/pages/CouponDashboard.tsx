@@ -25,13 +25,9 @@ const CouponDashboard = () => {
                 // Fetch all usages since the beginning of "today" or just all of them as per user request "start from today only"
                 // Since the table is new, all data is "from today" onwards basically.
                 // But to be safe and strictly follow "today only", I can filter by created_at.
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
                 const { data: usages, error } = await supabase
                     .from('coupon_usages')
-                    .select('coupon_code')
-                    .gte('created_at', today.toISOString());
+                    .select('coupon_code');
 
                 if (error) throw error;
 
@@ -70,8 +66,8 @@ const CouponDashboard = () => {
         <div className="min-h-screen bg-neutral-50 p-8">
             <div className="max-w-5xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold text-neutral-900">Live Coupon Analytics</h1>
-                    <p className="text-neutral-500">Real-time tracking of coupon code usage for successful payments today.</p>
+                    <h1 className="text-3xl font-bold text-neutral-900">Coupon Usage Analytics</h1>
+                    <p className="text-neutral-500">Total usage tracking of coupon codes across all time.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -85,14 +81,14 @@ const CouponDashboard = () => {
                             <CardContent>
                                 <div className="text-2xl font-bold">{item.count}</div>
                                 <p className="text-xs text-muted-foreground">
-                                    redemptions today
+                                    total redemptions
                                 </p>
                             </CardContent>
                         </Card>
                     ))}
                     {data.length === 0 && (
                         <Card className="col-span-full py-8 text-center text-muted-foreground">
-                            No coupons used today yet.
+                            No coupons used yet.
                         </Card>
                     )}
                 </div>
