@@ -86,7 +86,7 @@ const Dashboard = () => {
       id: 9,
       name: "WhatsApp Group",
       subtitle: "Join our WhatsApp Group for discussions",
-      path: "https://chat.whatsapp.com/CapPklRuxIC8c1H5xAhnri",
+      path: "https://chat.whatsapp.com/H55tfv6SgTx3oHJdX8m8P2",
       isExternal: true,
       icon: <div className="p-2 bg-green-100 rounded-full"><Users className="w-6 h-6 text-green-600" /></div>
     },
