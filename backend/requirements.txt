@@ -2,7 +2,7 @@ fastapi
 uvicorn
 pydantic
 mangum
-azure-cognitiveservices-speech
+requests
 openai
 supabase
 boto3
