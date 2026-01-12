@@ -124,18 +124,25 @@ const LEVEL_6_MAP: CellType[][] = [
 ];
 
 const LEVEL_6_EDGES = new Set([
-    // False progression
+    // Main descent
     '0,0|1,0', '1,0|2,0', '2,0|3,0', '3,0|3,1',
     '3,1|3,2', '3,2|2,2', '2,2|1,2',
 
-    // Key 1
+    // Path to Key 1
     '1,2|1,3', '1,3|2,3', '2,3|3,3', '3,3|4,3',
+    '4,3|4,2', // Key 1
 
-    // Forced reroute
-    '4,3|4,2', // Key 2
+    // Branch to Key 2 (FIX)
+    '4,3|4,4', // Key 2
+    '4,4|5,4',
+    '5,4|5,3',
+    '5,3|5,2',
+
+    // Merge back
+    '5,2|4,2',
+
+    // Final path
     '4,2|5,2', '5,2|6,2',
-
-    // Final descent
     '6,2|6,1', '6,1|6,0'
 ]);
 
