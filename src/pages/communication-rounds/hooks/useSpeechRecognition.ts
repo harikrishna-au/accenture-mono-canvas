@@ -100,11 +100,21 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
         setIsRecording(true);
 
         try {
+            if (recognitionRef.current && isRecording) {
+                console.warn("Recognition already started, ignoring start request.");
+                return;
+            }
             recognitionRef.current.start();
-        } catch (err) {
-            console.error('Failed to start recording:', err);
-            setError('Failed to start recording');
-            setIsRecording(false);
+        } catch (err: any) {
+            if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
+                console.warn("Ignored InvalidStateError: Recognition was already active.");
+                // Ensure state stays consistent
+                setIsRecording(true);
+            } else {
+                console.error('Failed to start recording:', err);
+                setError('Failed to start recording');
+                setIsRecording(false);
+            }
         }
     };
 

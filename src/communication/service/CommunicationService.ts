@@ -105,7 +105,16 @@ export class CommunicationBackendService {
                 throw new Error("TTS Failed");
             }
 
-            const blob = await response.blob();
+            const data = await response.json();
+            if (!data.audio_content) throw new Error("No audio content in response");
+
+            // Decode Base64
+            const binaryString = window.atob(data.audio_content);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: 'audio/mpeg' });
             const url = URL.createObjectURL(blob);
             const audio = new Audio(url);
 

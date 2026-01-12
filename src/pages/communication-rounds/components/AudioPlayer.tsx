@@ -33,14 +33,24 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
             });
 
             if (response.ok) {
-                const blob = await response.blob();
-                console.log("TTS Audio Blob received:", blob.type, blob.size, "bytes");
-                if (blob.size < 100) {
-                    console.warn("TTS Audio Blob is suspiciously small, likely text error response masquerading as 200 OK");
+                const data = await response.json();
+                if (data.audio_content) {
+                    // Decode Base64
+                    const binaryString = window.atob(data.audio_content);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const blob = new Blob([bytes], { type: 'audio/mpeg' });
+
+                    console.log("TTS Audio Parsed from Base64:", blob.size, "bytes");
+                    const url = URL.createObjectURL(blob);
+                    setAudioUrl(url);
+                    setUseFallback(false);
+                } else {
+                    console.warn('Backend TTS response missing audio_content');
+                    setUseFallback(true);
                 }
-                const url = URL.createObjectURL(blob);
-                setAudioUrl(url);
-                setUseFallback(false);
             } else {
                 console.warn('Backend TTS failed, using browser fallback');
                 setUseFallback(true);

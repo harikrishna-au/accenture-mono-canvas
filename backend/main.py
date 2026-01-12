@@ -283,6 +283,8 @@ def submit_written(submission: WrittenSubmission):
         print(f"Bedrock Error in submit_written: {e}")
         raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
+import base64
+
 @app.post("/api/tts")
 def get_tts_audio(request: TTSRequest):
     """Generates Azure Neural TTS audio"""
@@ -302,7 +304,9 @@ def get_tts_audio(request: TTSRequest):
     if not audio_data:
         raise HTTPException(status_code=500, detail="TTS Generation Failed (Check Azure Keys)")
         
-    return Response(content=audio_data, media_type="audio/mpeg")
+    # Robust Fix: Return Base64 encoded JSON to avoid API Gateway binary corruption
+    b64_audio = base64.b64encode(audio_data).decode('utf-8')
+    return {"audio_content": b64_audio}
 
 @app.post("/api/round1/grade", response_model=GradeResponse)
 def grade_answer(request: GradeRequest):
