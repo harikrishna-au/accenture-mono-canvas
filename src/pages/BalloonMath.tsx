@@ -20,14 +20,14 @@ const BalloonMathGame: React.FC = () => {
     const [balloons, setBalloons] = useState<Balloon[]>([]);
     const [round, setRound] = useState(1);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(10); // Standard time for the round
+    const [timeLeft, setTimeLeft] = useState(15); // Standard time for the round
     const [gameOver, setGameOver] = useState(false);
     const [started, setStarted] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
     const [roundPerfect, setRoundPerfect] = useState(true);
 
     const TOTAL_ROUNDS = 25;
-    const TIME_PER_ROUND = 10; // Reduced time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
+    const TIME_PER_ROUND = 15; // Increased time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
     const BUBBLE_COUNT = 3;
 
     const generateEquation = () => {
