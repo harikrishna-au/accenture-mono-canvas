@@ -1,13 +1,16 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
-from pydantic import BaseModel
+from fastapi.responses import Response, JSONResponse
+from pydantic import BaseModel, Field, constr
 import random
-from typing import List, Optional
+from typing import List, Optional, Literal
 import uvicorn
 import os
 from dotenv import load_dotenv
 from mangum import Mangum # Adapter for AWS Lambda
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Load env variables including Azure keys
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -23,16 +26,21 @@ except ImportError:
     from services.azure_speech import generate_speech
     from services.bedrock_analysis import analyze_overall_performance, grade_submission
 
+# Security: Rate Limiter Setup
+limiter = Limiter(key_func=get_remote_address)
+
 class GameHistoryItem(BaseModel):
-    question: str
-    answer: str
-    score: Optional[int] = 0
+    question: str = Field(..., max_length=1000)
+    answer: str = Field(..., max_length=10000)
+    score: Optional[int] = Field(0, ge=0, le=100)
     section: Optional[str] = "General"
 
 class GameHistoryRequest(BaseModel):
-    history: List[GameHistoryItem]
+    history: List[GameHistoryItem] = Field(..., max_items=100)
 
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Enable CORS for frontend
 app.add_middleware(
@@ -44,14 +52,15 @@ app.add_middleware(
 )
 
 @app.post("/api/analyze-game")
-def analyze_game(request: GameHistoryRequest):
+@limiter.limit("10/minute")
+def analyze_game(request: Request, body: GameHistoryRequest): # 'request' arg required for limiter
     try:
         # Flatten history to dicts
-        history_data = [item.dict() for item in request.history]
+        history_data = [item.dict() for item in body.history]
         return analyze_overall_performance(history_data)
     except Exception as e:
         print(f"Bedrock Error in analyze_game: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Analysis service unavailable")
 
 # Lambda Handler
 handler = Mangum(app)
@@ -78,23 +87,25 @@ class GradeResponse(BaseModel):
     explanation: str
 
 class AudioSubmission(BaseModel):
-    questionId: str
-    transcript: str
+    questionId: str = Field(..., max_length=100)
+    transcript: str = Field(..., max_length=10000)
 
 class WrittenSubmission(BaseModel):
-    questionId: str
-    text: str
+    questionId: str = Field(..., max_length=100)
+    text: str = Field(..., max_length=5000)
 
 class TTSRequest(BaseModel):
-    text: str
-    voice_type: str
+    text: str = Field(..., max_length=500, description="Text to synthesize (max 500 chars)")
+    voice_type: Literal["male_1", "male_2", "female_1", "female_2"] = "male_1"
 
 @app.get("/")
-def read_root():
+@limiter.limit("60/minute")
+def read_root(request: Request):
     return {"status": "online", "message": "Communication Backend Active with Azure AI"}
 
 @app.get("/api/round1/sentence", response_model=SentenceResponse)
-def get_random_sentence():
+@limiter.limit("30/minute")
+def get_random_sentence(request: Request):
     """Returns a random sentence with its associated questions."""
     item = random.choice(DATA_BANK)
     
@@ -179,7 +190,8 @@ def convert_to_camel_case(obj):
         return obj
 
 @app.get("/api/questions")
-def get_questions(section: str):
+@limiter.limit("20/minute")
+def get_questions(request: Request, section: str):
     try:
         # Use Scan with FilterExpression (works without GSI)
         response = table.scan(
@@ -211,10 +223,11 @@ def get_questions(section: str):
         return transformed_items
     except Exception as e:
         print(f"DynamoDB Query Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Database Error")
 
 @app.post("/submit/audio")
-def submit_audio(submission: AudioSubmission):
+@limiter.limit("15/minute")
+def submit_audio(request: Request, submission: AudioSubmission):
     target_question = None
 
     # Try DynamoDB
@@ -249,7 +262,8 @@ def submit_audio(submission: AudioSubmission):
         raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
 @app.post("/submit/written")
-def submit_written(submission: WrittenSubmission):
+@limiter.limit("15/minute")
+def submit_written(request: Request, submission: WrittenSubmission):
     target_question = None
 
     # Try DynamoDB
@@ -281,12 +295,13 @@ def submit_written(submission: WrittenSubmission):
         return result
     except Exception as e:
         print(f"Bedrock Error in submit_written: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
+        raise HTTPException(status_code=500, detail= "Grading Service Unavailable")
 
 import base64
 
 @app.post("/api/tts")
-def get_tts_audio(request: TTSRequest):
+@limiter.limit("5/minute")
+def get_tts_audio(request: Request, body: TTSRequest):
     """Generates Azure Neural TTS audio"""
     
     # Map friendly voice types to Azure Neural Voices
@@ -297,12 +312,12 @@ def get_tts_audio(request: TTSRequest):
         "female_2": "en-US-SaraNeural"
     }
     
-    azure_voice = voice_map.get(request.voice_type, "en-US-GuyNeural")
+    azure_voice = voice_map.get(body.voice_type, "en-US-GuyNeural")
     
-    audio_data = generate_speech(request.text, azure_voice)
+    audio_data = generate_speech(body.text, azure_voice)
     
     if not audio_data:
-        raise HTTPException(status_code=500, detail="TTS Generation Failed (Check Azure Keys)")
+        raise HTTPException(status_code=500, detail="TTS Generation Failed")
         
     # Robust Fix: Return Base64 encoded JSON to avoid API Gateway binary corruption
     b64_audio = base64.b64encode(audio_data).decode('utf-8')

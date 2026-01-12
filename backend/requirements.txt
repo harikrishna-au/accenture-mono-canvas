@@ -3,6 +3,7 @@ uvicorn
 pydantic
 mangum
 requests
+slowapi
 openai
 supabase
 boto3
