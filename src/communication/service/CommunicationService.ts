@@ -94,7 +94,10 @@ export class CommunicationBackendService {
             // Request Azure TTS Audio
             const response = await fetch(`${this.backendUrl}/api/tts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'audio/mpeg'
+                },
                 body: JSON.stringify({ text, voice_type: voiceType })
             });
 

@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 
 def analyze_overall_performance(history: list) -> dict:
     """
-    Analyzes the user's overall performance using Amazon Titan Express.
+    Analyzes the user's overall performance using Claude 3 Haiku.
     """
     
     # Initialize Bedrock Client
@@ -31,17 +31,20 @@ def analyze_overall_performance(history: list) -> dict:
             transcript_text += f"Q: {item.get('question', 'Unknown')}\n"
             transcript_text += f"A: {item.get('answer', 'No answer')}\n"
 
-    prompt = f"""You are an encouraging, expert Native English Communication Coach. Your goal is to motivate the learner while providing specific, actionable feedback to help them improve.
-
-TRANSCRIPT OF USER ANSWERS:
-{transcript_text}
+    system_prompt = """You are an encouraging, expert Native English Communication Coach. Your goal is to motivate the learner while providing specific, actionable feedback to help them improve.
 
 INSTRUCTIONS:
 1. Analyze the user's responses for Fluency, Grammar, Vocabulary, and Pronunciation.
 2. Be HIGHLY MOTIVATIONAL in your "overall_feedback". Acknowledge their effort, tell them they are doing great, but also gently point out areas to focus on. Explicitly encourage them to "take time to practice more" and "analyze their answers".
 3. For "section_feedback", do NOT use generic names like "Body" or "Conclusion" unless they match the transcript sections. Use the actual section names provided (e.g., "Section A", "Listening").
 4. Provide concrete examples of how to improve in the "feedback" fields.
-5. Return ONLY a valid JSON object in this format:
+5. Return ONLY a valid JSON object."""
+
+    user_message = f"""
+TRANSCRIPT OF USER ANSWERS:
+{transcript_text}
+
+Provide the analysis in this JSON format:
 {{
     "fluency_score": int (0-100),
     "grammar_score": int (0-100),
@@ -54,28 +57,31 @@ INSTRUCTIONS:
         {{ "section": "Section Name", "feedback": "Specific, encouraging advice for this section." }}
     ]
 }}
-JSON Response:
 """
 
-    # Titan Payload
+    # Claude 3 Haiku Payload
     payload = {
-        "inputText": prompt,
-        "textGenerationConfig": {
-            "maxTokenCount": 1024,
-            "stopSequences": [],
-            "temperature": 0.7,
-            "topP": 0.9
-        }
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 2048,
+        "system": system_prompt,
+        "messages": [
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ],
+        "temperature": 0.7,
+        "top_p": 0.9
     }
 
     try:
         response = bedrock.invoke_model(
-            modelId="amazon.titan-text-express-v1",
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",
             body=json.dumps(payload)
         )
         
         result_body = json.loads(response['body'].read())
-        ai_response_text = result_body['results'][0]['outputText']
+        ai_response_text = result_body['content'][0]['text']
         
         # Parse JSON
         start = ai_response_text.find('{')
@@ -86,20 +92,22 @@ JSON Response:
             raise ValueError(f"AI format error: {ai_response_text[:100]}")
             
     except Exception as e:
-        print(f"Titan Analysis Error: {e}")
+        print(f"Claude Analysis Error: {e}")
         raise e
 
 
 def grade_submission(question_text: str, user_transcript: str) -> dict:
     """
-    Grades a single submission using Amazon Titan Express.
+    Grades a single submission using Claude 3 Haiku.
     """
     bedrock = boto3.client(
         'bedrock-runtime',
         region_name=os.getenv('BEDROCK_REGION', os.getenv('AWS_DEFAULT_REGION', 'us-east-1'))
     )
     
-    prompt = f"""You are a communication coach.
+    system_prompt = "You are a communication coach. Evaluate the answer and return ONLY a valid JSON object."
+    
+    user_message = f"""
 Question: {question_text}
 User Answer: {user_transcript}
 
@@ -109,35 +117,39 @@ Evaluate the answer and return ONLY a JSON object:
     "feedback": "string",
     "correct": boolean
 }}
-JSON Response:
 """
 
     payload = {
-        "inputText": prompt,
-        "textGenerationConfig": {
-            "maxTokenCount": 512,
-            "stopSequences": [],
-            "temperature": 0.1,
-            "topP": 0.9
-        }
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1024,
+        "system": system_prompt,
+        "messages": [
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ],
+        "temperature": 0.1,
+        "top_p": 0.9
     }
     
     try:
         response = bedrock.invoke_model(
-            modelId="amazon.titan-text-express-v1",
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",
             body=json.dumps(payload)
         )
         
         result = json.loads(response['body'].read())
-        text = result['results'][0]['outputText']
+        text = result['content'][0]['text']
         
         s = text.find('{')
         e = text.rfind('}') + 1
         return json.loads(text[s:e])
         
     except Exception as e:
-        print(f"Titan Grading Error: {e}")
+        print(f"Claude Grading Error: {e}")
         raise e
+
 
 
 

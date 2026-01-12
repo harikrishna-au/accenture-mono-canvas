@@ -13,7 +13,6 @@ Globals:
 
   Api:
     BinaryMediaTypes:
-      - "*/*"
       - "audio/mpeg"
     Cors:
       AllowMethods: "'*'"

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
 import { Lock, Crown, ClipboardList, Users } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
@@ -21,20 +21,21 @@ const Dashboard = () => {
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const { isPremium, loading: premiumLoading } = usePremiumStatus();
+  const { isSignedIn } = useAuth();
   // useRazorpay removed to force popup flow
   const [isFooterHovered, setIsFooterHovered] = useState(false);
 
   // Auto-show feedback popup once
   useEffect(() => {
     const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
-    if (!hasSeenFeedback && !premiumLoading) {
+    if (!hasSeenFeedback && !premiumLoading && isSignedIn) {
       const timer = setTimeout(() => {
         setShowFeedbackPopup(true);
         localStorage.setItem('has_seen_feedback_v1', 'true');
       }, 3000); // Show after 3 seconds
       return () => clearTimeout(timer);
     }
-  }, [premiumLoading]);
+  }, [premiumLoading, isSignedIn]);
 
   const handleSubscribe = async () => {
     if (isPremium) {

@@ -25,7 +25,10 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
             const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
             const response = await fetch(`${backendUrl}/api/tts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'audio/mpeg'
+                },
                 body: JSON.stringify({ text, voice_type: voiceType })
             });
 
