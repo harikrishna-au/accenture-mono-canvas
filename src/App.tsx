@@ -26,7 +26,15 @@ const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    // Only show splash if not already shown in this session
+    return !sessionStorage.getItem('hasShownSplash');
+  });
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    sessionStorage.setItem('hasShownSplash', 'true');
+  };
 
   return (
     <ClerkProvider
@@ -38,7 +46,7 @@ const App = () => {
     >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+          {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
           <Toaster />
           <Sonner />
           <BrowserRouter
