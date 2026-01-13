@@ -13,7 +13,9 @@ import {
   Youtube,
   Trophy,
   LogOut,
-  Lock
+  Lock,
+  Gamepad2,
+  Crosshair
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createShape } from "@/puzzle/matrix/createShape";
@@ -52,6 +54,35 @@ export default function FindMin() {
 
   const { isPremium } = usePremiumStatus();
   // const { initiatePayment, isLoading: isPaymentLoading } = useRazorpay();
+
+  // Premium Modes State
+  const [gameMode, setGameMode] = useState<'arcade' | 'practice'>('arcade');
+  const [showModeSelect, setShowModeSelect] = useState(false);
+  const [showLevelSelect, setShowLevelSelect] = useState(false);
+
+  useEffect(() => {
+    if (isPremium) {
+      setShowModeSelect(true);
+    }
+  }, [isPremium]);
+
+  const handleModeSelect = (mode: 'arcade' | 'practice') => {
+    setGameMode(mode);
+    setShowModeSelect(false);
+    if (mode === 'practice') {
+      setShowLevelSelect(true);
+    }
+    // If arcade, just let it render the default game view (Level 1)
+  };
+
+  const handleLevelSelect = (levelIdx: number) => {
+    setLevel(levelIdx + 1);
+    setShowLevelSelect(false);
+    setGameComplete(false);
+    setValidation(null);
+    setSelectedIndex(null);
+    setTimeLeft(240);
+  };
 
   useEffect(() => {
     setTiles(buildBoard(level));
@@ -134,11 +165,25 @@ export default function FindMin() {
       setLevelsWon(prev => prev + 1);
     }
 
-    // CHECK PREMIUM STATUS
-    if (won && level === 3 && !isPremium) {
+    // CHECK PREMIUM STATUS (Arcade Gate Only)
+    if (gameMode === 'arcade' && won && level === 3 && !isPremium) {
       setTimeout(() => {
         setShowLockModal(true);
       }, 1000);
+      return;
+    }
+
+    // Practice Mode Logic
+    if (gameMode === 'practice') {
+      if (won) {
+        // Show validation success for a moment then go back
+        setTimeout(() => {
+          setShowLevelSelect(true);
+        }, 1000);
+      } else {
+        // Time up
+        setShowLevelSelect(true);
+      }
       return;
     }
 
@@ -198,6 +243,108 @@ export default function FindMin() {
           <Button onClick={() => window.location.href = "/"} className="w-full h-14 text-lg bg-neutral-900 text-white">
             Back to Home
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mode Selection Screen
+  if (showModeSelect) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-neutral-50 text-neutral-900 overflow-auto pt-24 pb-10">
+        <Header />
+        <div className="max-w-4xl w-full p-4 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Select Game Mode</h1>
+            <p className="text-xl text-neutral-500">Choose how you want to challenge yourself.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Arcade Mode */}
+            <div
+              onClick={() => handleModeSelect('arcade')}
+              className="bg-white hover:bg-neutral-100 border-2 border-neutral-200 hover:border-black rounded-3xl p-8 cursor-pointer transition-all duration-300 group relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Gamepad2 className="w-32 h-32" />
+              </div>
+              <div className="space-y-4 relative z-10">
+                <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Gamepad2 className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-neutral-900">Arcade Mode</h3>
+                  <p className="text-neutral-500 mt-2">The classic experience. Play through all levels sequentially. Prove your consistency.</p>
+                </div>
+                <div className="pt-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-neutral-400 group-hover:text-neutral-900 transition-colors">
+                  Start Game <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+
+            {/* Practice Mode */}
+            <div
+              onClick={() => handleModeSelect('practice')}
+              className="bg-gradient-to-br from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border-2 border-indigo-200 hover:border-indigo-500 rounded-3xl p-8 cursor-pointer transition-all duration-300 group relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-indigo-600">
+                <Crosshair className="w-32 h-32" />
+              </div>
+              <div className="space-y-4 relative z-10">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Crosshair className="w-8 h-8" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-bold text-neutral-900">Practice Mode</h3>
+                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full border border-indigo-200">PREMIUM</span>
+                  </div>
+                  <p className="text-neutral-600 mt-2">Target specific levels. Master difficult patterns without restarting from the beginning.</p>
+                </div>
+                <div className="pt-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-indigo-600 group-hover:text-indigo-800 transition-colors">
+                  Select Level <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Level Selection Screen
+  if (showLevelSelect) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-neutral-50 text-neutral-900 overflow-auto pt-24 pb-10">
+        <Header />
+        <div className="max-w-4xl w-full p-4 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-neutral-900 tracking-tight">Select Level</h1>
+              <p className="text-neutral-500">Pick a challenge to master.</p>
+            </div>
+            <Button variant="outline" onClick={() => setShowModeSelect(true)}>Back to Modes</Button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleLevelSelect(idx)}
+                className="bg-white border-2 border-neutral-100 hover:border-black hover:shadow-xl rounded-2xl p-6 cursor-pointer transition-all duration-200 group flex flex-col items-center gap-4 py-12"
+              >
+                <div className="w-16 h-16 rounded-full bg-neutral-100 group-hover:bg-black group-hover:text-white flex items-center justify-center text-2xl font-bold transition-colors duration-200">
+                  {idx + 1}
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-lg">Level {idx + 1}</div>
+                  <div className="text-xs text-neutral-400 font-medium uppercase tracking-wider mt-1">
+                    {idx < 3 ? 'Standard' : 'Advanced'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
