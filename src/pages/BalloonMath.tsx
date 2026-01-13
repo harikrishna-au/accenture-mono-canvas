@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import PageWrapper from '@/components/PageWrapper';
 import Header from "@/components/Header";
-import { LogOut } from "lucide-react";
+import { LogOut, Flag } from "lucide-react";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 
 interface Balloon {
     id: number;
@@ -17,6 +18,7 @@ interface Balloon {
 
 const BalloonMathGame: React.FC = () => {
     const navigate = useNavigate();
+    const { isPremium } = usePremiumStatus();
     const [balloons, setBalloons] = useState<Balloon[]>([]);
     const [round, setRound] = useState(1);
     const [score, setScore] = useState(0);
@@ -26,7 +28,7 @@ const BalloonMathGame: React.FC = () => {
     const [showInstructions, setShowInstructions] = useState(false);
     const [roundPerfect, setRoundPerfect] = useState(true);
 
-    const TOTAL_ROUNDS = 25;
+    const FREE_ROUNDS = 25;
     const TIME_PER_ROUND = 15; // Increased time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
     const BUBBLE_COUNT = 3;
 
@@ -158,8 +160,7 @@ const BalloonMathGame: React.FC = () => {
             setRoundPerfect(false);
         }
 
-        // Pop the balloon regardless of correctness (as per user request explicitly "remove that and start evaluation")
-        // Logic: If correct -> Good, pop it. If incorrect -> Pop it (penalty is just no score for round), continue playing.
+        // Pop the balloon regardless of correctness
         const updatedBalloons = balloons.map(b =>
             b.id === clickedBalloon.id ? { ...b, popped: true } : b
         );
@@ -167,10 +168,6 @@ const BalloonMathGame: React.FC = () => {
 
         // Check if all popped
         if (updatedBalloons.every(b => b.popped)) {
-            // Round Complete
-            // Increment score ONLY if the round was perfect AND this last click was also correct (though roundPerfect handles previous clicks)
-            // Wait: If I click wrong now (last one?), it's impossible (last one is always smallest remaining).
-            // But if I clicked wrong earlier, roundPerfect is false.
             if (roundPerfect && isCorrect) {
                 setScore(prev => prev + 1);
             }
@@ -180,17 +177,22 @@ const BalloonMathGame: React.FC = () => {
     };
 
     const nextRound = (success: boolean) => {
-        if (round >= TOTAL_ROUNDS) {
-            setGameOver(true);
-            // Save if needed, maybe update high score logic
-            localStorage.setItem('score_balloon', score.toString());
-            localStorage.setItem('completed_balloon', 'true');
+        const maxRounds = isPremium ? Infinity : FREE_ROUNDS;
+
+        if (round >= maxRounds) {
+            finishGame();
         } else {
             setRound(prev => prev + 1);
             setTimeLeft(TIME_PER_ROUND);
             setRoundPerfect(true);
             generateBalloons();
         }
+    };
+
+    const finishGame = () => {
+        setGameOver(true);
+        localStorage.setItem('score_balloon', score.toString());
+        localStorage.setItem('completed_balloon', 'true');
     };
 
     // Start Screen
@@ -272,7 +274,7 @@ const BalloonMathGame: React.FC = () => {
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-neutral-500 pt-4 border-t border-neutral-200">
-                                <span>• {TOTAL_ROUNDS} Rounds</span>
+                                <span>• {isPremium ? "Unlimited Rounds" : `${FREE_ROUNDS} Rounds`}</span>
                                 <span>• {TIME_PER_ROUND} Seconds per round</span>
                             </div>
                         </div>
@@ -301,7 +303,7 @@ const BalloonMathGame: React.FC = () => {
 
                         <div className="py-6">
                             <div className="text-neutral-600 mb-1">Your Score</div>
-                            <div className="text-6xl font-bold text-neutral-900">{score} / {TOTAL_ROUNDS}</div>
+                            <div className="text-6xl font-bold text-neutral-900">{score} / {round}</div>
                         </div>
 
                         <p className="text-xl text-neutral-600">
@@ -330,7 +332,7 @@ const BalloonMathGame: React.FC = () => {
             <div className="flex-1 relative w-full max-w-4xl mx-auto">
                 {/* Round Indicator */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-neutral-100 px-4 py-1 rounded-full text-sm font-medium text-neutral-500 z-10">
-                    Section {round} of {TOTAL_ROUNDS}
+                    Section {round} {isPremium ? "(Infinite)" : `of ${FREE_ROUNDS}`}
                 </div>
 
                 {/* Instruction Hint */}
@@ -338,6 +340,21 @@ const BalloonMathGame: React.FC = () => {
                     <p className="text-sm uppercase tracking-widest font-bold text-neutral-400 mb-1">Target</p>
                     <p className="font-medium text-lg text-neutral-800">Select the bubbles in order from <span className="font-bold underline decoration-2 decoration-blue-500">LOWEST</span> to <span className="font-bold underline decoration-2 decoration-red-500">HIGHEST</span> value</p>
                 </div>
+
+                {/* Premium End Button */}
+                {isPremium && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <Button
+                            onClick={finishGame}
+                            variant="destructive"
+                            size="sm"
+                            className="gap-2 shadow-md hover:scale-105 transition-transform"
+                        >
+                            <Flag className="w-4 h-4" />
+                            Finish Now
+                        </Button>
+                    </div>
+                )}
 
                 {/* Game Area */}
                 <div className="absolute inset-0 top-32">
