@@ -81,8 +81,10 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
     };
 
     const handlePayment = async () => {
-        await initiatePayment(finalAmount, appliedCouponHash);
-        onClose();
+        const success = await initiatePayment(finalAmount, appliedCouponHash);
+        if (success) {
+            onClose();
+        }
     };
 
     return (

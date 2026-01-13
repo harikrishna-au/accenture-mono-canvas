@@ -88,6 +88,8 @@ export function useRazorpay() {
 
                         if (verifyRes.ok) {
                             toast.success("Payment Verified! Premium Unlocked. 🌟");
+                            // Clean up referral coupon on success
+                            localStorage.removeItem("referral_coupon");
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1000);
@@ -118,10 +120,12 @@ export function useRazorpay() {
 
             const rzp1 = new (window as any).Razorpay(options);
             rzp1.open();
+            return true;
 
         } catch (error: any) {
             console.error('Payment Error:', error);
             toast.error(error.message || "Failed to initiate payment");
+            return false;
         } finally {
             setIsLoading(false);
         }
