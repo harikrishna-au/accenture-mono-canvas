@@ -15,7 +15,8 @@ import {
   LogOut,
   Lock,
   Gamepad2,
-  Crosshair
+  Crosshair,
+  Grid3X3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createShape } from "@/puzzle/matrix/createShape";
@@ -440,6 +441,20 @@ export default function FindMin() {
         >
           <Check className="h-6 w-6" />
         </Button>
+
+        {/* Back to Levels (Practice Mode Only) */}
+        {gameMode === 'practice' && (
+          <Button
+            onClick={() => {
+              setShowLevelSelect(true);
+              setGameComplete(false); // Ensure we don't show completion screen
+            }}
+            className="h-12 w-12 rounded-lg bg-indigo-500 p-0 text-white hover:bg-indigo-600"
+            title="Back to Levels"
+          >
+            <Grid3X3 className="h-6 w-6" />
+          </Button>
+        )}
 
         {/* Exit Button */}
         <Button

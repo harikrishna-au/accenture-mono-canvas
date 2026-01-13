@@ -603,6 +603,21 @@ const HiddenMaze = () => {
                     <Timer className="w-6 h-6" />
                     <span>{formatTime(timeLeft)}</span>
                 </div>
+
+                {gameMode === 'practice' && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            setShowLevelSelect(true);
+                            setIsGameActive(false);
+                        }}
+                        className="flex items-center gap-2 border-2 border-neutral-300 hover:border-black hover:bg-neutral-100 text-neutral-600 hover:text-black"
+                    >
+                        <Grid3X3 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Levels</span>
+                    </Button>
+                )}
             </div>
 
             {/* Grid Container */}
