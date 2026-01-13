@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const COUPONS: Record<string, number> = {
     "390045773": 79,
     "2072602638": 99,
     "869997654": 69,
-     "2100205611": 78,
+    "2100205611": 78,
 };
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
@@ -39,6 +39,25 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
     const [appliedCouponHash, setAppliedCouponHash] = useState<string | undefined>();
     const [error, setError] = useState("");
     const { initiatePayment, isLoading } = useRazorpay();
+
+    // Auto-apply referral coupon
+    useEffect(() => {
+        if (isOpen && !appliedAmount) {
+            const storedCoupon = localStorage.getItem("referral_coupon");
+            if (storedCoupon) {
+                setCoupon(storedCoupon);
+                // Validate immediately
+                const code = storedCoupon.trim().toUpperCase();
+                const hashedCode = simpleHash(code); // Using existing simpleHash function
+                if (COUPONS[hashedCode]) {
+                    setAppliedAmount(COUPONS[hashedCode]);
+                    setAppliedCouponHash(hashedCode);
+                    setError("");
+                    toast.success("Referral coupon auto-applied!");
+                }
+            }
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

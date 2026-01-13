@@ -17,7 +17,10 @@ import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { GameCard } from "@/components/dashboard/GameCard";
 import PaymentPopup from "@/components/PaymentPopup";
 
+import { useSearchParams } from "react-router-dom";
+
 const Dashboard = () => {
+  const [searchParams] = useSearchParams();
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
@@ -27,24 +30,56 @@ const Dashboard = () => {
   const [isFooterHovered, setIsFooterHovered] = useState(false);
   const [showTour, setShowTour] = useState(false);
 
+  // Capture Referral Code
+  useEffect(() => {
+    const referralCode = searchParams.get("referral") || searchParams.get("refferal"); // Handle typo
+    if (referralCode) {
+      localStorage.setItem("referral_coupon", referralCode);
+      localStorage.setItem("auto_open_payment", "true");
+      // Optional: Clear param from URL? Maybe not needed for now.
+    }
+  }, [searchParams]);
+
+  // Function to trigger feedback popup check
+  const triggerFeedbackCheck = () => {
+    const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
+    if (!hasSeenFeedback && !premiumLoading && isSignedIn) {
+      setTimeout(() => {
+        setShowFeedbackPopup(true);
+        localStorage.setItem('has_seen_feedback_v1', 'true');
+      }, 2000);
+    }
+  };
+
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('has_seen_tour_v1');
     if (!hasSeenTour) {
       setTimeout(() => setShowTour(true), 1000);
-    }
-  }, []);
-
-  // Auto-show feedback popup once
-  useEffect(() => {
-    const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
-    if (!hasSeenFeedback && !premiumLoading && isSignedIn) {
-      const timer = setTimeout(() => {
-        setShowFeedbackPopup(true);
-        localStorage.setItem('has_seen_feedback_v1', 'true');
-      }, 3000); // Show after 3 seconds
-      return () => clearTimeout(timer);
+      // Feedback will be triggered after tour closes
+    } else {
+      // Tour already seen, safe to trigger feedback check directly
+      triggerFeedbackCheck();
     }
   }, [premiumLoading, isSignedIn]);
+
+  const handleTourClose = () => {
+    setShowTour(false);
+    // Trigger feedback check when tour is closed
+    triggerFeedbackCheck();
+  };
+
+  // Handle Auto-Open Payment (Referral Flow)
+  useEffect(() => {
+    const shouldAutoOpen = localStorage.getItem("auto_open_payment");
+    if (shouldAutoOpen && isSignedIn && !isPremium) {
+      // Delay to let dashboard animations finish
+      const timer = setTimeout(() => {
+        setShowPaymentPopup(true);
+        localStorage.removeItem("auto_open_payment");
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSignedIn, isPremium]);
 
   const handleSubscribe = async () => {
     if (isPremium) {
@@ -125,7 +160,7 @@ const Dashboard = () => {
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
-      <OnboardingTour isOpen={showTour} onClose={() => setShowTour(false)} />
+      <OnboardingTour isOpen={showTour} onClose={handleTourClose} />
 
       <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-4 pt-20 md:p-8 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
