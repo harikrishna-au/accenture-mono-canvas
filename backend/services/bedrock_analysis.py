@@ -1,19 +1,23 @@
-
-import boto3
 import json
 import os
-from botocore.exceptions import ClientError
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load env (if local)
+load_dotenv()
+
+def get_openai_client():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY is not set")
+    return OpenAI(api_key=api_key)
 
 def analyze_overall_performance(history: list) -> dict:
     """
-    Analyzes the user's overall performance using Claude 3 Haiku.
+    Analyzes user performance using OpenAI GPT-4o-mini.
+    Replaces Bedrock implementation.
     """
-    
-    # Initialize Bedrock Client
-    bedrock = boto3.client(
-        'bedrock-runtime',
-        region_name=os.getenv('BEDROCK_REGION', os.getenv('AWS_DEFAULT_REGION', 'us-east-1'))
-    )
+    client = get_openai_client()
 
     # Group History by Section
     sections = {}
@@ -30,7 +34,7 @@ def analyze_overall_performance(history: list) -> dict:
         for idx, item in enumerate(items):
             transcript_text += f"Q: {item.get('question', 'Unknown')}\n"
             transcript_text += f"A: {item.get('answer', 'No answer')}\n"
-
+    
     system_prompt = """You are an encouraging, expert Native English Communication Coach. Your goal is to motivate the learner while providing specific, actionable feedback to help them improve.
 
 INSTRUCTIONS:
@@ -38,8 +42,8 @@ INSTRUCTIONS:
 2. Be HIGHLY MOTIVATIONAL in your "overall_feedback". Acknowledge their effort, tell them they are doing great, but also gently point out areas to focus on. Explicitly encourage them to "take time to practice more" and "analyze their answers".
 3. For "section_feedback", do NOT use generic names like "Body" or "Conclusion" unless they match the transcript sections. Use the actual section names provided (e.g., "Section A", "Listening").
 4. Provide concrete examples of how to improve in the "feedback" fields.
-5. Return ONLY a valid JSON object."""
-
+5. Return ONLY a valid JSON object matching the requested schema."""
+    
     user_message = f"""
 TRANSCRIPT OF USER ANSWERS:
 {transcript_text}
@@ -58,52 +62,30 @@ Provide the analysis in this JSON format:
     ]
 }}
 """
-
-    # Claude 3 Haiku Payload
-    payload = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 2048,
-        "system": system_prompt,
-        "messages": [
-            {
-                "role": "user",
-                "content": user_message
-            }
-        ],
-        "temperature": 0.7,
-        "top_p": 0.9
-    }
-
+    
     try:
-        response = bedrock.invoke_model(
-            modelId="anthropic.claude-3-haiku-20240307-v1:0",
-            body=json.dumps(payload)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.7
         )
         
-        result_body = json.loads(response['body'].read())
-        ai_response_text = result_body['content'][0]['text']
-        
-        # Parse JSON
-        start = ai_response_text.find('{')
-        end = ai_response_text.rfind('}') + 1
-        if start != -1 and end != -1:
-            return json.loads(ai_response_text[start:end])
-        else:
-            raise ValueError(f"AI format error: {ai_response_text[:100]}")
+        result_text = response.choices[0].message.content
+        return json.loads(result_text)
             
     except Exception as e:
-        print(f"Claude Analysis Error: {e}")
+        print(f"OpenAI Analysis Error: {e}")
         raise e
-
 
 def grade_submission(question_text: str, user_transcript: str) -> dict:
     """
-    Grades a single submission using Claude 3 Haiku.
+    Grades a single submission using Azure OpenAI / OpenAI.
     """
-    bedrock = boto3.client(
-        'bedrock-runtime',
-        region_name=os.getenv('BEDROCK_REGION', os.getenv('AWS_DEFAULT_REGION', 'us-east-1'))
-    )
+    client = get_openai_client()
     
     system_prompt = "You are a communication coach. Evaluate the answer and return ONLY a valid JSON object."
     
@@ -118,38 +100,26 @@ Evaluate the answer and return ONLY a JSON object:
     "correct": boolean
 }}
 """
-
-    payload = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 1024,
-        "system": system_prompt,
-        "messages": [
-            {
-                "role": "user",
-                "content": user_message
-            }
-        ],
-        "temperature": 0.1,
-        "top_p": 0.9
-    }
     
     try:
-        response = bedrock.invoke_model(
-            modelId="anthropic.claude-3-haiku-20240307-v1:0",
-            body=json.dumps(payload)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.1
         )
         
-        result = json.loads(response['body'].read())
-        text = result['content'][0]['text']
-        
-        s = text.find('{')
-        e = text.rfind('}') + 1
-        return json.loads(text[s:e])
+        result_text = response.choices[0].message.content
+        return json.loads(result_text)
         
     except Exception as e:
-        print(f"Claude Grading Error: {e}")
-        raise e
-
-
-
-
+        print(f"OpenAI Grading Error: {e}")
+        # Return fallback for safety
+        return {
+            "score": 0,
+            "feedback": f"Error during grading: {str(e)}",
+            "correct": False
+        }

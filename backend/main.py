@@ -60,7 +60,8 @@ def analyze_game(request: Request, body: GameHistoryRequest): # 'request' arg re
         return analyze_overall_performance(history_data)
     except Exception as e:
         print(f"Bedrock Error in analyze_game: {e}")
-        raise HTTPException(status_code=500, detail="Analysis service unavailable")
+        # DEBUG: Return actual error to identify issue
+        raise HTTPException(status_code=500, detail=f"Bedrock Error: {str(e)}")
 
 # Lambda Handler
 handler = Mangum(app)
