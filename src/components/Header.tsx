@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { Maximize, Minimize, LogOut } from "lucide-react";
+import { Maximize, Minimize, LogOut, HelpCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-const Header = () => {
+interface HeaderProps {
+  onStartTour?: () => void;
+}
+
+const Header = ({ onStartTour }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -37,6 +41,15 @@ const Header = () => {
           HARRY THE BLAZE
         </button>
         <div className="flex items-center gap-4">
+          {onStartTour && (
+            <button
+              onClick={onStartTour}
+              className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors text-sm"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Tour</span>
+            </button>
+          )}
           {showExit && (
             <button
               onClick={() => navigate("/dashboard")}

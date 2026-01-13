@@ -11,6 +11,7 @@ import SupportPopup from "@/components/SupportPopup";
 import SEO from "@/components/SEO";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { toast } from "sonner";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { GameCard } from "@/components/dashboard/GameCard";
@@ -24,6 +25,14 @@ const Dashboard = () => {
   const { isSignedIn } = useAuth();
   // useRazorpay removed to force popup flow
   const [isFooterHovered, setIsFooterHovered] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('has_seen_tour_v1');
+    if (!hasSeenTour) {
+      setTimeout(() => setShowTour(true), 1000);
+    }
+  }, []);
 
   // Auto-show feedback popup once
   useEffect(() => {
@@ -110,12 +119,13 @@ const Dashboard = () => {
       </div>
 
       <div className={`w-full flex flex-col items-center transition-all duration-500 z-50 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
-        <Header />
+        <Header onStartTour={() => setShowTour(true)} />
       </div>
       <CompletionPopup />
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup isOpen={showFeedbackPopup} onClose={() => setShowFeedbackPopup(false)} />
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
+      <OnboardingTour isOpen={showTour} onClose={() => setShowTour(false)} />
 
       <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-4 pt-20 md:p-8 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
@@ -124,9 +134,28 @@ const Dashboard = () => {
 
             <div className="w-full mb-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {games.map((game) => (
+                {/* Technical Round Group */}
+                <div id="onboarding-tr-group" style={{ display: 'contents' }}>
+                  {games.slice(0, 3).map((game) => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      isPremium={isPremium}
+                      onSubscribe={handleSubscribe}
+                      onFeedback={() => setShowFeedbackPopup(true)}
+                    />
+                  ))}
+                </div>
+
+                {/* Remaining Games */}
+                {games.slice(3).map((game) => (
                   <GameCard
                     key={game.id}
+                    id={
+                      game.name === "Communication Round" ? "onboarding-comm-card" :
+                        (game.name === "Unlock All Levels" || game.name === "Premium Active") ? "onboarding-premium-card" :
+                          undefined
+                    }
                     game={game}
                     isPremium={isPremium}
                     onSubscribe={handleSubscribe}

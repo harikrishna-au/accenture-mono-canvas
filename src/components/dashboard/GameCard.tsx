@@ -21,9 +21,10 @@ interface GameCardProps {
     isPremium: boolean;
     onSubscribe: () => void;
     onFeedback: () => void;
+    id?: string;
 }
 
-export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardProps) => {
+export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameCardProps) => {
     const navigate = useNavigate();
 
     const handleCardClick = async () => {
@@ -68,6 +69,7 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback }: GameCardP
 
     return (
         <div
+            id={id}
             onClick={handleCardClick}
             className={`relative h-32 border-2 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden transition-all duration-300
         ${game.name === "Connect with me"
