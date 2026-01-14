@@ -194,9 +194,10 @@ def convert_to_camel_case(obj):
 @limiter.limit("20/minute")
 def get_questions(request: Request, section: str):
     try:
-        # Use Scan with FilterExpression (works without GSI)
-        response = table.scan(
-            FilterExpression=Key('section').eq(section)
+        # Use Query on GSI 'SectionIndex' for performance
+        response = table.query(
+            IndexName='SectionIndex',
+            KeyConditionExpression=Key('section').eq(section)
         )
         items = response.get('Items', [])
         
@@ -303,26 +304,38 @@ import base64
 @app.post("/api/tts")
 @limiter.limit("5/minute")
 def get_tts_audio(request: Request, body: TTSRequest):
-    """Generates Azure Neural TTS audio"""
+    """Generates Amazon Polly TTS audio"""
     
-    # Map friendly voice types to Azure Neural Voices
+    # Map friendly voice types to Amazon Polly Neural Voices
     voice_map = {
-        "male_1": "en-US-GuyNeural",
-        "male_2": "en-US-DavisNeural",
-        "female_1": "en-US-JennyNeural",
-        "female_2": "en-US-SaraNeural"
+        "male_1": "Matthew",
+        "male_2": "Joey",
+        "female_1": "Joanna",
+        "female_2": "Salli"
     }
     
-    azure_voice = voice_map.get(body.voice_type, "en-US-GuyNeural")
+    polly_voice = voice_map.get(body.voice_type, "Matthew")
     
-    audio_data = generate_speech(body.text, azure_voice)
-    
-    if not audio_data:
-        raise HTTPException(status_code=500, detail="TTS Generation Failed")
+    try:
+        polly = boto3.client('polly')
+        response = polly.synthesize_speech(
+            Text=body.text,
+            OutputFormat='mp3',
+            VoiceId=polly_voice,
+            Engine='neural'
+        )
         
-    # Robust Fix: Return Base64 encoded JSON to avoid API Gateway binary corruption
-    b64_audio = base64.b64encode(audio_data).decode('utf-8')
-    return {"audio_content": b64_audio}
+        if "AudioStream" in response:
+            audio_bytes = response["AudioStream"].read()
+            # Return Base64 encoded JSON
+            b64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+            return {"audio_content": b64_audio}
+        else:
+            raise HTTPException(status_code=500, detail="Polly Generation Failed (No Stream)")
+            
+    except Exception as e:
+        print(f"Polly Error: {e}")
+        raise HTTPException(status_code=500, detail=f"TTS Error: {str(e)}")
 
 @app.post("/api/round1/grade", response_model=GradeResponse)
 def grade_answer(request: GradeRequest):

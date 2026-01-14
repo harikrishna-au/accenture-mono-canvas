@@ -99,23 +99,36 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
         setError(null);
         setIsRecording(true);
 
-        try {
-            if (recognitionRef.current && isRecording) {
-                console.warn("Recognition already started, ignoring start request.");
-                return;
+        const attemptStart = (retryCount = 0) => {
+            try {
+                if (recognitionRef.current && isRecording) {
+                    console.warn("Recognition already started, ignoring start request.");
+                    return;
+                }
+                recognitionRef.current.start();
+            } catch (err: any) {
+                // If it's an abort or invalid state, it might be due to quick toggling
+                // Retry once after a short delay
+                if (retryCount < 1) {
+                    console.log('Failed to start, retrying...', err);
+                    setTimeout(() => attemptStart(retryCount + 1), 150);
+                    return;
+                }
+
+                if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
+                    console.warn("Ignored InvalidStateError: Recognition was already active.");
+                    // Ensure state stays consistent
+                    setIsRecording(true);
+                } else {
+                    console.error('Failed to start recording:', err);
+                    // Include the specific error message for debugging
+                    setError(`Failed to start recording: ${err.message || err.name || 'Unknown error'}`);
+                    setIsRecording(false);
+                }
             }
-            recognitionRef.current.start();
-        } catch (err: any) {
-            if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
-                console.warn("Ignored InvalidStateError: Recognition was already active.");
-                // Ensure state stays consistent
-                setIsRecording(true);
-            } else {
-                console.error('Failed to start recording:', err);
-                setError('Failed to start recording');
-                setIsRecording(false);
-            }
-        }
+        };
+
+        attemptStart();
     };
 
     const stopRecording = () => {

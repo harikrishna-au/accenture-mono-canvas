@@ -20,13 +20,6 @@ Globals:
       AllowOrigin: "'*'"
 
 Parameters:
-  AzureSpeechKey:
-    Type: String
-    Description: Azure Speech Resource Key
-  AzureSpeechRegion:
-    Type: String
-    Description: Azure Speech Resource Region
-    Default: eastus
   OpenAiApiKey:
     Type: String
     Description: OpenAI API Key
@@ -43,8 +36,6 @@ Resources:
         Variables:
           DYNAMODB_TABLE: communication_questions
           BEDROCK_REGION: ap-south-1
-          AZURE_SPEECH_KEY: !Ref AzureSpeechKey
-          AZURE_SPEECH_REGION: !Ref AzureSpeechRegion
           OPENAI_API_KEY: !Ref OpenAiApiKey
       Policies:
         - DynamoDBCrudPolicy:
@@ -54,6 +45,7 @@ Resources:
             Action:
               - bedrock:*
               - aws-marketplace:*
+              - polly:*
             Resource: '*'
       Events:
         ApiRoot:

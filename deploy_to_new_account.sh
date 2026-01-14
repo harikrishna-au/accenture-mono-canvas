@@ -39,8 +39,8 @@ sam deploy \
     --resolve-s3 \
     --no-confirm-changeset \
     --no-fail-on-empty-changeset \
-    --parameter-overrides AzureSpeechKey=$AZURE_SPEECH_KEY AzureSpeechRegion=$AZURE_SPEECH_REGION OpenAiApiKey=$OPENAI_API_KEY
+    --parameter-overrides OpenAiApiKey=$OPENAI_API_KEY
 
 echo ""
 echo "🌱 Seeding Database..."
-# python3 backend/seed_dynamo.py
+python3 backend/seed_dynamo.py
