@@ -91,8 +91,16 @@ export function ReadingAloudRound() {
 
                 <div className="flex flex-col items-center gap-4">
                     {speechError && (
-                        <div className="w-full bg-red-50 border border-red-200 p-4 rounded-lg text-red-700 text-sm">
-                            ⚠️ Microphone error: {speechError}. Please allow microphone access.
+                        <div className="w-full bg-red-50 border border-red-200 p-4 rounded-lg text-red-700 text-sm flex flex-col items-center gap-2">
+                            <p>⚠️ Error: {speechError}</p>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={startRecording}
+                                className="bg-white hover:bg-red-50 text-red-700 border-red-200"
+                            >
+                                🔄 Retry
+                            </Button>
                         </div>
                     )}
 
@@ -101,6 +109,7 @@ export function ReadingAloudRound() {
                         disabled={!!speechError}
                         size="lg"
                         className={`w-48 h-16 text-lg ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        style={{ display: speechError ? 'none' : 'flex' }}
                     >
                         {isRecording ? (
                             <>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface SpeechRecognitionResult {
     transcript: string;
@@ -14,22 +14,51 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
+    const isMounted = useRef(true);
 
     useEffect(() => {
-        // Check if browser supports Speech Recognition
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        isMounted.current = true;
+        return () => {
+            isMounted.current = false;
+            // Cleanup on unmount
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.stop();
+                } catch (e) {
+                    // Ignore
+                }
+                recognitionRef.current = null; // Ensure ref is cleared on unmount
+            }
+        };
+    }, []);
 
+    const startRecording = useCallback(() => {
+        // Check browser support dynamically or cached
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            setError('Speech recognition not supported in this browser');
+            setError('Speech recognition not supported in this browser. Please use Chrome or Safari.');
             return;
         }
 
+        // If a recognition instance is already active, stop it first to ensure a fresh start
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop();
+            } catch (e) {
+                // Ignore errors if already stopped or not started
+            }
+            recognitionRef.current = null;
+        }
+
+        // Always create a fresh instance to avoid stale state in long-running sessions
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
 
         recognition.onresult = (event: any) => {
+            if (!isMounted.current) return;
+
             let finalTranscript = '';
             let interimTranscript = '';
 
@@ -46,101 +75,83 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
         };
 
         recognition.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            let errorMessage = `Recognition error: ${event.error}`;
+            if (!isMounted.current) return;
+            console.warn('Speech recognition error event:', event.error);
 
+            if (event.error === 'no-speech') {
+                return;
+            }
+
+            if (event.error === 'aborted') {
+                setIsRecording(false);
+                recognitionRef.current = null; // Clear ref on explicit abort
+                return;
+            }
+
+            let errorMessage = `Error: ${event.error}`;
+            // Map errors...
             switch (event.error) {
                 case 'network':
-                    errorMessage = "Network error. Please check your internet connection. Note: Speech recognition requires HTTPS.";
+                    errorMessage = "Network connection failed. Please check your internet.";
                     break;
                 case 'not-allowed':
                 case 'service-not-allowed':
-                    errorMessage = "Microphone access denied. Please allow microphone permissions in your browser settings.";
+                    errorMessage = "Microphone access denied. Please verify browser permissions.";
                     break;
-                case 'no-speech':
-                    // Silently stop recording without error
-                    setIsRecording(false);
-                    return;
                 case 'audio-capture':
-                    errorMessage = "No microphone found. Ensure your microphone is plugged in and set up correctly.";
+                    errorMessage = "No microphone detected.";
                     break;
-                case 'aborted':
-                    // Silently stop recording without error
-                    setIsRecording(false);
-                    return;
-                default:
-                    errorMessage = `Error occurred: ${event.error}`;
             }
 
             setError(errorMessage);
             setIsRecording(false);
+            recognitionRef.current = null; // Clear ref on error
         };
 
         recognition.onend = () => {
-            setIsRecording(false);
+            if (isMounted.current) {
+                setIsRecording(false);
+                // Don't nullify ref immediately if we want to restart? 
+                // Actually for fresh-instance strategy, we should nullify.
+                // But if it ended due to silence and we wanted continuous... 
+                // For now, let's treat onend as 'stopped'.
+                recognitionRef.current = null; // Clear ref when recognition session ends
+            }
         };
 
         recognitionRef.current = recognition;
+        setError(null);
+        setTranscript('');
 
-        return () => {
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
-            }
-        };
+        try {
+            recognition.start();
+            setIsRecording(true);
+        } catch (err: any) {
+            console.error('Failed to start recording:', err);
+            setError('Could not start recording. Please try again.');
+            setIsRecording(false);
+            recognitionRef.current = null;
+        }
     }, []);
 
-    const startRecording = () => {
-        if (!recognitionRef.current) {
-            setError('Speech recognition not initialized');
-            return;
+    const stopRecording = useCallback(() => {
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop();
+            } catch (err) {
+                // Ignore
+            }
+            // We rely on onend to set isRecording(false), but force it just in case
+            // actually onend is reliable enough, but strictly:
+            // recognitionRef.current = null; // Wait for onend to cleanup
         }
+        setIsRecording(false);
+    }, []);
 
+    const resetTranscript = useCallback(() => {
         setTranscript('');
         setError(null);
-        setIsRecording(true);
-
-        const attemptStart = (retryCount = 0) => {
-            try {
-                if (recognitionRef.current && isRecording) {
-                    console.warn("Recognition already started, ignoring start request.");
-                    return;
-                }
-                recognitionRef.current.start();
-            } catch (err: any) {
-                // If it's an abort or invalid state, it might be due to quick toggling
-                // Retry once after a short delay
-                if (retryCount < 1) {
-                    console.log('Failed to start, retrying...', err);
-                    setTimeout(() => attemptStart(retryCount + 1), 150);
-                    return;
-                }
-
-                if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
-                    console.warn("Ignored InvalidStateError: Recognition was already active.");
-                    // Ensure state stays consistent
-                    setIsRecording(true);
-                } else {
-                    console.error('Failed to start recording:', err);
-                    // Include the specific error message for debugging
-                    setError(`Failed to start recording: ${err.message || err.name || 'Unknown error'}`);
-                    setIsRecording(false);
-                }
-            }
-        };
-
-        attemptStart();
-    };
-
-    const stopRecording = () => {
-        if (recognitionRef.current && isRecording) {
-            recognitionRef.current.stop();
-            setIsRecording(false);
-        }
-    };
-
-    const resetTranscript = () => {
-        setTranscript('');
-    };
+    }, []);
 
     return {
         transcript,
