@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList, Users } from "lucide-react";
+import { Lock, Crown, ClipboardList, Users, Linkedin } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -129,11 +129,11 @@ const Dashboard = () => {
     },
     {
       id: 9,
-      name: "WhatsApp Group",
-      subtitle: "Join our WhatsApp Group for discussions",
-      path: "https://chat.whatsapp.com/H55tfv6SgTx3oHJdX8m8P2",
+      name: "LinkedIn Profile",
+      subtitle: "Connect with me on LinkedIn",
+      path: "https://www.linkedin.com/in/hari-krishna-nallana-33949b277/",
       isExternal: true,
-      icon: <div className="p-2 bg-green-100 rounded-full"><Users className="w-6 h-6 text-green-600" /></div>
+      icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
     },
     { id: 10, name: "", path: "" },
     { id: 11, name: "", path: "" },
