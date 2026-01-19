@@ -10,6 +10,7 @@ Globals:
     Environment:
       Variables:
         DYNAMODB_TABLE: communication_questions
+        INTERVIEW_TABLE: interview_sessions
 
   Api:
     BinaryMediaTypes:
@@ -37,9 +38,12 @@ Resources:
           DYNAMODB_TABLE: communication_questions
           BEDROCK_REGION: ap-south-1
           OPENAI_API_KEY: !Ref OpenAiApiKey
+          INTERVIEW_TABLE: interview_sessions
       Policies:
         - DynamoDBCrudPolicy:
             TableName: communication_questions
+        - DynamoDBCrudPolicy:
+            TableName: interview_sessions
         - Statement:
           - Effect: Allow
             Action:
@@ -76,6 +80,27 @@ Resources:
         - IndexName: SectionIndex
           KeySchema:
             - AttributeName: section
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+
+  InterviewSessionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: interview_sessions
+      AttributeDefinitions:
+        - AttributeName: session_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: session_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: user_id
               KeyType: HASH
           Projection:
             ProjectionType: ALL

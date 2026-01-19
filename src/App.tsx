@@ -17,6 +17,7 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
 import CouponDashboard from "./pages/CouponDashboard";
+import AIInterview from "./pages/AIInterview";
 import PremiumRoute from "@/components/PremiumRoute";
 
 import { useState } from "react";
@@ -63,6 +64,7 @@ const App = () => {
               <Route path="/refund" element={<RefundPolicy />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/coupon-stats" element={<CouponDashboard />} />
+              <Route path="/ai-interview" element={<AIInterview />} />
 
               {/* Matrix Flow Game */}
               <Route path="/game/matrix" element={<Guidelines />} />

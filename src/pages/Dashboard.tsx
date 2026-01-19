@@ -113,9 +113,7 @@ const Dashboard = () => {
     {
       id: 10,
       name: "AI Interview",
-      path: "",
-      disabled: true,
-      overlayText: "COMING SOON",
+      path: "/ai-interview",
       icon: <Bot className="w-8 h-8" />
     },
     {
