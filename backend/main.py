@@ -1,8 +1,11 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel, Field, constr
 import random
+import shutil 
+from pathlib import Path
+from pypdf import PdfReader
 from typing import List, Optional, Literal
 import uvicorn
 import os
@@ -11,6 +14,11 @@ from mangum import Mangum # Adapter for AWS Lambda
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+import uuid
+import time
+import json
+from openai import OpenAI
+import boto3
 
 # Load env variables including Azure keys
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -25,6 +33,21 @@ except ImportError:
     from data import DATA_BANK
     from services.azure_speech import generate_speech
     from services.bedrock_analysis import analyze_overall_performance, grade_submission
+
+# --- CLIENT INITIALIZATION ---
+try:
+    if os.environ.get("OPENAI_API_KEY"):
+        openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    else:
+        print("WARNING: OPENAI_API_KEY not found in environment variables.")
+        openai_client = None
+except Exception as e:
+    print(f"OpenAI Init Error: {e}")
+    openai_client = None
+
+polly_client = boto3.client('polly')
+dynamodb = boto3.resource('dynamodb')
+interview_table = dynamodb.Table(os.environ.get('INTERVIEW_TABLE', 'interview_sessions'))
 
 # Security: Rate Limiter Setup
 limiter = Limiter(key_func=get_remote_address)
@@ -98,6 +121,30 @@ class WrittenSubmission(BaseModel):
 class TTSRequest(BaseModel):
     text: str = Field(..., max_length=500, description="Text to synthesize (max 500 chars)")
     voice_type: Literal["male_1", "male_2", "female_1", "female_2"] = "male_1"
+
+# --- INTERVIEW MODELS ---
+class InterviewStartRequest(BaseModel):
+    resume_text: str = Field(..., max_length=10000)
+    user_id: str = Field(None, description="Clerk User ID")
+
+class InterviewChatRequest(BaseModel):
+    session_id: str
+    user_text: str
+
+class InterviewEndRequest(BaseModel):
+    session_id: str
+
+class InterviewStartResponse(BaseModel):
+    session_id: str
+    ai_message: str
+    audio_content: str
+
+class InterviewChatResponse(BaseModel):
+    ai_message: str
+    audio_content: str
+    status: str
+
+# --- ENDPOINTS ---
 
 @app.get("/")
 @limiter.limit("60/minute")
@@ -355,6 +402,300 @@ def grade_answer(request: GradeRequest):
         "score": 10 if is_correct else 0,
         "correct": is_correct,
         "explanation": f"The correct answer was: {question['correct_answer']}"
+    }
+
+# --- INTERVIEW ENDPOINTS ---
+@app.post("/api/interview/start", response_model=InterviewStartResponse)
+def start_interview(
+    resume_text: str = Form(None), 
+    user_id: str = Form(None),
+    resume_file: UploadFile = File(None)
+):
+    # 0. Check Attempt Limit (if User ID provided)
+    # 0. Check Attempt Limit (if User ID provided)
+    if user_id:
+        try:
+            print(f"Checking limit for user: {user_id}")
+            response = interview_table.query(
+                IndexName='UserIdIndex',
+                KeyConditionExpression=Key('user_id').eq(user_id)
+            )
+            items = response.get('Items', [])
+            # Filter for completed sessions only
+            completed_count = sum(1 for item in items if item.get('status') == 'completed')
+            print(f"User {user_id} has {completed_count} completed interviews.")
+            
+            if completed_count >= 2:
+                print(f"Limit reached for {user_id}")
+                raise HTTPException(status_code=403, detail="Free limit reached. You have completed 2 interviews.")
+        except HTTPException:
+            raise
+        except Exception as e:
+            # FAIL OPEN: If DB check fails, let them proceed but log it
+            print(f"⚠️ LIMIT CHECK FAILED (Allowing to proceed): {e}")
+            pass 
+
+    # 1. Process Resume
+    final_resume_text = ""
+    
+    if resume_file:
+        try:
+            reader = PdfReader(resume_file.file)
+            for page in reader.pages:
+                final_resume_text += page.extract_text() + "\n"
+        except Exception as e:
+            print(f"PDF Error: {e}")
+            raise HTTPException(status_code=400, detail="Failed to read PDF file")
+    elif resume_text:
+        final_resume_text = resume_text
+    
+    if not final_resume_text.strip():
+        raise HTTPException(status_code=400, detail="Resume content is required (text or PDF)")
+
+    session_id = str(uuid.uuid4())
+    
+    system_prompt = f"""
+    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral interview.
+    
+    CANDIDATE RESUME:
+    "{body.resume_text}"
+
+    GOAL: Assess culture fit, communication, and behavior.
+    
+    STRUCTURE:
+    1. Introduction (0-3m)
+    2. Experience (3-8m)
+    3. Behavioral (8-13m)
+    4. Closing (13-15m)
+    
+    RULES:
+    - Keep responses concise (under 3 sentences).
+    - If answer is short, ASK FOLLOW-UP.
+    - Be professional but encouraging.
+    
+    Start with a greeting and the first question.
+    """
+    
+    # 2. Get Initial Question from OpenAI
+    try:
+        if not openai_client:
+             raise HTTPException(status_code=500, detail="OpenAI API Key not configured on server")
+
+        completion = openai_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Here is the candidate's resume:\n{final_resume_text}\n\nStart the interview."}
+            ],
+            model="gpt-4o",
+        )
+        ai_text = completion.choices[0].message.content
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"OpenAI Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate interview question")
+
+    full_history = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Here is the candidate's resume:\n{final_resume_text}\n\nStart the interview."},
+        {"role": "assistant", "content": ai_text}
+    ]
+
+    # 3. Save Session
+    try:
+        interview_table.put_item(
+            Item={
+                'session_id': session_id,
+                'user_id': user_id,
+                'history': json.dumps(full_history),
+                'created_at': int(time.time()),
+                'status': 'active'
+            }
+        )
+    except Exception as e:
+        print(f"DynamoDB Error: {e}")
+        raise HTTPException(status_code=500, detail="Database Error")
+
+    # 4. Generate Audio
+    try:
+        audio_response = polly_client.synthesize_speech(
+            Text=ai_text,
+            OutputFormat='mp3',
+            VoiceId='Joanna',
+            Engine='neural'
+        )
+        audio_b64 = base64.b64encode(audio_response['AudioStream'].read()).decode('utf-8')
+    except Exception as e:
+        print(f"Polly Error: {e}")
+        audio_b64 = "" # Fail gracefully for audio
+
+    return {
+        "session_id": session_id,
+        "ai_message": ai_text,
+        "audio_content": audio_b64
+    }
+
+@app.post("/api/interview/chat", response_model=InterviewChatResponse)
+def chat_interview(body: InterviewChatRequest):
+    # 1. Fetch Session
+    try:
+        response = interview_table.get_item(Key={'session_id': body.session_id})
+        item = response.get('Item')
+        if not item:
+            raise HTTPException(status_code=404, detail="Session not found")
+            
+        history = json.loads(item['history'])
+    except Exception as e:
+        print(f"DynamoDB Fetch Error: {e}")
+        raise HTTPException(status_code=500, detail="Database Error")
+
+    # 2. Append User Message
+    history.append({"role": "user", "content": body.user_text})
+
+    # 3. Generate AI Response
+    try:
+        if not openai_client:
+             raise HTTPException(status_code=500, detail="OpenAI API Key not configured")
+        
+        completion = openai_client.chat.completions.create(
+            messages=history,
+            model="gpt-4o",
+        )
+        ai_text = completion.choices[0].message.content
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"OpenAI Error: {e}")
+        raise HTTPException(status_code=500, detail="AI Service Failed")
+
+    # 4. Append AI Message & Save
+    history.append({"role": "assistant", "content": ai_text})
+    
+    try:
+        interview_table.update_item(
+            Key={'session_id': body.session_id},
+            UpdateExpression="set history = :h",
+            ExpressionAttributeValues={':h': json.dumps(history)}
+        )
+    except Exception as e:
+        print(f"DynamoDB Update Error: {e}")
+        # Continue even if save fails? No, critical.
+        raise HTTPException(status_code=500, detail="Database Save Error")
+
+    # 5. Generate Audio
+    try:
+        audio_response = polly_client.synthesize_speech(
+            Text=ai_text,
+            OutputFormat='mp3',
+            VoiceId='Joanna',
+            Engine='neural'
+        )
+        audio_b64 = base64.b64encode(audio_response['AudioStream'].read()).decode('utf-8')
+    except Exception as e:
+        print(f"Polly Error: {e}")
+        audio_b64 = ""
+
+    return {
+        "ai_message": ai_text,
+        "audio_content": audio_b64,
+        "status": "active"
+    }
+
+@app.post("/api/interview/end")
+def end_interview_session(body: InterviewEndRequest):
+    try:
+        interview_table.update_item(
+            Key={'session_id': body.session_id},
+            UpdateExpression="set #s = :s",
+            ExpressionAttributeNames={'#s': 'status'},
+            ExpressionAttributeValues={':s': 'completed'}
+        )
+        return {"message": "Session ended"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database Error")
+
+@app.post("/api/interview/chat_audio")
+async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):
+    # 1. Save Temp Audio File
+    temp_filename = f"/tmp/{uuid.uuid4()}.wav"
+    try:
+        with open(temp_filename, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="File Upload Error")
+
+    # 2. Transcribe (Whisper)
+    try:
+        with open(temp_filename, "rb") as audio_file:
+            transcript = openai_client.audio.transcriptions.create(
+                model="whisper-1", 
+                file=audio_file
+            )
+        user_text = transcript.text
+    except Exception as e:
+        print(f"Whisper Error: {e}")
+        raise HTTPException(status_code=500, detail="Transcription Failed")
+    finally:
+        if os.path.exists(temp_filename):
+            os.remove(temp_filename)
+
+    # 3. Proceed with Chat Logic (Reuse chat_interview logic manually for now to save complexity)
+    # Fetch Session
+    try:
+        response = interview_table.get_item(Key={'session_id': session_id})
+        item = response.get('Item')
+        if not item:
+            raise HTTPException(status_code=404, detail="Session not found")
+        history = json.loads(item['history'])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database Fetch Error")
+
+    # Append User
+    history.append({"role": "user", "content": user_text})
+
+    # Generate AI
+    try:
+        if not openai_client:
+             raise HTTPException(status_code=500, detail="OpenAI API Key not configured")
+
+        completion = openai_client.chat.completions.create(
+            messages=history,
+            model="gpt-4o",
+        )
+        ai_text = completion.choices[0].message.content
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="AI Service Failed")
+
+    # Append AI & Save
+    history.append({"role": "assistant", "content": ai_text})
+    try:
+        interview_table.update_item(
+            Key={'session_id': session_id},
+            UpdateExpression="set history = :h",
+            ExpressionAttributeValues={':h': json.dumps(history)}
+        )
+    except Exception as e:
+        print(f"DynamoDB Update Error: {e}")
+
+    # Generate Audio (Polly)
+    try:
+        audio_response = polly_client.synthesize_speech(
+            Text=ai_text,
+            OutputFormat='mp3',
+            VoiceId='Joanna',
+            Engine='neural'
+        )
+        audio_b64 = base64.b64encode(audio_response['AudioStream'].read()).decode('utf-8')
+    except Exception as e:
+        print(f"Polly Error: {e}")
+        audio_b64 = ""
+
+    return {
+        "ai_message": ai_text,
+        "audio_content": audio_b64,
+        "status": "active"
     }
 
 # Entry point for running directly

@@ -24,6 +24,11 @@ export AZURE_SPEECH_KEY=$(grep AZURE_SPEECH_KEY backend/.env | cut -d '#' -f1 | 
 export AZURE_SPEECH_REGION=$(grep AZURE_SPEECH_REGION backend/.env | cut -d '#' -f1 | awk -F= '{print $2}' | tr -d ' "[:space:]')
 export OPENAI_API_KEY=$(grep OPENAI_API_KEY backend/.env | cut -d '#' -f1 | awk -F= '{print $2}' | tr -d ' "[:space:]')
 
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "❌ Error: OPENAI_API_KEY not found in backend/.env"
+    exit 1
+fi
+
 echo ""
 echo "📦 Building project (Clean Build)..."
 rm -rf .aws-sam
