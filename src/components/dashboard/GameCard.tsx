@@ -17,6 +17,7 @@ interface GameCardProps {
         premiumBottomBarText?: string;
         typingHighlight?: boolean;
         typingText?: string;
+        overlayText?: string;
     };
     isPremium: boolean;
     onSubscribe: () => void;
@@ -90,44 +91,46 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameC
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[200%] group-hover:animate-shine pointer-events-none z-10" />
             )}
 
-            {game.name ? (
-                <>
-                    {game.name === "Connect with me" ? (
-                        <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
-                    ) : game.icon ? (
-                        <div className="mb-1 text-amber-500">{game.icon}</div>
-                    ) : game.special ? (
-                        <div className="mb-1">{game.icon}</div>
-                    ) : (
-                        <img
-                            src={accentureLogo}
-                            alt="Accenture"
-                            className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
-                        />
-                    )}
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center">
+                {game.name ? (
+                    <>
+                        {game.name === "Connect with me" ? (
+                            <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
+                        ) : game.icon ? (
+                            <div className="mb-1 text-amber-500">{game.icon}</div>
+                        ) : game.special ? (
+                            <div className="mb-1">{game.icon}</div>
+                        ) : (
+                            <img
+                                src={accentureLogo}
+                                alt="Accenture"
+                                className="absolute top-3 right-3 h-4 w-auto opacity-60 group-hover:invert group-hover:opacity-100 transition-all"
+                            />
+                        )}
 
-                    <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : game.special ? "text-white" : ""}`}>
-                        {game.name}
-                    </span>
-
-                    {game.subtitle && (
-                        <span className={`text-[10px] font-medium text-center uppercase tracking-wide mt-1 animate-pulse ${game.special ? "text-white/90" : "text-amber-600"}`}>
-                            {game.subtitle}
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : game.special ? "text-white" : ""}`}>
+                            {game.name}
                         </span>
-                    )}
-                </>
-            ) : (
-                <span className="text-sm font-medium text-neutral-400 text-center italic">
-                    Coming Soon
-                </span>
-            )}
+
+                        {game.subtitle && (
+                            <span className={`text-[10px] font-medium text-center uppercase tracking-wide mt-1 animate-pulse ${game.special ? "text-white/90" : "text-amber-600"}`}>
+                                {game.subtitle}
+                            </span>
+                        )}
+                    </>
+                ) : (
+                    <span className="text-sm font-medium text-neutral-400 text-center italic">
+                        Coming Soon
+                    </span>
+                )}
+            </div>
 
             {/* Overlays */}
             {game.disabled && !game.special && (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative pointer-events-none">
-                        <div className="w-[600px] h-10 bg-red-600 transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
-                            <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">UNDER DEVELOPMENT</span>
+                        <div className="w-[600px] h-10 bg-red-600/80 backdrop-blur-sm transform -rotate-[25deg] origin-center shadow-2xl flex items-center justify-center border-y-2 border-red-400/50">
+                            <span className="text-white font-bold text-sm tracking-[0.2em] drop-shadow-md">{game.overlayText || "UNDER DEVELOPMENT"}</span>
                         </div>
                     </div>
                 </div>

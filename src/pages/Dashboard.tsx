@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList, Users, Linkedin } from "lucide-react";
+import { Lock, Crown, ClipboardList, Users, Linkedin, Bot } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -110,7 +110,14 @@ const Dashboard = () => {
       typingHighlight: true,
       typingText: "BOOK 1:1 SESSION"
     },
-    { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
+    {
+      id: 10,
+      name: "AI Interview",
+      path: "",
+      disabled: true,
+      overlayText: "COMING SOON",
+      icon: <Bot className="w-8 h-8" />
+    },
     {
       id: 7,
       name: isPremium ? "Premium Active" : "Unlock All Levels",
@@ -135,7 +142,7 @@ const Dashboard = () => {
       isExternal: true,
       icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
     },
-    { id: 10, name: "", path: "" },
+    { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     { id: 11, name: "", path: "" },
     { id: 12, name: "", path: "" },
   ];
