@@ -19,16 +19,6 @@ export class CommunicationBackendService {
             const data = await response.json();
             console.log('✅ Received questions:', data);
 
-            // Debugging: Check for audioUrl
-            if (Array.isArray(data) && data.length > 0) {
-                console.log("🔍 First Question Sample:", {
-                    id: data[0].id,
-                    audioUrl: data[0].audioUrl,
-                    contextAudioUrl: data[0].contextAudioUrl,
-                    audioSrc: data[0].audioSrc
-                });
-            }
-
             // Backend now returns camelCase directly
             return data || [];
 

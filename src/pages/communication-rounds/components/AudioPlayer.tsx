@@ -24,7 +24,6 @@ export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudio
         try {
             // Use environment variable for backend URL
             const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
-            console.log("🔊 Fetching audio from TTS API...");
             const response = await fetch(`${backendUrl}/api/tts`, {
                 method: 'POST',
                 headers: {
@@ -104,7 +103,6 @@ export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudio
     }, [text, voiceType, initialAudioUrl]);
 
     const playWithBrowserTTS = () => {
-        console.log("🔊 Using Browser Native TTS fallback");
         if (!window.speechSynthesis) {
             console.error('Browser does not support speech synthesis');
             return;
@@ -144,7 +142,6 @@ export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudio
             playWithBrowserTTS();
         } else {
             // Use backend audio
-            console.log(`🔊 Playing audio from S3: ${audioUrl}`);
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
 
