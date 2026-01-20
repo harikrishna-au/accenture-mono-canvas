@@ -92,7 +92,7 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameC
             )}
 
             <div className="relative z-10 w-full h-full flex flex-col items-center justify-center">
-                {game.name ? (
+                {game.name && !game.typingHighlight ? (
                     <>
                         {game.name === "Connect with me" ? (
                             <div className="text-4xl mb-1 group-hover:scale-110 transition-transform">🤝</div>
@@ -118,11 +118,11 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameC
                             </span>
                         )}
                     </>
-                ) : (
+                ) : !game.name ? (
                     <span className="text-sm font-medium text-neutral-400 text-center italic">
                         Coming Soon
                     </span>
-                )}
+                ) : null}
             </div>
 
             {/* Overlays */}
