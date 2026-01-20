@@ -62,6 +62,10 @@ Resources:
               - aws-marketplace:*
               - polly:*
             Resource: '*'
+        - S3CrudPolicy:
+            BucketName: !Ref ResumeBucket
+        - S3ReadPolicy:
+            BucketName: !Ref AudioAssetsBucket
       Events:
         ApiRoot:
           Type: Api
@@ -121,24 +125,17 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "communication-backend-resumebucket-${AWS::StackName}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders: ["*"]
             AllowedMethods: [PUT, POST, GET]
             AllowedOrigins: ["*"]
             MaxAge: 3000
-
-  ResumeBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref ResumeBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal: "*"
-            Action: "s3:PutObject"
-            Resource: !Sub "${ResumeBucket.Arn}/*"
 
   AudioAssetsBucket:
     Type: AWS::S3::Bucket
