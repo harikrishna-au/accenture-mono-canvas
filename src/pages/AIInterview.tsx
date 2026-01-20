@@ -22,7 +22,8 @@ const AIInterview = () => {
         timeLeft,
         startInterview,
         endInterview,
-        toggleRecording
+        toggleRecording,
+        uploadResumeToS3
     } = useAIInterview();
 
     // Format time as MM:SS (Logic kept here for display, could be utility)
@@ -41,6 +42,7 @@ const AIInterview = () => {
             {!interviewStarted ? (
                 <ResumeCollection
                     onSubmit={(text) => startInterview(text, user?.id)}
+                    onUpload={uploadResumeToS3}
                     isSubmitting={isResumeSubmitting}
                 />
             ) : (

@@ -144,6 +144,47 @@ class InterviewChatResponse(BaseModel):
     audio_content: str
     status: str
 
+# --- RESUME UPLOAD ENDPOINT ---
+
+class ResumeUploadRequest(BaseModel):
+    filename: str
+
+@app.post("/api/resume/upload-url")
+@limiter.limit("5/minute")
+def get_resume_upload_url(request: Request, body: ResumeUploadRequest):
+    try:
+        bucket_name = os.environ.get("RESUME_BUCKET_NAME")
+        if not bucket_name:
+             # Fallback logic for local testing or if env var missing
+             # In production, this should come from CloudFormation outputs -> Env Var
+             print("WARNING: RESUME_BUCKET_NAME not set")
+             return {"error": "Resume storage not configured"}
+
+        object_name = f"resumes/{uuid.uuid4()}_{body.filename}"
+        
+        # Generate Presigned URL
+        s3_client = boto3.client('s3')
+        try:
+            response = s3_client.generate_presigned_post(
+                Bucket=bucket_name,
+                Key=object_name,
+                Fields={"acl": "public-read", "Content-Type": "application/pdf"},
+                Conditions=[
+                    {"acl": "public-read"},
+                    {"Content-Type": "application/pdf"},
+                    ["content-length-range", 1, 10485760] # Max 10MB
+                ],
+                ExpiresIn=3600
+            )
+            return response
+        except Exception as e:
+            print(f"S3 Presign Error: {e}")
+            raise HTTPException(status_code=500, detail="Failed to generate upload URL")
+
+    except Exception as e:
+        print(f"Resume Upload Setup Error: {e}")
+        raise HTTPException(status_code=500, detail="Server Error")
+
 # --- ENDPOINTS ---
 
 @app.get("/")
@@ -455,25 +496,39 @@ def start_interview(
     session_id = str(uuid.uuid4())
     
     system_prompt = f"""
-    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral interview.
+    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral interview for the following candidate.
     
     CANDIDATE RESUME:
     "{body.resume_text}"
 
-    GOAL: Assess culture fit, communication, and behavior.
-    
+    GOAL: Assess culture fit, communication, and project experience. Do NOT ask deep technical coding questions (e.g., "Write a function to..."). Focus on the "Why", "How", and "Impact".
+
     STRUCTURE:
-    1. Introduction (0-3m)
-    2. Experience (3-8m)
-    3. Behavioral (8-13m)
-    4. Closing (13-15m)
-    
+    1.  **Introduction Phase (0-4 minutes)**:
+        *   Start by asking the candidate to introduce themselves.
+        *   **CRITICAL**: You MUST keep asking follow-up engagement questions about their background, hobbies, or summary until approximately 4 minutes have passed.
+        *   If the user answers quickly, say "That's interesting, tell me more about..." or "How did you get into [topic]?".
+        *   Do NOT move to the main questions until you have established rapport and ~4 minutes of conversation have occurred.
+
+    2.  **Main Interview Questions (4-12 minutes)**:
+        *   Ask exactly 5 distinct questions based on their resume.
+        *   Focus on: Teamwork, Challenges, Project Impact, and Behavioral Scenarios.
+        *   Example Pattern:
+            *   Q1: specific project challenge.
+            *   Q2: conflict resolution / teamwork.
+            *   Q3: handling deadlines / pressure.
+            *   Q4: learning new technology (process, not code).
+            *   Q5: why this role/company?
+
+    3.  **Closing (12-15 minutes)**:
+        *   Wrap up and ask if they have questions.
+
     RULES:
-    - Keep responses concise (under 3 sentences).
-    - If answer is short, ASK FOLLOW-UP.
+    - Keep your responses concise (under 3 sentences).
     - Be professional but encouraging.
+    - If the user's answer is too short, PROBE DEEPER.
     
-    Start with a greeting and the first question.
+    Start with a warm greeting and ask them to introduce themselves.
     """
     
     # 2. Get Initial Question from OpenAI

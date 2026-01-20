@@ -45,23 +45,46 @@ export const useAIInterview = () => {
         };
     }, [interviewStarted, interviewEnded]);
 
-    const startInterview = async (resume: string | File, userId?: string | null) => {
+    const uploadResumeToS3 = async (file: File): Promise<void> => {
+        try {
+            // 1. Get Presigned URL
+            const urlResponse = await fetch(`${API_BASE_URL}/resume/upload-url`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ filename: file.name })
+            });
+
+            if (!urlResponse.ok) throw new Error("Failed to get upload URL");
+            const { url, fields } = await urlResponse.json();
+
+            // 2. Upload to S3
+            const formData = new FormData();
+            Object.entries(fields).forEach(([key, value]) => {
+                formData.append(key, value as string);
+            });
+            formData.append("file", file);
+
+            const uploadResponse = await fetch(url, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!uploadResponse.ok) throw new Error("S3 Upload Failed");
+
+        } catch (error) {
+            console.error("Resume Upload Error:", error);
+            throw error;
+        }
+    };
+
+    const startInterview = async (resume: string, userId?: string | null) => {
 
         setIsResumeSubmitting(true);
 
         try {
             const formData = new FormData();
-
-            if (typeof resume === 'string') {
-                if (!resume.trim()) {
-                    setIsResumeSubmitting(false); // Make sure to stop loading
-                    return;
-                }
-                setResumeText(resume);
-                formData.append("resume_text", resume);
-            } else {
-                formData.append("resume_file", resume);
-            }
+            // Always text now
+            formData.append("resume_text", resume);
 
             if (userId) {
                 formData.append("user_id", userId);
@@ -216,6 +239,7 @@ export const useAIInterview = () => {
         timeLeft,
         startInterview,
         endInterview,
-        toggleRecording
+        toggleRecording,
+        uploadResumeToS3
     };
 };
