@@ -93,6 +93,7 @@ export function FillBlankRound() {
                     <AudioPlayer
                         text={currentQuestion?.audioSrc?.replace(/_+/g, ' blank ') || ''}
                         voiceType={currentQuestion?.voiceType || 'male_1'}
+                        audioUrl={currentQuestion?.audioUrl}
                         playOnce={true}
                     />
                 </div>

@@ -5,11 +5,12 @@ import { Play, Volume2, Loader2 } from 'lucide-react';
 interface AudioPlayerProps {
     text: string;
     voiceType?: string;
+    audioUrl?: string; // Static S3 URL
     onPlayComplete?: () => void;
     playOnce?: boolean;
 }
 
-export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOnce = true }: AudioPlayerProps) {
+export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudioUrl, onPlayComplete, playOnce = true }: AudioPlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [hasPlayed, setHasPlayed] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -86,16 +87,20 @@ export function AudioPlayer({ text, voiceType = 'male_1', onPlayComplete, playOn
         setAudioUrl(null);
         setUseFallback(false);
 
-        if (text) {
+        if (initialAudioUrl) {
+            setAudioUrl(initialAudioUrl);
+            setUseFallback(false);
+        } else if (text) {
             fetchAudio();
         }
 
         return () => {
-            if (audioUrl) {
+            if (audioUrl && !initialAudioUrl) {
+                // Revoke object URL only if it was created by us (blob)
                 URL.revokeObjectURL(audioUrl);
             }
         };
-    }, [text, voiceType]);
+    }, [text, voiceType, initialAudioUrl]);
 
     const playWithBrowserTTS = () => {
         if (!window.speechSynthesis) {

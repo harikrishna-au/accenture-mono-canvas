@@ -6,7 +6,7 @@ import { Question, SectionType, SECTIONS } from "../data/types";
 export class CommunicationBackendService {
 
     // Use env var or fallback to localhost
-    private backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    private backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8000").replace(/\/$/, "");
 
     async getQuestionsForSection(section: SectionType): Promise<Question[]> {
         console.log(`🔌 Fetching questions for section ${section} from ${this.backendUrl}`);
@@ -153,6 +153,20 @@ export class CommunicationBackendService {
 
         if (onEnd) utterance.onend = onEnd;
         window.speechSynthesis.speak(utterance);
+    }
+
+    async playAudio(url: string, onEnd?: () => void) {
+        window.speechSynthesis.cancel();
+        try {
+            const audio = new Audio(url);
+            audio.onended = () => {
+                if (onEnd) onEnd();
+            };
+            await audio.play();
+        } catch (e) {
+            console.error("Audio playback failed:", e);
+            if (onEnd) onEnd();
+        }
     }
 
     stopSpeaking() {

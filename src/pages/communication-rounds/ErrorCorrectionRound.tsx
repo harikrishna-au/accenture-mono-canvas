@@ -92,6 +92,7 @@ export function ErrorCorrectionRound() {
                     <AudioPlayer
                         text={currentQuestion?.audioSrc || ''}
                         voiceType={currentQuestion?.voiceType || 'female_1'}
+                        audioUrl={currentQuestion?.audioUrl}
                         playOnce={false}
                     />
                 </div>

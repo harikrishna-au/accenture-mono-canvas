@@ -117,6 +117,7 @@ export function ListeningComprehensionRound() {
                         <AudioPlayer
                             text={currentQuestion.contextAudioSrc}
                             voiceType="female_1"
+                            audioUrl={currentQuestion.contextAudioUrl}
                             playOnce={true}
                             onPlayComplete={handleContextPlayComplete}
                         />
@@ -136,6 +137,7 @@ export function ListeningComprehensionRound() {
                             <AudioPlayer
                                 text={currentSubQuestion.audioSrc || currentSubQuestion.text || ''}
                                 voiceType="female_1"
+                                audioUrl={currentSubQuestion.audioUrl}
                                 playOnce={false}
                             />
                         </div>

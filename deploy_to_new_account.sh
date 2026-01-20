@@ -44,7 +44,7 @@ sam deploy \
     --resolve-s3 \
     --no-confirm-changeset \
     --no-fail-on-empty-changeset \
-    --parameter-overrides OpenAiApiKey=$OPENAI_API_KEY
+    --parameter-overrides OpenAiApiKey=$OPENAI_API_KEY AzureSpeechKey=$AZURE_SPEECH_KEY AzureSpeechRegion=$AZURE_SPEECH_REGION
 
 echo ""
 echo "🌱 Seeding Database..."

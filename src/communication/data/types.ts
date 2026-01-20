@@ -16,7 +16,9 @@ export interface Question {
     section: SectionType;
     promptText?: string; // Text to read or topic
     contextAudioSrc?: string; // Main story/situation audio (played once)
+    contextAudioUrl?: string; // S3 URL for context audio
     audioSrc?: string; // Specific question audio (played for each sub-question)
+    audioUrl?: string; // S3 URL for question audio
     followUpQuestion?: string; // Should be spoken after the audioSrc for Listening Comp
     correctAnswer?: string; // For grading
     timeLimit?: number; // In seconds
@@ -27,6 +29,7 @@ export interface Question {
         section: SectionType; // Redundant but useful for type matching if needed, or just inherit
         text?: string; // Prompt text for sub-question
         audioSrc?: string; // Audio for the specific question
+        audioUrl?: string; // S3 URL
         correctAnswer?: string;
         options?: string[];
     }[];

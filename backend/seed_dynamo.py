@@ -7,6 +7,76 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('communication_questions')
 
+# --- Audio Generation Helpers ---
+cf_client = boto3.client('cloudformation')
+s3_client = boto3.client('s3')
+polly_client = boto3.client('polly')
+
+AUDIO_BUCKET_NAME = None
+
+def get_audio_bucket_name():
+    global AUDIO_BUCKET_NAME
+    if AUDIO_BUCKET_NAME: return AUDIO_BUCKET_NAME
+    try:
+        # Assuming stack name is fixed as per deploy script
+        response = cf_client.describe_stacks(StackName='communication-backend')
+        for output in response['Stacks'][0].get('Outputs', []):
+            if output['OutputKey'] == 'AudioAssetsBucketName':
+                AUDIO_BUCKET_NAME = output['OutputValue']
+                print(f"✅ Found Audio Bucket: {AUDIO_BUCKET_NAME}")
+                return AUDIO_BUCKET_NAME
+    except Exception as e:
+        print(f"⚠️ Failed to get bucket name (Run deploy first?): {e}")
+    return None
+
+VOICE_MAP = {
+    "male_1": "Matthew",
+    "male_2": "Joey",
+    "female_1": "Joanna",
+    "female_2": "Salli"
+}
+
+def ensure_audio(text, q_id, suffix="", voice_type="female_1"):
+    bucket = get_audio_bucket_name()
+    if not bucket or not text: return None
+
+    filename = f"audio/{q_id}{suffix}.mp3"
+    s3_key = filename
+    # Construct S3 URL (Public)
+    region = boto3.session.Session().region_name
+    s3_url = f"https://{bucket}.s3.{region}.amazonaws.com/{s3_key}"
+
+    # Optimization: Check if exists to avoid re-generating (Polly costs)
+    try:
+        s3_client.head_object(Bucket=bucket, Key=s3_key)
+        # print(f"  ⏭️  Exists: {filename}")
+        return s3_url
+    except ClientError:
+        pass # Not found
+
+    print(f"  🎙️  Generating audio for {q_id}{suffix}...")
+    voice_id = VOICE_MAP.get(voice_type, "Joanna")
+    
+    try:
+        response = polly_client.synthesize_speech(
+            Text=text,
+            OutputFormat='mp3',
+            VoiceId=voice_id,
+            Engine='neural'
+        )
+        if "AudioStream" in response:
+            s3_client.put_object(
+                Bucket=bucket,
+                Key=s3_key,
+                Body=response['AudioStream'].read(),
+                ContentType='audio/mpeg'
+            )
+            return s3_url
+    except Exception as e:
+        print(f"  ❌ Audio Gen Failed: {e}")
+    
+    return None
+
 def clear_table():
     print("🗑️  Clearing existing data...")
     # Scan and delete all items (simple for this scale, for prod use batch delete)
@@ -361,6 +431,44 @@ def seed_questions():
     ])
     
     print(f"📝 Seeding {len(questions)} questions...")
+
+    # --- Generate Audio Assets ---
+    bucket_name = get_audio_bucket_name()
+    if bucket_name:
+        print(f"🔊 Processing Audio Assets (bucket: {bucket_name})...")
+        for q in questions:
+            voice = q.get('voice_type', 'female_1')
+            
+            # 1. Context Audio (Sections A, B)
+            if q.get('context_audio_src'):
+                url = ensure_audio(q['context_audio_src'], q['id'], suffix="_context", voice_type=voice)
+                if url: q['context_audio_url'] = url
+            
+            # 2. Main Question Audio (Sections C, D, E, F)
+            # Section C uses prompt_text. D, E, F use audio_src.
+            audio_text = q.get('audio_src')
+            if not audio_text and q.get('section') == 'C':
+                audio_text = q.get('prompt_text')
+            
+            # Special handling for Section E (Fill Blank) -> Replace '_' with 'blank'
+            if q.get('section') == 'E' and audio_text:
+                audio_text = audio_text.replace('_', ' blank ')
+
+            if audio_text:
+                url = ensure_audio(audio_text, q['id'], suffix="", voice_type=voice)
+                if url: q['audio_url'] = url
+            
+            # 3. Sub-questions Audio
+            if 'sub_questions' in q:
+                for sub in q['sub_questions']:
+                    if sub.get('audio_src'):
+                        # Questions usually read by standard narrator (Joanna)
+                        url = ensure_audio(sub['audio_src'], sub['id'], suffix="", voice_type="female_1")
+                        if url: sub['audio_url'] = url
+    else:
+        print("⚠️ Skipping Audio Generation (No bucket found).")
+
+    # Batch Write to DynamoDB
     with table.batch_writer() as batch:
         for question in questions:
             batch.put_item(Item=question)

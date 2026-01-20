@@ -7,6 +7,8 @@ Globals:
     Timeout: 60
     MemorySize: 512
     Runtime: python3.12
+    Architectures:
+      - arm64
     Environment:
       Variables:
         DYNAMODB_TABLE: communication_questions
@@ -24,6 +26,12 @@ Parameters:
   OpenAiApiKey:
     Type: String
     Description: OpenAI API Key
+  AzureSpeechKey:
+    Type: String
+    Description: Azure Speech Key
+  AzureSpeechRegion:
+    Type: String
+    Description: Azure Speech Region
 
 Resources:
   CommunicationAPI:
@@ -38,6 +46,8 @@ Resources:
           DYNAMODB_TABLE: communication_questions
           BEDROCK_REGION: ap-south-1
           OPENAI_API_KEY: !Ref OpenAiApiKey
+          AZURE_SPEECH_KEY: !Ref AzureSpeechKey
+          AZURE_SPEECH_REGION: !Ref AzureSpeechRegion
           INTERVIEW_TABLE: interview_sessions
       Policies:
         - DynamoDBCrudPolicy:
@@ -106,6 +116,32 @@ Resources:
             ProjectionType: ALL
       BillingMode: PAY_PER_REQUEST
 
+  AudioAssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [GET]
+            AllowedOrigins: ["*"]
+
+  AudioAssetsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AudioAssetsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "${AudioAssetsBucket.Arn}/*"
+
 Outputs:
   CommunicationApiUrl:
     Description: "API Gateway endpoint URL"
@@ -114,3 +150,7 @@ Outputs:
   CommunicationApiFunctionArn:
     Description: "Lambda Function ARN"
     Value: !GetAtt CommunicationAPI.Arn
+
+  AudioAssetsBucketName:
+    Description: "S3 Bucket for Audio Assets"
+    Value: !Ref AudioAssetsBucket

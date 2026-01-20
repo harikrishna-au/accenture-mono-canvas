@@ -4,7 +4,7 @@ const INTERVIEW_DURATION_SECONDS = 15 * 60; // 15 minutes
 
 // API BASE URL - Adjust based on environment or Vite proxy
 // API BASE URL
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "/api";
+const API_BASE_URL = (import.meta.env.VITE_BACKEND_URL || "/api").replace(/\/$/, "");
 
 export const useAIInterview = () => {
     // Session State
