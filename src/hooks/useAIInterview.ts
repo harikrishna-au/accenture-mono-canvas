@@ -48,7 +48,7 @@ export const useAIInterview = () => {
     const uploadResumeToS3 = async (file: File): Promise<void> => {
         try {
             // 1. Get Presigned URL
-            const urlResponse = await fetch(`${API_BASE_URL}/resume/upload-url`, {
+            const urlResponse = await fetch(`${API_BASE_URL}/api/resume/upload-url`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ filename: file.name })
@@ -90,7 +90,7 @@ export const useAIInterview = () => {
                 formData.append("user_id", userId);
             }
 
-            const response = await fetch(`${API_BASE_URL}/interview/start`, {
+            const response = await fetch(`${API_BASE_URL}/api/interview/start`, {
                 method: "POST",
                 // Content-Type header not set for FormData, browser sets it with boundary
                 body: formData
@@ -129,7 +129,7 @@ export const useAIInterview = () => {
 
         if (sessionId) {
             try {
-                await fetch(`${API_BASE_URL}/interview/end`, {
+                await fetch(`${API_BASE_URL}/api/interview/end`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ session_id: sessionId })
@@ -163,7 +163,7 @@ export const useAIInterview = () => {
 
 
             // We pass session_id as query param for simplicity with UploadFile
-            const response = await fetch(`${API_BASE_URL}/interview/chat_audio?session_id=${sessionId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/interview/chat_audio?session_id=${sessionId}`, {
                 method: "POST",
                 body: formData
             });
