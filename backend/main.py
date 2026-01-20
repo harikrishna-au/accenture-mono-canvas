@@ -163,14 +163,15 @@ def get_resume_upload_url(request: Request, body: ResumeUploadRequest):
         object_name = f"resumes/{uuid.uuid4()}_{body.filename}"
         
         # Generate Presigned URL
-        s3_client = boto3.client('s3')
+        # Explicitly use ap-south-1 to avoid 307 Redirects which cause CORS issues
+        s3_client = boto3.client('s3', region_name='ap-south-1')
         try:
             response = s3_client.generate_presigned_post(
                 Bucket=bucket_name,
                 Key=object_name,
-                Fields={"acl": "public-read", "Content-Type": "application/pdf"},
+                # Remove "acl": "public-read" because BlockPublicAccess is ON
+                Fields={"Content-Type": "application/pdf"},
                 Conditions=[
-                    {"acl": "public-read"},
                     {"Content-Type": "application/pdf"},
                     ["content-length-range", 1, 10485760] # Max 10MB
                 ],
