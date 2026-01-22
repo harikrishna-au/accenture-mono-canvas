@@ -3,6 +3,7 @@
 
 <head>
   <script>
+    // Safari and some old browsers are missing requestIdleCallback; provide a tiny polyfill.
     window.requestIdleCallback = window.requestIdleCallback ||
       function (cb) {
         var start = Date.now();

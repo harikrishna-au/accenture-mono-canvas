@@ -50,6 +50,7 @@ Resources:
           AZURE_SPEECH_REGION: !Ref AzureSpeechRegion
           INTERVIEW_TABLE: interview_sessions
           RESUME_BUCKET_NAME: !Ref ResumeBucket
+          ALLOWED_ORIGINS: "https://www.harrytheblaze.site,http://localhost:5173,http://localhost:3000"
       Policies:
         - DynamoDBCrudPolicy:
             TableName: communication_questions
