@@ -218,7 +218,7 @@ export const useAIInterview = () => {
 
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            console.log("Transcript:", transcript);
+            console.log("Transcript captured:", transcript);
             // Auto-send on result
             processText(transcript);
         };
@@ -234,9 +234,10 @@ export const useAIInterview = () => {
 
         recognition.onend = () => {
             setIsRecording(false);
-            if (status === "listening") {
-                setStatus("idle");
-            }
+            setStatus((prev) => {
+                if (prev === "listening") return "idle";
+                return prev;
+            });
         };
 
         // Store in ref to stop if needed (though onresult usually handles it)
@@ -247,8 +248,12 @@ export const useAIInterview = () => {
     const stopRecording = () => {
         if (mediaRecorderRef.current && isRecording) {
             // It's actually a recognition instance now
-            (mediaRecorderRef.current as any).stop();
-            setIsRecording(false);
+            try {
+                (mediaRecorderRef.current as any).stop();
+            } catch (e) {
+                console.error("Error stopping recognition:", e);
+            }
+            // setIsRecording(false) will be handled by onend
         }
     };
 
