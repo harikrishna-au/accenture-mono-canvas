@@ -102,7 +102,11 @@ export const useAIInterview = () => {
                 return;
             }
 
-            if (!response.ok) throw new Error("Failed to start session");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: "Unknown Start Error" }));
+                console.error("Start Interview Error Details:", errorData);
+                throw new Error(errorData.detail || "Failed to start session");
+            }
 
             const data = await response.json();
 
@@ -118,7 +122,7 @@ export const useAIInterview = () => {
 
         } catch (error) {
             console.error("Error starting interview:", error);
-            alert("Failed to start AI session. Please try again.");
+            alert(`Failed to start AI session: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setIsResumeSubmitting(false);
         }
@@ -152,14 +156,14 @@ export const useAIInterview = () => {
         }
     };
 
-    const processAudio = async (audioBlob: Blob) => {
+    const processAudio = async (audioBlob: Blob, extension: string = "wav") => {
         if (!sessionId) return;
 
         setIsProcessing(true);
         setStatus("processing");
         try {
             const formData = new FormData();
-            formData.append("file", audioBlob, "recording.wav");
+            formData.append("file", audioBlob, `recording.${extension}`);
 
 
             // We pass session_id as query param for simplicity with UploadFile
@@ -168,7 +172,11 @@ export const useAIInterview = () => {
                 body: formData
             });
 
-            if (!response.ok) throw new Error("Backend audio processing failed");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: "Unknown Backend Error" }));
+                console.error("Audio Processing Error Details:", errorData);
+                throw new Error(errorData.detail || "Backend audio processing failed");
+            }
 
             const data = await response.json();
 
@@ -192,7 +200,22 @@ export const useAIInterview = () => {
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+
+            // Detect supported mime type
+            let mimeType = 'audio/webm';
+            if (MediaRecorder.isTypeSupported('audio/webm')) {
+                mimeType = 'audio/webm';
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                mimeType = 'audio/mp4'; // Safari
+            } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+                mimeType = 'audio/aac';
+            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+                mimeType = 'audio/ogg';
+            }
+
+            console.log("Using MIME type:", mimeType);
+
+            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
             chunksRef.current = [];
 
             mediaRecorderRef.current.ondataavailable = (e) => {
@@ -202,8 +225,17 @@ export const useAIInterview = () => {
             };
 
             mediaRecorderRef.current.onstop = async () => {
-                const audioBlob = new Blob(chunksRef.current, { type: 'audio/wav' });
-                await processAudio(audioBlob);
+                // Determine extension based on mimeType
+                let extension = 'webm';
+                if (mimeType.includes('mp4')) extension = 'mp4';
+                else if (mimeType.includes('aac')) extension = 'aac';
+                else if (mimeType.includes('ogg')) extension = 'ogg';
+                else if (mimeType.includes('wav')) extension = 'wav';
+
+                const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+
+                // Pass extension to processAudio
+                await processAudio(audioBlob, extension);
             };
 
             mediaRecorderRef.current.start();

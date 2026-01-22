@@ -175,7 +175,13 @@ def end_interview_session(body: InterviewEndRequest):
 @router.post("/chat_audio")
 async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):
     # 1. Save & Transcribe
-    temp_filename = f"/tmp/{uuid.uuid4()}.wav"
+    # 1. Save & Transcribe
+    # Preserve extension (e.g., .webm, .mp4, .m4a) because OpenAI needs it or ffmpeg needs it
+    ext = os.path.splitext(file.filename)[1]
+    if not ext:
+        ext = ".wav"
+        
+    temp_filename = f"/tmp/{uuid.uuid4()}{ext}"
     try:
         with open(temp_filename, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
