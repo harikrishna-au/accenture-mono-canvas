@@ -156,31 +156,31 @@ export const useAIInterview = () => {
         }
     };
 
-    const processAudio = async (audioBlob: Blob, extension: string = "wav") => {
-        if (!sessionId) return;
+    // Text-based processing (replaces processAudio)
+    const processText = async (text: string) => {
+        if (!sessionId || !text.trim()) return;
 
         setIsProcessing(true);
         setStatus("processing");
         try {
-            const formData = new FormData();
-            formData.append("file", audioBlob, `recording.${extension}`);
-
-
-            // We pass session_id as query param for simplicity with UploadFile
-            const response = await fetch(`${API_BASE_URL}/api/interview/chat_audio?session_id=${sessionId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/interview/chat`, {
                 method: "POST",
-                body: formData
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    user_text: text
+                })
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ detail: "Unknown Backend Error" }));
-                console.error("Audio Processing Error Details:", errorData);
-                throw new Error(errorData.detail || "Backend audio processing failed");
+                console.error("Chat Error Details:", errorData);
+                throw new Error(errorData.detail || "Backend chat processing failed");
             }
 
             const data = await response.json();
 
-            setTextToSpeak(data.ai_message); // Fallback / Debug
+            setTextToSpeak(data.ai_message);
 
             if (data.audio_content) {
                 setAudioSrc(data.audio_content);
@@ -190,70 +190,65 @@ export const useAIInterview = () => {
             }
 
         } catch (error) {
-            console.error("Error processing audio:", error);
+            console.error("Error processing chat:", error);
             setStatus("idle");
+            alert(`Chat Failed: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setIsProcessing(false);
         }
     };
 
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const startRecording = () => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-            // Detect supported mime type
-            let mimeType = 'audio/webm';
-            if (MediaRecorder.isTypeSupported('audio/webm')) {
-                mimeType = 'audio/webm';
-            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                mimeType = 'audio/mp4'; // Safari
-            } else if (MediaRecorder.isTypeSupported('audio/aac')) {
-                mimeType = 'audio/aac';
-            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-                mimeType = 'audio/ogg';
-            }
+        if (!SpeechRecognition) {
+            alert("Your browser does not support Speech Recognition. Please use Chrome or Safari.");
+            return;
+        }
 
-            console.log("Using MIME type:", mimeType);
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
 
-            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
-            chunksRef.current = [];
-
-            mediaRecorderRef.current.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    chunksRef.current.push(e.data);
-                }
-            };
-
-            mediaRecorderRef.current.onstop = async () => {
-                // Determine extension based on mimeType
-                let extension = 'webm';
-                if (mimeType.includes('mp4')) extension = 'mp4';
-                else if (mimeType.includes('aac')) extension = 'aac';
-                else if (mimeType.includes('ogg')) extension = 'ogg';
-                else if (mimeType.includes('wav')) extension = 'wav';
-
-                const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-
-                // Pass extension to processAudio
-                await processAudio(audioBlob, extension);
-            };
-
-            mediaRecorderRef.current.start();
+        recognition.onstart = () => {
             setIsRecording(true);
             setStatus("listening");
-        } catch (error) {
-            console.error("Error accessing microphone:", error);
-            alert("Could not access microphone. Please ensure permissions are granted.");
-        }
+        };
+
+        recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Transcript:", transcript);
+            // Auto-send on result
+            processText(transcript);
+        };
+
+        recognition.onerror = (event: any) => {
+            console.error("Speech Recognition Error:", event.error);
+            setIsRecording(false);
+            setStatus("idle");
+            if (event.error === 'not-allowed') {
+                alert("Microphone access denied. Please allow microphone access.");
+            }
+        };
+
+        recognition.onend = () => {
+            setIsRecording(false);
+            if (status === "listening") {
+                setStatus("idle");
+            }
+        };
+
+        // Store in ref to stop if needed (though onresult usually handles it)
+        (mediaRecorderRef.current as any) = recognition;
+        recognition.start();
     };
 
     const stopRecording = () => {
         if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
+            // It's actually a recognition instance now
+            (mediaRecorderRef.current as any).stop();
             setIsRecording(false);
-            if (mediaRecorderRef.current.stream) {
-                mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            }
         }
     };
 
