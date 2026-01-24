@@ -91,3 +91,14 @@ def mark_session_completed(session_id: str, feedback: dict = None):
         ExpressionAttributeNames=expr_names,
         ExpressionAttributeValues=expr_values
     )
+
+def update_session_progress(session_id: str, history: list, next_index: int):
+    import json
+    interview_table.update_item(
+        Key={'session_id': session_id},
+        UpdateExpression="set history = :h, current_question_index = :i",
+        ExpressionAttributeValues={
+            ':h': json.dumps(history),
+            ':i': next_index
+        }
+    )

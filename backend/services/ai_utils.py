@@ -93,3 +93,54 @@ def generate_interview_feedback(history: list) -> dict:
     except Exception as e:
         print(f"Feedback Generation Error: {e}")
         return {}
+
+def generate_interview_questions(resume_text: str) -> dict:
+    """
+    Generates a full list of 15 interview questions based on the resume.
+    Returns a dict with 'questions': [list of strings]
+    """
+    if not openai_client:
+        print("OpenAI API Key not configured")
+        return {"questions": []}
+
+    prompt = """
+    You are Sarah, a Senior HR Manager.
+    Generate a strict sequence of 15 interview questions for the following candidate.
+    
+    STRUCTURE:
+    - Questions 1-5: Introduction & Background (Ice breakers, tell me about yourself, follow-ups on education/bio)
+    - Questions 6-12: Technical Experience & Projects (Based on resume specific projects, technologies, challenges)
+    - Questions 13-15: HR & Behavioral (Teamwork, conflict, career goals)
+
+    OUTPUT FORMAT:
+    {
+        "questions": [
+            "Question 1 text...",
+            "Question 2 text...",
+            ...
+            "Question 15 text..."
+        ]
+    }
+    
+    RULES:
+    - Questions must be concise (1-2 sentences).
+    - Do not include question numbers in the strings.
+    - Tailor technical questions to the resume content below.
+    """
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": f"CANDIDATE RESUME:\n{resume_text[:2000]}"}
+    ]
+
+    try:
+        completion = openai_client.chat.completions.create(
+            messages=messages,
+            model="gpt-4o",
+            response_format={ "type": "json_object" }
+        )
+        import json
+        return json.loads(completion.choices[0].message.content)
+    except Exception as e:
+        print(f"Question Generation Error: {e}")
+        return {"questions": []}

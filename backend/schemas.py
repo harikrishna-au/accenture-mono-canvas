@@ -63,6 +63,7 @@ class InterviewChatResponse(BaseModel):
     ai_message: str
     audio_content: str
     status: str
+    feedback: Optional[dict] = None
 
 class ResumeUploadRequest(BaseModel):
     filename: str

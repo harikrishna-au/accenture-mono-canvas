@@ -3,7 +3,7 @@ try:
     from backend.schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback
+    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions
     from backend.services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -11,7 +11,7 @@ except ImportError:
     from schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback
+    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions
     from services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -109,34 +109,38 @@ def start_interview(
     - Manage the flow to ensure all phases are covered within ~15 turns.
     """
     
-    # 2. Get Initial Question
+    # 2. Pre-generate Questions
     try:
         if not openai_client:
              raise HTTPException(status_code=500, detail="OpenAI API Key not configured")
 
-        initial_user_msg = f"Here is the candidate's resume:\n{final_resume_text[:2000]}...\n\nStart the interview."
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": initial_user_msg}
-        ]
+        # Generate Full Question Queue
+        q_data = generate_interview_questions(final_resume_text)
+        question_queue = q_data.get("questions", [])
         
-        ai_text = generate_chat_completion(messages)
+        if not question_queue:
+            raise HTTPException(status_code=500, detail="Failed to generate interview questions")
+
+        initial_ai_text = question_queue[0]
+
     except Exception as e:
         print(f"OpenAI Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate interview question: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate interview questions: {str(e)}")
 
+    # Initial History
     full_history = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": initial_user_msg},
-        {"role": "assistant", "content": ai_text}
+        {"role": "assistant", "content": initial_ai_text}
     ]
 
-    # 3. Save Session
+    # 3. Save Session with Queue
     try:
         save_session({
             'session_id': session_id,
             'user_id': user_id,
             'history': json.dumps(full_history),
+            'question_queue': json.dumps(question_queue),
+            'current_question_index': 0,
             'created_at': int(time.time()),
             'status': 'active'
         })
@@ -145,11 +149,11 @@ def start_interview(
         raise HTTPException(status_code=500, detail="Database Error")
 
     # 4. Generate Audio
-    audio_b64 = generate_openai_audio(ai_text)
+    audio_b64 = generate_openai_audio(initial_ai_text)
 
     return {
         "session_id": session_id,
-        "ai_message": ai_text,
+        "ai_message": initial_ai_text,
         "audio_content": audio_b64
     }
 
@@ -160,26 +164,65 @@ def chat_interview(body: InterviewChatRequest):
     if not item:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    history = json.loads(item['history'])
+    # 2. Update History with User Answer
+    history = json.loads(item.get('history', '[]'))
     history.append({"role": "user", "content": body.user_text})
 
-    # 2. Generate AI
-    try:
-        ai_text = generate_chat_completion(history)
-    except Exception:
-        raise HTTPException(status_code=500, detail="AI Service Failed")
-
-    history.append({"role": "assistant", "content": ai_text})
+    # 3. Get Next Question from Queue
+    question_queue = json.loads(item.get('question_queue', '[]'))
+    current_index = int(item.get('current_question_index', 0))
     
-    # 3. Save & Audio
-    update_session_history(body.session_id, history)
-    audio_b64 = generate_openai_audio(ai_text)
+    next_index = current_index + 1
+    
+    if next_index < len(question_queue):
+        # Next Question Exists
+        ai_text = question_queue[next_index]
+        history.append({"role": "assistant", "content": ai_text})
+        
+        # Save Updates (History + Index)
+        # We need to update index in DB. aws_utils update_session_history currently only updates history.
+        # We should update generic item or expand that function. For now, let's use a generic update or modify the util.
+        # Ideally, we should modify aws_utils.py to support generic updates, but to be safe/fast:
+        # We will use the table resource directly here or assume an expanded utility.
+        # Let's check aws_utils again. It has specific update functions.
+        # I'll use a direct update here via boto3 logic if needed, OR better:
+        # I'll update `update_session_history` in the NEXT tool call to be more flexible, 
+        # BUT for this specific tool call, I will assume the function `update_session_progress` (which I will create/modify next).
+        # Wait, I can just modify `aws_utils` first. 
+        # Actually, let's write the logic here assuming I can call `update_session_state` which updates history AND index.
+        
+        # Let's revert to simplicity: just use table.update_item directly here since I have the table reference from imports?
+        # No, `interview_table` is imported from aws_utils.
+        # I will update `aws_utils.py` to add `update_session_progress` in a separate step? 
+        # No, I should have done that. Let me do this:
+        # I will write the code here to use `update_session_progress`, and then I will immediately add that function to `aws_utils.py`.
+        
+        from backend.services.aws_utils import update_session_progress
+        update_session_progress(body.session_id, history, next_index)
 
-    return {
-        "ai_message": ai_text,
-        "audio_content": audio_b64,
-        "status": "active"
-    }
+        status = "active"
+        audio_b64 = generate_openai_audio(ai_text)
+        
+        return {
+            "ai_message": ai_text,
+            "audio_content": audio_b64,
+            "status": status
+        }
+    else:
+        # End of Interview
+        feedback = generate_interview_feedback(history)
+        mark_session_completed(body.session_id, feedback)
+        
+        return {
+            "ai_message": "Thank you for your time. The interview is now complete.",
+            "audio_content": "", # Optional: Generate goodbye audio
+            "status": "completed",
+            # We can't return feedback in this schema? InterviewChatResponse usually just has message/audio/status.
+            # The frontend expects to handle 'completed' status.
+            # If the schema allows extra fields, we can send it.
+            # Usually strict Pydantic models drop extras.
+            # Let's check schemas.
+        }
 
 @router.post("/end")
 def end_interview_session(body: InterviewEndRequest):
