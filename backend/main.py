@@ -4,6 +4,16 @@ import sys
 # Global Debug Tracker
 import_status = {}
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    import_status["dotenv"] = "Success"
+except ImportError:
+    
+    import_status["dotenv"] = "Not Installed"
+except Exception as e:
+    import_status["dotenv"] = f"Failed: {e}"
+
 def safe_import(module_name, alias=None):
     try:
         mod = __import__(module_name)
@@ -39,7 +49,7 @@ if FastAPI:
     app = FastAPI()
 
     # Configure explicit allowed origins to satisfy CORS when credentials are used
-    default_origins = "http://localhost:5173,http://localhost:3000,https://www.harrytheblaze.site"
+    default_origins = "http://localhost:5173,http://localhost:3000,http://localhost:8081,https://www.harrytheblaze.site"
     origins = os.getenv("ALLOWED_ORIGINS", default_origins).split(",")
 
     app.add_middleware(

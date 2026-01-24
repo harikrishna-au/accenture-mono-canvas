@@ -3,7 +3,7 @@ try:
     from backend.schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client
+    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio
     from backend.services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -11,7 +11,7 @@ except ImportError:
     from schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client
+    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio
     from services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -128,7 +128,7 @@ def start_interview(
         raise HTTPException(status_code=500, detail="Database Error")
 
     # 4. Generate Audio
-    audio_b64 = generate_polly_audio(ai_text)
+    audio_b64 = generate_openai_audio(ai_text)
 
     return {
         "session_id": session_id,
@@ -156,7 +156,7 @@ def chat_interview(body: InterviewChatRequest):
     
     # 3. Save & Audio
     update_session_history(body.session_id, history)
-    audio_b64 = generate_polly_audio(ai_text)
+    audio_b64 = generate_openai_audio(ai_text)
 
     return {
         "ai_message": ai_text,
@@ -211,7 +211,7 @@ async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):
     history.append({"role": "assistant", "content": ai_text})
     update_session_history(session_id, history)
     
-    audio_b64 = generate_polly_audio(ai_text)
+    audio_b64 = generate_openai_audio(ai_text)
 
     return {
         "ai_message": ai_text,
