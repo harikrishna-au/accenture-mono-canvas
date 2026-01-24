@@ -100,8 +100,7 @@ def generate_interview_questions(resume_text: str) -> dict:
     Returns a dict with 'questions': [list of strings]
     """
     if not openai_client:
-        print("OpenAI API Key not configured")
-        return {"questions": []}
+        raise Exception("OpenAI API Key not configured or Client Init Failed")
 
     prompt = """
     You are Sarah, a Senior HR Manager.
@@ -133,14 +132,10 @@ def generate_interview_questions(resume_text: str) -> dict:
         {"role": "user", "content": f"CANDIDATE RESUME:\n{resume_text[:2000]}"}
     ]
 
-    try:
-        completion = openai_client.chat.completions.create(
-            messages=messages,
-            model="gpt-4o",
-            response_format={ "type": "json_object" }
-        )
-        import json
-        return json.loads(completion.choices[0].message.content)
-    except Exception as e:
-        print(f"Question Generation Error: {e}")
-        return {"questions": []}
+    completion = openai_client.chat.completions.create(
+        messages=messages,
+        model="gpt-4o",
+        response_format={ "type": "json_object" }
+    )
+    import json
+    return json.loads(completion.choices[0].message.content)
