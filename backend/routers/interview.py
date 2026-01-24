@@ -3,7 +3,7 @@ try:
     from backend.schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio
+    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback
     from backend.services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -11,7 +11,7 @@ except ImportError:
     from schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio
+    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback
     from services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -68,28 +68,45 @@ def start_interview(
     session_id = str(uuid.uuid4())
     
     system_prompt = f"""
-    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral interview.
+    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral and technical interview.
     
     CANDIDATE RESUME:
     "{final_resume_text}"
 
-    GOAL: Assess culture fit, communication, and project experience. Do NOT ask deep technical coding questions.
-
+    GOAL: Assess culture fit, communication, and project experience.
+    
     STRUCTURE:
-    1.  **Introduction Phase (0-4 minutes)**:
-        *   Start by asking the candidate to introduce themselves.
-        *   **CRITICAL**: Keep asking follow-up engagement questions until approx 4 minutes have passed.
-        *   Do NOT move to main questions until rapport is established (~4 mins).
-
-    2.  **Main Interview Questions (4-12 minutes)**:
-        *   Ask exactly 5 distinct questions based on their resume (Teamwork, Challenges, Impact, Behavior, Why this role?).
-
-    3.  **Closing (12-15 minutes)**:
-        *   Wrap up and ask if they have questions.
+    1.  **Introduction Phase (5 Questions)**:
+        *   Ask the candidate to introduce themselves.
+        *   Ask 4 follow-up engagement questions about their background.
+    
+    2.  **Technical Phase (5-10 Questions)**:
+        *   Ask questions about their Projects, Achievements, and Technical Skills.
+        *   Focus on "basics" and "experience" rather than deep coding problems.
+        *   Verify claims made in the resume.
+    
+    3.  **HR & Behavioral Phase (Until 15 mins)**:
+        *   Ask behavioral questions (e.g., conflict resolution, teamwork) to fill the remaining time.
+    
+    4.  **Conclusion & Feedback**:
+        *   Wrap up the interview.
+        *   **CRITICAL**: As your FINAL message, you MUST output a specific JSON block with feedback.
+        *   Format:
+            ```json
+            {{
+                "feedback": {{
+                    "strengths": ["..."],
+                    "areas_for_improvement": ["..."],
+                    "rating": "X/10",
+                    "summary": "..."
+                }}
+            }}
+            ```
 
     RULES:
-    - Keep responses concise (under 3 sentences).
-    - Be professional but encouraging.
+    - Ask ONLY ONE question at a time.
+    - Keep your responses professional but encouraging.
+    - Manage the flow to ensure all phases are covered within ~15 turns.
     """
     
     # 2. Get Initial Question
@@ -167,10 +184,26 @@ def chat_interview(body: InterviewChatRequest):
 @router.post("/end")
 def end_interview_session(body: InterviewEndRequest):
     try:
-        mark_session_completed(body.session_id)
-        return {"message": "Session ended"}
-    except Exception:
-        raise HTTPException(status_code=500, detail="Database Error")
+        # 1. Fetch Session for History
+        item = get_session(body.session_id)
+        if not item:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        history = json.loads(item.get('history', '[]'))
+
+        # 2. Generate Feedback
+        feedback = generate_interview_feedback(history)
+        
+        # 3. Save & Mark Completed
+        mark_session_completed(body.session_id, feedback)
+        
+        return {
+            "message": "Session ended",
+            "feedback": feedback
+        }
+    except Exception as e:
+        print(f"End Session Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to end session or generate feedback")
 
 @router.post("/chat_audio")
 async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):

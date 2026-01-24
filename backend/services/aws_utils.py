@@ -74,10 +74,20 @@ def update_session_history(session_id: str, history: list):
         ExpressionAttributeValues={':h': json.dumps(history)}
     )
 
-def mark_session_completed(session_id: str):
+def mark_session_completed(session_id: str, feedback: dict = None):
+    update_expr = "set #s = :s"
+    expr_values = {':s': 'completed'}
+    expr_names = {'#s': 'status'}
+
+    if feedback:
+        update_expr += ", feedback = :f"
+        # Store as JSON string or Map, depending on preference. 
+        # Since DynamoDB supports Maps, passing the dict directly works if using boto3 Table resource.
+        expr_values[':f'] = feedback
+
     interview_table.update_item(
         Key={'session_id': session_id},
-        UpdateExpression="set #s = :s",
-        ExpressionAttributeNames={'#s': 'status'},
-        ExpressionAttributeValues={':s': 'completed'}
+        UpdateExpression=update_expr,
+        ExpressionAttributeNames=expr_names,
+        ExpressionAttributeValues=expr_values
     )

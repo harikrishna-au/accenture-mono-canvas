@@ -53,3 +53,43 @@ def generate_openai_audio(text: str, voice: str = "alloy") -> str:
     except Exception as e:
         print(f"OpenAI TTS Error: {e}")
         return ""
+
+def generate_interview_feedback(history: list) -> dict:
+    """
+    Analyzes the interview history and returns a structured JSON feedback report.
+    """
+    if not openai_client:
+        print("OpenAI API Key not configured for Feedback")
+        return {}
+
+    prompt = """
+    Analyze the following interview transcript between a candidate and an HR Manager (Sarah).
+    Provide a detailed evaluation in VALID JSON format.
+    
+    OUTPUT FORMAT:
+    {
+        "feedback": {
+            "strengths": ["List 3-4 key strengths identified"],
+            "areas_for_improvement": ["List 3-4 specific areas to improve"],
+            "rating": "Provide a score out of 10 (e.g., '8/10')",
+            "summary": "A concise 2-3 sentence summary of the candidate's performance."
+        }
+    }
+    """
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": f"TRANSCRIPT:\n{str(history)}"}
+    ]
+
+    try:
+        completion = openai_client.chat.completions.create(
+            messages=messages,
+            model="gpt-4o",
+            response_format={ "type": "json_object" }
+        )
+        import json
+        return json.loads(completion.choices[0].message.content)
+    except Exception as e:
+        print(f"Feedback Generation Error: {e}")
+        return {}
