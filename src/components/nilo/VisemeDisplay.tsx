@@ -42,24 +42,39 @@ export const VisemeDisplay = ({ audioSrc }: VisemeDisplayProps) => {
         };
     }, []);
 
+    // Audio Autoplay Error State
+    const [audioError, setAudioError] = useState(false);
+
     // Handle Audio Playback & Animation
     useEffect(() => {
-        if (audioSrc) {
-            if (audioRef.current) {
-                audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
-                audioRef.current.play().catch(e => console.error("Audio playback error:", e));
+        if (audioSrc && audioRef.current) {
+            audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
+            audioRef.current.play()
+                .then(() => {
+                    setAudioError(false);
+                    // Start talking animation
+                    if (talkingIntervalRef.current) clearInterval(talkingIntervalRef.current);
 
-                // Start talking animation
-                if (talkingIntervalRef.current) clearInterval(talkingIntervalRef.current);
-
-                talkingIntervalRef.current = setInterval(() => {
-                    // Random mouth shapes 1-21 (assuming 0 is neutral)
-                    const randomViseme = Math.floor(Math.random() * 20) + 1;
-                    setImageIndex(randomViseme);
-                }, 100); // Change mouth every 100ms
-            }
+                    talkingIntervalRef.current = setInterval(() => {
+                        // Random mouth shapes 1-21 (assuming 0 is neutral)
+                        const randomViseme = Math.floor(Math.random() * 20) + 1;
+                        setImageIndex(randomViseme);
+                    }, 100); // Change mouth every 100ms
+                })
+                .catch(e => {
+                    console.error("Audio playback error:", e);
+                    setAudioError(true);
+                });
         }
     }, [audioSrc]);
+
+    const retryPlay = () => {
+        if (audioRef.current) {
+            audioRef.current.play()
+                .then(() => setAudioError(false))
+                .catch(e => console.error("Retry failed:", e));
+        }
+    };
 
     const handleAudioEnded = () => {
         if (talkingIntervalRef.current) clearInterval(talkingIntervalRef.current);
@@ -105,6 +120,19 @@ export const VisemeDisplay = ({ audioSrc }: VisemeDisplayProps) => {
                         )}
                     />
                 </div>
+
+                {audioError && (
+                    <button
+                        onClick={retryPlay}
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors rounded-full cursor-pointer group"
+                    >
+                        <div className="bg-white/90 p-4 rounded-full shadow-lg transform group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600 ml-1">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </div>
+                    </button>
+                )}
             </div>
         </div>
     );
