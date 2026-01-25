@@ -166,7 +166,11 @@ def chat_interview(body: InterviewChatRequest):
         # No, I should have done that. Let me do this:
         # I will write the code here to use `update_session_progress`, and then I will immediately add that function to `aws_utils.py`.
         
-        from backend.services.aws_utils import update_session_progress
+        try:
+            from backend.services.aws_utils import update_session_progress
+        except ImportError:
+            from services.aws_utils import update_session_progress
+            
         update_session_progress(body.session_id, history, next_index)
 
         status = "active"
