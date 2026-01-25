@@ -149,7 +149,13 @@ export const useAIInterview = () => {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.feedback) {
-                        setFeedback(data.feedback);
+                        // Robust check: Ensure feedback is nested as expected by component
+                        if (data.feedback.feedback) {
+                            setFeedback(data.feedback);
+                        } else {
+                            // Wrap flat feedback in expected structure
+                            setFeedback({ feedback: data.feedback });
+                        }
                     }
                 }
             } catch (e) {
