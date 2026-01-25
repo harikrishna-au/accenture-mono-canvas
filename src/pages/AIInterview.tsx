@@ -37,16 +37,17 @@ const AIInterview = () => {
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // If interview is done, show feedback
-    if (interviewEnded) {
-        return <InterviewFeedback feedback={feedback} />;
-    }
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
             textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
         }
     }, [userResponse]);
+
+    // If interview is done, show feedback
+    if (interviewEnded) {
+        return <InterviewFeedback feedback={feedback} />;
+    }
 
     // Format time as MM:SS (Logic kept here for display, could be utility)
     const formatTime = (seconds: number) => {
@@ -55,10 +56,15 @@ const AIInterview = () => {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const handleEndClick = () => {
+        if (window.confirm("Are you sure you want to end the interview? This will submit your answers and generate a feedback report.")) {
+            endInterview();
+        }
+    };
+
     // If interview is done, show feedback (with data)
-    if (interviewEnded) {
-        return <InterviewFeedback feedback={feedback} />;
-    }
+    // Redundant check removed since we have one above, but kept structure for clarity if needed.
+    // Actually, let's keep the Loading check here.
 
     // Loading State for Feedback Generation
     if (isEnding) {
@@ -124,7 +130,7 @@ const AIInterview = () => {
                                 {formatTime(timeLeft)}
                             </div>
                             <button
-                                onClick={endInterview}
+                                onClick={handleEndClick}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-full font-bold transition-all border border-red-200"
                                 title="End Interview"
                             >
