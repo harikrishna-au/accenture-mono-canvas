@@ -71,7 +71,9 @@ export const useAIInterview = () => {
 
     const requestMicPermission = async () => {
         try {
-            await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Stop tracks immediately after permission check to release mic
+            stream.getTracks().forEach(track => track.stop());
             return true;
         } catch (error) {
             console.error("Mic permission denied:", error);
@@ -416,3 +418,4 @@ export const useAIInterview = () => {
         feedback,
         isEnding
     };
+};
