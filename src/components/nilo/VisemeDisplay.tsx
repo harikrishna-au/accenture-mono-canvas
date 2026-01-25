@@ -25,6 +25,10 @@ export const VisemeDisplay = ({ audioSrc, onAudioEnd }: VisemeDisplayProps) => {
     const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
     const animationFrameRef = useRef<number | null>(null);
 
+    // Frame rate limiting for lip sync
+    const lastUpdateTimeRef = useRef<number>(0);
+    const UPDATE_INTERVAL = 80; // Update mouth shape every 80ms (about 12 times per second)
+
     // Function to trigger blink
     const triggerBlink = () => {
         setShouldBlink(true);
@@ -78,28 +82,32 @@ export const VisemeDisplay = ({ audioSrc, onAudioEnd }: VisemeDisplayProps) => {
     const animate = () => {
         if (!analyserRef.current || !audioRef.current) return;
 
-        const bufferLength = analyserRef.current.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        analyserRef.current.getByteFrequencyData(dataArray);
+        const currentTime = Date.now();
+        const timeSinceLastUpdate = currentTime - lastUpdateTimeRef.current;
 
-        // Calculate average volume
-        let sum = 0;
-        for (let i = 0; i < bufferLength; i++) {
-            sum += dataArray[i];
-        }
-        const average = sum / bufferLength;
+        // Only update if enough time has passed (frame rate limiting)
+        if (timeSinceLastUpdate >= UPDATE_INTERVAL) {
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyserRef.current.getByteFrequencyData(dataArray);
 
-        // Threshold for "speaking" (adjust as needed)
-        if (average > 10 && !audioRef.current.paused) {
-            // Change mouth only slightly randomly to reduce jitter
-            // Or based on volume intensity (louder = wider?)
-            // For cartoon, random frames 1-20 works well but maybe update less frequently?
-            // To prevent too fast flickering, we can use a timestamp or frame count.
-            // But simplest valid approach:
-            const randomViseme = Math.floor(Math.random() * 20) + 1;
-            setImageIndex(randomViseme);
-        } else {
-            setImageIndex(0); // Neutral
+            // Calculate average volume
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+
+            // Threshold for "speaking" (adjust as needed)
+            if (average > 10 && !audioRef.current.paused) {
+                // Change mouth shape based on volume
+                const randomViseme = Math.floor(Math.random() * 20) + 1;
+                setImageIndex(randomViseme);
+            } else {
+                setImageIndex(0); // Neutral
+            }
+
+            lastUpdateTimeRef.current = currentTime;
         }
 
         animationFrameRef.current = requestAnimationFrame(animate);
