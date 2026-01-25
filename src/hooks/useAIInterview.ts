@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const INTERVIEW_DURATION_SECONDS = 10 * 60; // 10 minutes
 
@@ -27,24 +27,7 @@ export const useAIInterview = () => {
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Timer Logic
-    useEffect(() => {
-        if (interviewStarted && !interviewEnded && timeLeft > 0) {
-            timerRef.current = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        endInterview(); // Auto-end logic
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
 
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, [interviewStarted, interviewEnded]);
 
     const uploadResumeToS3 = async (file: File): Promise<void> => {
         try {
@@ -152,7 +135,7 @@ export const useAIInterview = () => {
         }
     };
 
-    const endInterview = async () => {
+    const endInterview = useCallback(async () => {
         if (timerRef.current) clearInterval(timerRef.current);
 
         if (sessionId) {
@@ -177,7 +160,26 @@ export const useAIInterview = () => {
         setInterviewEnded(true);
         setStatus("idle");
         stopRecording();
-    };
+    }, [sessionId]);
+
+    // Timer Logic - Must be after endInterview definition
+    useEffect(() => {
+        if (interviewStarted && !interviewEnded && timeLeft > 0) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => {
+                    if (prev <= 1) {
+                        endInterview(); // Auto-end logic
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [interviewStarted, interviewEnded, endInterview]);
 
     const toggleRecording = () => {
         if (isRecording) {

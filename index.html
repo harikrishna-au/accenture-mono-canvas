@@ -3,24 +3,29 @@
 
 <head>
   <script>
-    // Safari and some old browsers are missing requestIdleCallback; provide a tiny polyfill.
-    window.requestIdleCallback = window.requestIdleCallback ||
-      function (cb) {
-        var start = Date.now();
-        return setTimeout(function () {
-          cb({
-            didTimeout: false,
-            timeRemaining: function () {
-              return Math.max(0, 50 - (Date.now() - start));
-            }
-          });
-        }, 1);
-      };
+    // Polyfill for requestIdleCallback (Safari and older browsers)
+    // This must run before any other scripts to ensure React can use it
+    (function () {
+      if (!window.requestIdleCallback) {
+        window.requestIdleCallback = function (cb) {
+          var start = Date.now();
+          return setTimeout(function () {
+            cb({
+              didTimeout: false,
+              timeRemaining: function () {
+                return Math.max(0, 50 - (Date.now() - start));
+              }
+            });
+          }, 1);
+        };
+      }
 
-    window.cancelIdleCallback = window.cancelIdleCallback ||
-      function (id) {
-        clearTimeout(id);
-      };
+      if (!window.cancelIdleCallback) {
+        window.cancelIdleCallback = function (id) {
+          clearTimeout(id);
+        };
+      }
+    })();
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,7 +47,7 @@
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4272590349276136"
-     crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 
 </head>
 
