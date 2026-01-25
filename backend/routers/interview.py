@@ -31,24 +31,24 @@ def start_interview(
     user_id: str = Form(None),
     resume_file: UploadFile = File(None)
 ):
-    # 0. Check Attempt Limit
-    if user_id:
-        try:
-            print(f"Checking limit for user: {user_id}")
-            response = interview_table.query(
-                IndexName='UserIdIndex',
-                KeyConditionExpression=Key('user_id').eq(user_id)
-            )
-            items = response.get('Items', [])
-            completed_count = sum(1 for item in items if item.get('status') == 'completed')
-            
-            if completed_count >= 2:
-                raise HTTPException(status_code=403, detail="Free limit reached. You have completed 2 interviews.")
-        except HTTPException:
-            raise
-        except Exception as e:
-            print(f"⚠️ LIMIT CHECK FAILED: {e}")
-            pass 
+    # 0. Check Attempt Limit - REMOVED (Unlimited Access)
+    # if user_id:
+    #     try:
+    #         print(f"Checking limit for user: {user_id}")
+    #         response = interview_table.query(
+    #             IndexName='UserIdIndex',
+    #             KeyConditionExpression=Key('user_id').eq(user_id)
+    #         )
+    #         items = response.get('Items', [])
+    #         completed_count = sum(1 for item in items if item.get('status') == 'completed')
+    #         
+    #         if completed_count >= 2:
+    #             raise HTTPException(status_code=403, detail="Free limit reached. You have completed 2 interviews.")
+    #     except HTTPException:
+    #         raise
+    #     except Exception as e:
+    #         print(f"⚠️ LIMIT CHECK FAILED: {e}")
+    #         pass 
 
     # 1. Process Resume
     final_resume_text = ""
