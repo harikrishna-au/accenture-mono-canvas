@@ -103,8 +103,8 @@ def generate_interview_questions(resume_text: str) -> dict:
         raise Exception("OpenAI API Key not configured or Client Init Failed")
 
     prompt = """
-    You are Sarah, a Senior HR Manager.
-    Generate a strict sequence of 15 interview questions for the following candidate.
+    You are Devi, an AI Interviewer at a top tech company.
+    Generate a full interview script in stric JSON format.
     
     STRUCTURE:
     - Questions 1-5: Introduction & Background (Ice breakers, tell me about yourself, follow-ups on education/bio)
@@ -122,6 +122,7 @@ def generate_interview_questions(resume_text: str) -> dict:
     }
     
     RULES:
+    - The output MUST be a valid JSON object.
     - Questions must be concise (1-2 sentences).
     - Do not include question numbers in the strings.
     - Tailor technical questions to the resume content below.

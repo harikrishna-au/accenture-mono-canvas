@@ -68,45 +68,12 @@ def start_interview(
     session_id = str(uuid.uuid4())
     
     system_prompt = f"""
-    You are Sarah, a Senior HR Manager at a top tech company. You are conducting a strict 15-minute behavioral and technical interview.
+    You are Devi, an AI Interviewer at a top tech company.
     
     CANDIDATE RESUME:
     "{final_resume_text}"
 
-    GOAL: Assess culture fit, communication, and project experience.
-    
-    STRUCTURE:
-    1.  **Introduction Phase (5 Questions)**:
-        *   Ask the candidate to introduce themselves.
-        *   Ask 4 follow-up engagement questions about their background.
-    
-    2.  **Technical Phase (5-10 Questions)**:
-        *   Ask questions about their Projects, Achievements, and Technical Skills.
-        *   Focus on "basics" and "experience" rather than deep coding problems.
-        *   Verify claims made in the resume.
-    
-    3.  **HR & Behavioral Phase (Until 15 mins)**:
-        *   Ask behavioral questions (e.g., conflict resolution, teamwork) to fill the remaining time.
-    
-    4.  **Conclusion & Feedback**:
-        *   Wrap up the interview.
-        *   **CRITICAL**: As your FINAL message, you MUST output a specific JSON block with feedback.
-        *   Format:
-            ```json
-            {{
-                "feedback": {{
-                    "strengths": ["..."],
-                    "areas_for_improvement": ["..."],
-                    "rating": "X/10",
-                    "summary": "..."
-                }}
-            }}
-            ```
-
-    RULES:
-    - Ask ONLY ONE question at a time.
-    - Keep your responses professional but encouraging.
-    - Manage the flow to ensure all phases are covered within ~15 turns.
+    GOAL: Conduct a structured interview based on the pre-generated question queue.
     """
     
     # 2. Pre-generate Questions
@@ -121,7 +88,9 @@ def start_interview(
         if not question_queue:
             raise HTTPException(status_code=500, detail="Failed to generate interview questions")
 
-        initial_ai_text = question_queue[0]
+        # Prepend Intro to Q1
+        intro_msg = "Hello, I am Devi, your AI Interviewer. I will be guiding you through this session today. Let's get started. "
+        initial_ai_text = intro_msg + question_queue[0]
 
     except Exception as e:
         print(f"OpenAI Error: {e}")
