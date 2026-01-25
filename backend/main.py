@@ -6,7 +6,8 @@ import_status = {}
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    env_path = os.path.join(os.getcwd(), ".env")
+    load_dotenv(env_path, override=True)
     import_status["dotenv"] = "Success"
 except ImportError:
     
@@ -49,7 +50,7 @@ if FastAPI:
     app = FastAPI()
 
     # Configure explicit allowed origins to satisfy CORS when credentials are used
-    default_origins = "http://localhost:5173,http://localhost:3000,http://localhost:8081,https://www.harrytheblaze.site"
+    default_origins = "http://localhost:5173,http://localhost:3000,http://localhost:8081,http://localhost:8080,https://www.harrytheblaze.site"
     origins = os.getenv("ALLOWED_ORIGINS", default_origins).split(",")
 
     app.add_middleware(

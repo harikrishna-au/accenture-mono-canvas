@@ -77,7 +77,7 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting }: ResumeCol
                     <p className="text-gray-500 max-w-md mx-auto">
                         {step === 1
                             ? "First, upload your PDF resume for our records."
-                            : "Now, paste the text content below for Sarah to analyze."}
+                            : "Now, paste the text content below for Devi to analyze."}
                     </p>
                 </div>
 

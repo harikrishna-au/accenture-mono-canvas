@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const INTERVIEW_DURATION_SECONDS = 15 * 60; // 15 minutes
+const INTERVIEW_DURATION_SECONDS = 10 * 60; // 10 minutes
 
 // API BASE URL - Adjust based on environment or Vite proxy
 // API BASE URL
@@ -21,6 +21,7 @@ export const useAIInterview = () => {
     const [status, setStatus] = useState<"idle" | "listening" | "processing" | "speaking">("idle");
     const [timeLeft, setTimeLeft] = useState(INTERVIEW_DURATION_SECONDS);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<any>(null); // Store detailed feedback
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -55,7 +56,15 @@ export const useAIInterview = () => {
             });
 
             if (!urlResponse.ok) throw new Error("Failed to get upload URL");
-            const { url, fields } = await urlResponse.json();
+
+            const data = await urlResponse.json();
+
+            if (!data.fields) {
+                console.error("Upload configuration missing from backend:", data);
+                throw new Error(data.error || "Resume storage is not configured on the server.");
+            }
+
+            const { url, fields } = data;
 
             // 2. Upload to S3
             const formData = new FormData();
@@ -77,7 +86,22 @@ export const useAIInterview = () => {
         }
     };
 
+    const requestMicPermission = async () => {
+        try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            return true;
+        } catch (error) {
+            console.error("Mic permission denied:", error);
+            alert("Microphone access is required for the interview. Please allow access.");
+            return false;
+        }
+    };
+
     const startInterview = async (resume: string, userId?: string | null) => {
+
+        // Request Mic immediately
+        const hasMic = await requestMicPermission();
+        if (!hasMic) return;
 
         setIsResumeSubmitting(true);
 
@@ -185,6 +209,11 @@ export const useAIInterview = () => {
             if (data.audio_content) {
                 setAudioSrc(data.audio_content);
                 setStatus("speaking");
+            } else if (data.status === "completed") {
+                setStatus("idle");
+                if (data.feedback) {
+                    setFeedback(data.feedback);
+                }
             } else {
                 setStatus("idle");
             }
@@ -198,7 +227,32 @@ export const useAIInterview = () => {
         }
     };
 
+    // User Interaction State
+    const [userResponse, _setUserResponse] = useState("");
+    const [autoSubmitCountdown, setAutoSubmitCountdown] = useState<number | null>(null);
+    const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const baseTextRef = useRef(""); // Snapshot of text before current recording session
+
+    // Wrapper to ensure we cancel timer on manual edit
+    const setUserResponse = (val: string) => {
+        cancelAutoSubmit();
+        _setUserResponse(val);
+    };
+
+    const cancelAutoSubmit = () => {
+        if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+        }
+        setAutoSubmitCountdown(null);
+    };
+
     const startRecording = () => {
+        cancelAutoSubmit(); // Cancel any existing countdown
+
+        // Snapshot current text so we append to it
+        baseTextRef.current = userResponse;
+
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
@@ -208,7 +262,7 @@ export const useAIInterview = () => {
 
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
-        recognition.interimResults = false;
+        recognition.interimResults = true; // Changed to true to show live text
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
@@ -219,8 +273,12 @@ export const useAIInterview = () => {
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
             console.log("Transcript captured:", transcript);
-            // Auto-send on result
-            processText(transcript);
+            // Update state directly (we don't want to cancel inside onresult loop repeatedly, wait, actually we do want to ensure no timer)
+            cancelAutoSubmit();
+
+            // Append new transcript to the base text
+            const prefix = baseTextRef.current.trim() ? " " : "";
+            _setUserResponse(baseTextRef.current + prefix + transcript);
         };
 
         recognition.onerror = (event: any) => {
@@ -238,6 +296,20 @@ export const useAIInterview = () => {
                 if (prev === "listening") return "idle";
                 return prev;
             });
+
+            // Start Auto-Submit Timer if we have text
+            // Access ref-less state might be stale in closure? No, onend runs after updates.
+            // But strict closure might capture old userResponse.
+            // Use a ref for userResponse if needed, OR just trust we set it in onresult.
+            // Actually, we can't read userResponse state reliably here if it just updated.
+            // Workaround: We know we just finished speaking.
+            // Let's rely on the fact userResponse IS updated.
+            // However, inside onend, `userResponse` might be stale.
+            // Let's safely start the timer anyway, and check length in the tick?
+            // Or better, checking `_setUserResponse` in `onresult` ensures state update.
+
+            // To be safe, we start the timer. If userResponse is empty, submitting does nothing anyway (submitResponse checks trim).
+            startAutoSubmitCountdown();
         };
 
         // Store in ref to stop if needed (though onresult usually handles it)
@@ -245,16 +317,57 @@ export const useAIInterview = () => {
         recognition.start();
     };
 
+    const startAutoSubmitCountdown = () => {
+        // Clear old
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+
+        // Start at 5
+        let count = 5;
+        setAutoSubmitCountdown(count);
+
+        countdownIntervalRef.current = setInterval(() => {
+            count--;
+            if (count <= 0) {
+                // Time's up
+                clearInterval(countdownIntervalRef.current!);
+                setAutoSubmitCountdown(null);
+                submitResponse(true); // Pass flag to bypass stale state check if needed?
+            } else {
+                setAutoSubmitCountdown(count);
+            }
+        }, 1000);
+    };
+
     const stopRecording = () => {
         if (mediaRecorderRef.current && isRecording) {
-            // It's actually a recognition instance now
             try {
                 (mediaRecorderRef.current as any).stop();
             } catch (e) {
                 console.error("Error stopping recognition:", e);
             }
-            // setIsRecording(false) will be handled by onend
         }
+    };
+
+    // Ref to access latest response in timer callback
+    const userResponseRef = useRef(userResponse);
+    useEffect(() => { userResponseRef.current = userResponse; }, [userResponse]);
+
+    const submitResponse = async (fromTimer = false) => {
+        cancelAutoSubmit(); // Stop timer if manual click
+
+        const text = fromTimer ? userResponseRef.current : userResponse;
+        if (!text.trim()) return;
+
+        await processText(text);
+
+        // Clearing
+        _setUserResponse("");
+    };
+
+    const handleAudioEnd = () => {
+        setStatus("idle");
+        // Auto-start recording as requested
+        startRecording();
     };
 
     return {
@@ -272,6 +385,13 @@ export const useAIInterview = () => {
         startInterview,
         endInterview,
         toggleRecording,
-        uploadResumeToS3
+        uploadResumeToS3,
+        userResponse,       // Exposed
+        setUserResponse,    // Exposed
+        submitResponse,      // Exposed
+        handleAudioEnd, // Exposed
+        autoSubmitCountdown,
+        cancelAutoSubmit,
+        feedback
     };
 };

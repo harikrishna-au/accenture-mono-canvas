@@ -63,7 +63,7 @@ def generate_interview_feedback(history: list) -> dict:
         return {}
 
     prompt = """
-    Analyze the following interview transcript between a candidate and an HR Manager (Sarah).
+    Analyze the following interview transcript between a candidate and an AI Interviewer (Devi).
     Provide a detailed evaluation in VALID JSON format.
     
     OUTPUT FORMAT:
@@ -72,7 +72,14 @@ def generate_interview_feedback(history: list) -> dict:
             "strengths": ["List 3-4 key strengths identified"],
             "areas_for_improvement": ["List 3-4 specific areas to improve"],
             "rating": "Provide a score out of 10 (e.g., '8/10')",
-            "summary": "A concise 2-3 sentence summary of the candidate's performance."
+            "summary": "A concise 2-3 sentence summary of the candidate's performance.",
+            "detailed_analysis": [
+                {
+                    "topic": "Brief topic name (e.g., 'Introduction', 'Project Experience')",
+                    "analysis": "Critique of the user's answer.",
+                    "better_answer_example": "A specific example of how they could have phrased it better."
+                }
+            ]
         }
     }
     """
@@ -107,7 +114,8 @@ def generate_interview_questions(resume_text: str) -> dict:
     Generate a full interview script in strict JSON format.
     
     STRUCTURE:
-    - Questions 1-5: Introduction & Background (Ice breakers, tell me about yourself, follow-ups on education/bio)
+    - Question 1: MUST be exactly "Please introduce yourself and tell me about your background."
+    - Questions 2-5: Follow-ups on education/bio and background
     - Questions 6-12: Technical Experience & Projects (Based on resume specific projects, technologies, challenges)
     - Questions 13-15: HR & Behavioral (Teamwork, conflict, career goals)
 

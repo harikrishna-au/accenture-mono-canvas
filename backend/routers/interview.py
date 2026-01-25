@@ -89,7 +89,7 @@ def start_interview(
             raise HTTPException(status_code=500, detail="Failed to generate interview questions")
 
         # Prepend Intro to Q1
-        intro_msg = "Hello, I am Devi, your AI Interviewer. I will be guiding you through this session today. Let's get started. "
+        intro_msg = "Hello, I am Devi, your AI Interviewer taking a mock interview for you. "
         initial_ai_text = intro_msg + question_queue[0]
 
     except Exception as e:
@@ -118,7 +118,7 @@ def start_interview(
         raise HTTPException(status_code=500, detail="Database Error")
 
     # 4. Generate Audio
-    audio_b64 = generate_openai_audio(initial_ai_text)
+    audio_b64 = generate_openai_audio(initial_ai_text, voice="shimmer")
 
     return {
         "session_id": session_id,
@@ -170,7 +170,7 @@ def chat_interview(body: InterviewChatRequest):
         update_session_progress(body.session_id, history, next_index)
 
         status = "active"
-        audio_b64 = generate_openai_audio(ai_text)
+        audio_b64 = generate_openai_audio(ai_text, voice="shimmer")
         
         return {
             "ai_message": ai_text,
@@ -184,13 +184,9 @@ def chat_interview(body: InterviewChatRequest):
         
         return {
             "ai_message": "Thank you for your time. The interview is now complete.",
-            "audio_content": "", # Optional: Generate goodbye audio
+            "audio_content": "", 
             "status": "completed",
-            # We can't return feedback in this schema? InterviewChatResponse usually just has message/audio/status.
-            # The frontend expects to handle 'completed' status.
-            # If the schema allows extra fields, we can send it.
-            # Usually strict Pydantic models drop extras.
-            # Let's check schemas.
+            "feedback": feedback
         }
 
 @router.post("/end")
@@ -256,7 +252,7 @@ async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):
     history.append({"role": "assistant", "content": ai_text})
     update_session_history(session_id, history)
     
-    audio_b64 = generate_openai_audio(ai_text)
+    audio_b64 = generate_openai_audio(ai_text, voice="shimmer")
 
     return {
         "ai_message": ai_text,

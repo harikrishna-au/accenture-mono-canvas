@@ -60,7 +60,7 @@ export const InterviewControls = ({ status, isRecording, onToggleRecording }: In
             </div>
 
             <p className="text-xs text-center text-gray-400 mt-4 max-w-sm">
-                Tip: Speak clearly. Sarah will listen until you stop the recording.
+                Tip: Speak clearly. Devi will listen until you stop the recording.
                 Keep answers concise to cover more ground.
             </p>
         </div>
