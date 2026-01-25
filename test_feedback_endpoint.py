@@ -49,8 +49,33 @@ def test_feedback_flow():
         print(f"❌ Exception during Start: {e}")
         return
 
-    # 2. End Interview (to trigger feedback)
-    print("\n2. Ending Interview to get Feedback...")
+    # 2. Test Chat Endpoint
+    print("\n2. Testing Chat Endpoint...")
+    chat_url = f"{BASE_URL}/api/interview/chat"
+    try:
+        chat_payload = {
+            "session_id": session_id,
+            "user_text": "I have experience with Python and AWS."
+        }
+        response = requests.post(chat_url, json=chat_payload)
+        
+        if response.status_code != 200:
+            print(f"❌ Chat Failed: {response.status_code} - {response.text}")
+            # Don't return, try to end anyway to clean up if possible, or maybe stop here?
+            # Let's stop to signal failure
+            return
+            
+        data = response.json()
+        print(f"✅ Chat Response Received.")
+        print(f"   AI: {data.get('ai_message')}")
+        print(f"   Status: {data.get('status')}")
+        
+    except Exception as e:
+        print(f"❌ Exception during Chat: {e}")
+        return
+
+    # 3. End Interview (to trigger feedback)
+    print("\n3. Ending Interview to get Feedback...")
     end_url = f"{BASE_URL}/api/interview/end"
     
     try:

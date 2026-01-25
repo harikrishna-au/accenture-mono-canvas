@@ -103,10 +103,11 @@ const AIInterview = () => {
                             </div>
                             <button
                                 onClick={endInterview}
-                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-full font-bold transition-all border border-red-200"
                                 title="End Interview"
                             >
-                                <XCircle className="w-6 h-6" />
+                                <XCircle className="w-4 h-4" />
+                                <span className="text-sm">End Interview</span>
                             </button>
                         </div>
                     </div>

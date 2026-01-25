@@ -226,6 +226,7 @@ export const useAIInterview = () => {
                 setStatus("speaking");
             } else if (data.status === "completed") {
                 setStatus("idle");
+                setInterviewEnded(true);
                 if (data.feedback) {
                     setFeedback(data.feedback);
                 }
