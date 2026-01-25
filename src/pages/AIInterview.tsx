@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import PageWrapper from "@/components/PageWrapper";
 import { VisemeDisplay } from "@/components/nilo/VisemeDisplay";
-import { Clock, XCircle } from "lucide-react";
+import { Clock, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIInterview } from "@/hooks/useAIInterview";
 import { ResumeCollection } from "@/components/nilo/ResumeCollection";
@@ -31,7 +31,8 @@ const AIInterview = () => {
         handleAudioEnd,
         autoSubmitCountdown,
         cancelAutoSubmit,
-        feedback
+        feedback,
+        isEnding
     } = useAIInterview();
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -57,6 +58,27 @@ const AIInterview = () => {
     // If interview is done, show feedback (with data)
     if (interviewEnded) {
         return <InterviewFeedback feedback={feedback} />;
+    }
+
+    // Loading State for Feedback Generation
+    if (isEnding) {
+        return (
+            <PageWrapper>
+                <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 animate-fade-in">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xl">🤖</span>
+                        </div>
+                    </div>
+                    <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold text-gray-900">Generating Your Feedback...</h2>
+                        <p className="text-gray-500">Analysing your improved responses and generating a report.</p>
+                        <p className="text-xs text-indigo-400 animate-pulse">This might take a few seconds.</p>
+                    </div>
+                </div>
+            </PageWrapper>
+        );
     }
 
     return (

@@ -135,8 +135,12 @@ export const useAIInterview = () => {
         }
     };
 
+    const [isEnding, setIsEnding] = useState(false);
+
     const endInterview = useCallback(async () => {
         if (timerRef.current) clearInterval(timerRef.current);
+
+        setIsEnding(true);
 
         if (sessionId) {
             try {
@@ -165,6 +169,7 @@ export const useAIInterview = () => {
 
         setInterviewEnded(true);
         setStatus("idle");
+        setIsEnding(false);
         stopRecording();
     }, [sessionId]);
 
@@ -408,6 +413,6 @@ export const useAIInterview = () => {
         handleAudioEnd, // Exposed
         autoSubmitCountdown,
         cancelAutoSubmit,
-        feedback
+        feedback,
+        isEnding
     };
-};

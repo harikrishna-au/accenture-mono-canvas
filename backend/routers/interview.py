@@ -199,23 +199,49 @@ def end_interview_session(body: InterviewEndRequest):
         # 1. Fetch Session for History
         item = get_session(body.session_id)
         if not item:
-            raise HTTPException(status_code=404, detail="Session not found")
+            # If session not found, we can't do much, but let's return a safe error
+            return JSONResponse(status_code=404, content={"message": "Session not found"})
         
         history = json.loads(item.get('history', '[]'))
 
-        # 2. Generate Feedback
-        feedback = generate_interview_feedback(history)
+        # 2. Generate Feedback (Safely)
+        feedback = {}
+        try:
+            feedback = generate_interview_feedback(history)
+        except Exception as e:
+            print(f"Feedback Generation Failed: {e}")
+            feedback = {
+                "feedback": {
+                    "strengths": ["Feedback generation unavailable"],
+                    "areas_for_improvement": ["Please contact support if this persists"],
+                    "rating": "N/A",
+                    "summary": "We encountered an issue generating your detailed feedback, but your interview has been recorded.",
+                    "detailed_analysis": []
+                }
+            }
         
-        # 3. Save & Mark Completed
-        mark_session_completed(body.session_id, feedback)
+        # 3. Save & Mark Completed (Safely)
+        try:
+            mark_session_completed(body.session_id, feedback)
+        except Exception as e:
+             print(f"DB Update Failed: {e}")
+             # If we can't mark it, we still return success to the user so they can exit
         
         return {
             "message": "Session ended",
             "feedback": feedback
         }
     except Exception as e:
-        print(f"End Session Error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to end session or generate feedback")
+        print(f"End Session Critical Error: {e}")
+        # Return a valid 200 OK with fallback so the UI exits cleanly
+        return {
+             "message": "Session ended with errors",
+             "feedback": {
+                "feedback": {
+                    "summary": "Interview completed. Detailed feedback could not be generated at this time."
+                }
+             }
+        }
 
 @router.post("/chat_audio")
 async def chat_interview_audio(session_id: str, file: UploadFile = File(...)):
