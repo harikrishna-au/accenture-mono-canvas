@@ -157,11 +157,18 @@ export const useAIInterview = () => {
 
         if (sessionId) {
             try {
-                await fetch(`${API_BASE_URL}/api/interview/end`, {
+                const response = await fetch(`${API_BASE_URL}/api/interview/end`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ session_id: sessionId })
                 });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.feedback) {
+                        setFeedback(data.feedback);
+                    }
+                }
             } catch (e) {
                 console.error("Error ending session:", e);
             }
