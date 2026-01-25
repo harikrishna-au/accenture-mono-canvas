@@ -104,7 +104,7 @@ def generate_interview_questions(resume_text: str) -> dict:
 
     prompt = """
     You are Devi, an AI Interviewer at a top tech company.
-    Generate a full interview script in stric JSON format.
+    Generate a full interview script in strict JSON format.
     
     STRUCTURE:
     - Questions 1-5: Introduction & Background (Ice breakers, tell me about yourself, follow-ups on education/bio)
@@ -130,7 +130,7 @@ def generate_interview_questions(resume_text: str) -> dict:
 
     messages = [
         {"role": "system", "content": prompt},
-        {"role": "user", "content": f"CANDIDATE RESUME:\n{resume_text[:2000]}"}
+        {"role": "user", "content": f"Respond in strict JSON format. CANDIDATE RESUME:\n{resume_text[:2000]}"}
     ]
 
     completion = openai_client.chat.completions.create(
