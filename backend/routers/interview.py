@@ -183,7 +183,7 @@ def chat_interview(body: InterviewChatRequest):
         }
     else:
         # End of Interview
-        feedback = generate_interview_feedback(history)
+        feedback = generate_interview_feedback(history, next_index, len(question_queue))
         mark_session_completed(body.session_id, feedback)
         
         return {
@@ -203,11 +203,14 @@ def end_interview_session(body: InterviewEndRequest):
             return JSONResponse(status_code=404, content={"message": "Session not found"})
         
         history = json.loads(item.get('history', '[]'))
+        question_queue = json.loads(item.get('question_queue', '[]'))
+        current_index = int(item.get('current_question_index', 0))
 
         # 2. Generate Feedback (Safely)
         feedback = {}
         try:
-            feedback = generate_interview_feedback(history)
+            # Pass indices to penalize if incomplete
+            feedback = generate_interview_feedback(history, current_index, len(question_queue))
         except Exception as e:
             print(f"Feedback Generation Failed: {e}")
             feedback = {

@@ -54,34 +54,45 @@ def generate_openai_audio(text: str, voice: str = "alloy") -> str:
         print(f"OpenAI TTS Error: {e}")
         return ""
 
-def generate_interview_feedback(history: list) -> dict:
+def generate_interview_feedback(history: list, current_question_index: int = 0, total_questions: int = 1) -> dict:
     """
     Analyzes the interview history and returns a structured JSON feedback report.
+    Takes indices to penalize incomplete interviews.
     """
     if not openai_client:
         print("OpenAI API Key not configured for Feedback")
         return {}
 
-    prompt = """
+    prompt = f"""
     Analyze the following interview transcript between a candidate and an AI Interviewer (Devi).
     Provide a detailed evaluation in VALID JSON format.
     
+    COMPLETENESS CONTEXT:
+    - The interview was designed for {total_questions} questions.
+    - The candidate reached question {current_question_index + 1} of {total_questions}.
+    
+    CRITICAL SCORING RULES:
+    1. If the candidate COMPLETED all {total_questions} questions, score them normally based on answer quality.
+    2. If the candidate ENDED EARLY (reached < {total_questions} or many indices skipped), YOU MUST PENALIZE the 'rating'.
+    3. PENALTY: For every missing or skipped question, reduce the potential rating out of 10. (e.g., if they only did 2/15 questions, their rating should be extremely low like 1/10 or 2/10 regardless of quality).
+    4. Provide specific COACHING in the 'summary' and 'areas_for_improvement' about completing the full interview.
+    
     OUTPUT FORMAT:
-    {
-        "feedback": {
+    {{
+        "feedback": {{
             "strengths": ["List 3-4 key strengths identified"],
-            "areas_for_improvement": ["List 3-4 specific areas to improve"],
-            "rating": "Provide a score out of 10 (e.g., '8/10')",
-            "summary": "A concise 2-3 sentence summary of the candidate's performance.",
+            "areas_for_improvement": ["List 3-4 specific areas to improve (Include coaching on interview completion if applicable)"],
+            "rating": "Provide a score out of 10 (MUST BE PENALIZED IF INCOMPLETE)",
+            "summary": "A concise summary focusing on performance and completeness.",
             "detailed_analysis": [
-                {
-                    "topic": "Brief topic name (e.g., 'Introduction', 'Project Experience')",
+                {{
+                    "topic": "Brief topic name",
                     "analysis": "Critique of the user's answer.",
-                    "better_answer_example": "A specific example of how they could have phrased it better."
-                }
+                    "better_answer_example": "Example of better phrasing."
+                }}
             ]
-        }
-    }
+        }}
+    }}
     """
 
     messages = [
