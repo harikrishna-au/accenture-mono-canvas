@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAIInterview } from "@/hooks/useAIInterview";
 import { ResumeCollection } from "@/components/nilo/ResumeCollection";
 import { InterviewFeedback } from "@/components/nilo/InterviewFeedback";
+import { EndInterviewConfirmation } from "@/components/nilo/EndInterviewConfirmation";
 
 import { useUser } from "@clerk/clerk-react";
 
@@ -32,7 +33,10 @@ const AIInterview = () => {
         autoSubmitCountdown,
         cancelAutoSubmit,
         feedback,
-        isEnding
+        isEnding,
+        showEndConfirmation,
+        openEndConfirmation,
+        closeEndConfirmation
     } = useAIInterview();
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,9 +56,7 @@ const AIInterview = () => {
     };
 
     const handleEndClick = () => {
-        if (window.confirm("Are you sure you want to end the interview? This will submit your answers and generate a feedback report.")) {
-            endInterview();
-        }
+        openEndConfirmation();
     };
 
     return (
@@ -219,6 +221,13 @@ const AIInterview = () => {
                     )}
                 </PageWrapper>
             )}
+
+            <EndInterviewConfirmation
+                isOpen={showEndConfirmation}
+                onConfirm={endInterview}
+                onCancel={closeEndConfirmation}
+                isEnding={isEnding}
+            />
         </>
     );
 };

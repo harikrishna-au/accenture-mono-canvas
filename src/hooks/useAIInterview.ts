@@ -22,6 +22,7 @@ export const useAIInterview = () => {
     const [timeLeft, setTimeLeft] = useState(INTERVIEW_DURATION_SECONDS);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<any>(null); // Store detailed feedback
+    const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -139,10 +140,14 @@ export const useAIInterview = () => {
 
     const [isEnding, setIsEnding] = useState(false);
 
+    const openEndConfirmation = () => setShowEndConfirmation(true);
+    const closeEndConfirmation = () => setShowEndConfirmation(false);
+
     const endInterview = useCallback(async () => {
         if (timerRef.current) clearInterval(timerRef.current);
 
         setIsEnding(true);
+        setShowEndConfirmation(false); // Close modal if open
 
         if (sessionId) {
             try {
@@ -181,7 +186,7 @@ export const useAIInterview = () => {
             timerRef.current = setInterval(() => {
                 setTimeLeft((prev) => {
                     if (prev <= 1) {
-                        endInterview(); // Auto-end logic
+                        setShowEndConfirmation(true); // Show confirmation instead of auto-ending
                         return 0;
                     }
                     return prev - 1;
@@ -416,7 +421,10 @@ export const useAIInterview = () => {
         autoSubmitCountdown,
         cancelAutoSubmit,
         feedback,
-        isEnding
+        isEnding,
+        showEndConfirmation,
+        openEndConfirmation,
+        closeEndConfirmation
     };
 };
 
