@@ -10,25 +10,35 @@ import blinkGif from "@/assets/nilo/AvatarImages/blink.gif";
 
 interface VisemeDisplayProps {
     text?: string;
-    audioSrc?: string | null; // Kept for interface compatibility
+    audioSrc?: string | null;
     onAudioEnd?: () => void;
 }
 
 export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [shouldBlink, setShouldBlink] = useState(false);
-    const [showManualPlay, setShowManualPlay] = useState(false); // State for manual play button
+    const [showManualPlay, setShowManualPlay] = useState(false);
+
+    // Mode State: 'azure' (default) or 'fallback' (volume-based)
+    const [mode, setMode] = useState<'azure' | 'fallback'>('azure');
+    // Track if we've already tried to fallback for this specific text/audio to prevent loops
+    const [hasFallenBack, setHasFallenBack] = useState(false);
+
+    // Refs
+    // Azure
     const synthesizerRef = useRef<sdk.SpeechSynthesizer | null>(null);
+
+    // Fallback / Volume
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
+    const lastUpdateTimeRef = useRef<number>(0);
+
     const blinkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const audioRef = useRef<HTMLAudioElement | null>(null); // For fallback
 
-    // Debugging
-    useEffect(() => {
-        console.log("VisemeDisplay mounted/updated. Text:", text ? text.substring(0, 20) + "..." : "Empty");
-        setShowManualPlay(false); // Reset on new text
-    }, [text]);
-
-    // Blinking Logic (Preserved from original theme)
+    // 1. Blinking Logic (Common)
     useEffect(() => {
         const triggerBlink = () => {
             setShouldBlink(true);
@@ -37,6 +47,8 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
 
         const startRegularBlinking = () => {
             blinkTimeoutRef.current = setInterval(() => {
+                // Don't blink if strictly talking (in either mode, imageIndex > 0 usually means talking)
+                // But simplified: just blink randomly
                 triggerBlink();
             }, 4000 + Math.random() * 2000);
         };
@@ -48,55 +60,46 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
         };
     }, []);
 
-    const handleManualPlay = () => {
-        if (audioRef.current) {
-            audioRef.current.play()
-                .then(() => setShowManualPlay(false))
-                .catch(e => console.error("Manual play failed:", e));
-        }
-    };
-
-    // Azure Speech Logic
+    // 2. Control Logic: Decide Mode & Trigger
     useEffect(() => {
-        if (text) {
-            handleVisemes(text);
-        }
-
+        // cleanup cleanups
         return () => {
-            if (synthesizerRef.current) {
-                synthesizerRef.current.close();
-                synthesizerRef.current = null;
-            }
+            stopAzure();
+            stopVolumeAnalysis();
         };
-    }, [text]);
+    }, []);
 
-    const handleVisemes = (textToSpeak: string) => {
+    useEffect(() => {
+        if (!text) return;
+
+        // Reset state for new utterance
+        setImageIndex(0);
+        setShowManualPlay(false);
+        setHasFallenBack(false);
+
         const speechKey = import.meta.env.VITE_AZURE_SPEECH_KEY;
         const speechRegion = import.meta.env.VITE_AZURE_SPEECH_REGION;
 
-        console.log("Initializing Azure Speech. Key Present:", !!speechKey, "Region Present:", !!speechRegion);
-
-        if (!speechKey || !speechRegion) {
-            console.error("Azure Speech credentials missing. Trying fallback audio.");
-            // Fallback: Play the backend provided audio if available
-            if (audioSrc && audioRef.current) {
-                console.log("Playing fallback audioSrc...");
-                audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
-                audioRef.current.onended = onAudioEnd || null;
-                audioRef.current.play().catch(e => {
-                    console.error("Fallback play error:", e);
-                    setShowManualPlay(true); // Show button if blocked
-                });
-            } else {
-                console.warn("No fallback audioSrc available.");
-            }
-            return;
+        if (speechKey && speechRegion && !hasFallenBack) {
+            console.log("VisemeDisplay: Attempting Azure TTS...");
+            setMode('azure');
+            startAzure(text, speechKey, speechRegion);
+        } else {
+            console.log("VisemeDisplay: Defaulting to Fallback/Volume mode.");
+            triggerFallback();
         }
 
-        const speechConfig = sdk.SpeechConfig.fromSubscription(speechKey, speechRegion);
+    }, [text, audioSrc]); // Re-run if text changes
+
+    // --- Azure Implementation ---
+    const startAzure = (textToSpeak: string, key: string, region: string) => {
+        stopVolumeAnalysis(); // Ensure no conflict
+
+        const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
+        // We want audio output to default speaker
         const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
 
-        // Cancel previous if any
+        // Close existing
         if (synthesizerRef.current) {
             try { synthesizerRef.current.close(); } catch (e) { }
         }
@@ -105,57 +108,174 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
         synthesizerRef.current = synthesizer;
 
         synthesizer.visemeReceived = (s, e) => {
-            // Direct update for real-time sync
+            // Azure Viseme Event
             setImageIndex(e.visemeId);
         };
 
-        console.log("VisemeDisplay: Starting Azure Synthesis for:", textToSpeak.substring(0, 20) + "...");
         synthesizer.speakTextAsync(
             textToSpeak,
             (result) => {
-                console.log("VisemeDisplay: Synthesis Result Reason:", result.reason);
                 if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-                    console.log("VisemeDisplay: Audio synthesis completed successfully.");
+                    // Success
                     onAudioEnd?.();
+                    setImageIndex(0);
+                    synthesizer.close();
+                    synthesizerRef.current = null;
                 } else if (result.reason === sdk.ResultReason.Canceled) {
                     const cancellation = sdk.CancellationDetails.fromResult(result);
-                    console.error("VisemeDisplay: CANCELED. Reason=" + cancellation.reason);
+                    console.warn("VisemeDisplay: Azure CANCELED.", cancellation.errorDetails);
+
+                    // IF ERROR -> Fallback
                     if (cancellation.reason === sdk.CancellationReason.Error) {
-                        console.error("VisemeDisplay: Azure Authentication Failed or Network Error. Check your KEYS.");
-                        console.error("VisemeDisplay: ErrorDetails=" + cancellation.errorDetails);
-
-                        // Check for Auth failure patterns
-                        if (cancellation.errorDetails.includes("1006") || cancellation.errorDetails.includes("401")) {
-                            console.warn("!!! YOUR AZURE CREDENTIALS APPEAR INVALID !!!");
-                        }
-
-                        // Trigger fallback if Azure fails
-                        if (audioSrc && audioRef.current) {
-                            console.log("VisemeDisplay: Switching to fallback audio due to Azure error.");
-                            audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
-                            audioRef.current.onended = onAudioEnd || null;
-                            audioRef.current.play().catch(e => {
-                                console.error("Fallback autoplay blocked:", e);
-                                setShowManualPlay(true);
-                            });
-                        }
+                        toast.error("Azure TTS Failed. Switching to backup audio.");
+                        triggerFallback();
                     }
+                    synthesizer.close();
+                    synthesizerRef.current = null;
                 }
-                synthesizer.close();
-                synthesizerRef.current = null;
-                setImageIndex(0); // Reset to neutral after speech
             },
             (err) => {
-                console.error("VisemeDisplay: Azure TTS Fatal Error:", err);
-                synthesizer.close();
-                synthesizerRef.current = null;
+                console.error("VisemeDisplay: Azure Fatal Error", err);
+                triggerFallback();
+                if (synthesizerRef.current) {
+                    synthesizerRef.current.close();
+                    synthesizerRef.current = null;
+                }
             }
         );
     };
 
+    const stopAzure = () => {
+        if (synthesizerRef.current) {
+            try { synthesizerRef.current.close(); } catch (e) { }
+            synthesizerRef.current = null;
+        }
+    };
+
+    // --- Fallback / Volume Implementation ---
+    const triggerFallback = () => {
+        setMode('fallback');
+        setHasFallenBack(true);
+        // The <audio> element is rendered when mode === 'fallback'
+        // We need to trigger its play. 
+        // We use a small timeout to let React render the audio element if it wasn't there
+        setTimeout(() => {
+            if (audioRef.current && audioSrc) {
+                audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
+                const playPromise = audioRef.current.play();
+
+                playPromise
+                    .then(() => {
+                        // Play started
+                        initAudioContext();
+                        animateVolume();
+                    })
+                    .catch(e => {
+                        console.warn("Fallback autoplay blocked:", e);
+                        setShowManualPlay(true);
+                    });
+            } else if (!audioSrc) {
+                console.warn("Fallback triggered but no audioSrc provided!");
+            }
+        }, 50);
+    };
+
+    const handleManualPlay = () => {
+        if (audioRef.current) {
+            audioRef.current.play()
+                .then(() => {
+                    setShowManualPlay(false);
+                    initAudioContext();
+                    animateVolume();
+                })
+                .catch(e => console.error("Manual play failed:", e));
+        }
+    };
+
+    const initAudioContext = () => {
+        if (!audioRef.current || audioContextRef.current) return;
+
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
+        analyserRef.current = audioContextRef.current!.createAnalyser();
+        analyserRef.current.fftSize = 256;
+
+        try {
+            sourceRef.current = audioContextRef.current!.createMediaElementSource(audioRef.current);
+            sourceRef.current.connect(analyserRef.current);
+            analyserRef.current.connect(audioContextRef.current!.destination);
+        } catch (e) {
+            // Often source already exists error if re-initialized
+            console.log("Audio Context Source Attach:", e);
+        }
+    };
+
+    const animateVolume = () => {
+        if (mode !== 'fallback') return; // Stop if we switched back (unlikely)
+
+        if (!analyserRef.current || !audioRef.current || audioRef.current.paused) {
+            if (audioRef.current?.paused) setImageIndex(0);
+            return; // Stop loop if paused
+        }
+
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTimeRef.current >= 50) { // 20fps update for visemes
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyserRef.current.getByteFrequencyData(dataArray);
+
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+            const average = sum / bufferLength;
+
+            if (average > 10) {
+                // Open mouth based on volume intensity
+                // Cartoon visemes 1-21. Let's pick a few "open" ones randomly or strictly
+                // Simple random for "talking" feel
+                const randomViseme = Math.floor(Math.random() * 15) + 1;
+                setImageIndex(randomViseme);
+            } else {
+                setImageIndex(0);
+            }
+            lastUpdateTimeRef.current = currentTime;
+        }
+
+        animationFrameRef.current = requestAnimationFrame(animateVolume);
+    };
+
+    const stopVolumeAnalysis = () => {
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        if (audioContextRef.current) {
+            audioContextRef.current.close().catch(() => { });
+            audioContextRef.current = null;
+        }
+    };
+
+    const handleFallbackEnded = () => {
+        stopVolumeAnalysis();
+        setImageIndex(0);
+        onAudioEnd?.();
+    };
+
+
     return (
         <div className="w-full h-full flex items-center justify-center p-4">
-            <audio ref={audioRef} className="hidden" />
+
+            {/* Fallback Audio Element - Rendered always or conditional? 
+                Better to always have it but control it via refs/mode 
+            */}
+            <audio
+                ref={audioRef}
+                className="hidden"
+                crossOrigin="anonymous"
+                onEnded={handleFallbackEnded}
+                onPause={() => setImageIndex(0)}
+                onPlay={() => {
+                    initAudioContext();
+                    animateVolume();
+                }}
+            />
+
             <div className="relative w-full max-w-[600px] aspect-square bg-transparent">
                 <div className="relative w-full h-full flex items-center justify-center">
                     {/* Base layer */}
@@ -175,7 +295,7 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
                         )}
                     />
 
-                    {/* Viseme overlay - Original Positioning */}
+                    {/* Viseme overlay */}
                     <img
                         src={cartoonVisemes[imageIndex] || cartoonVisemes[0]}
                         alt="Viseme"
@@ -185,8 +305,8 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
                         )}
                     />
 
-                    {/* Manual Play Button Overlay */}
-                    {showManualPlay && (
+                    {/* Manual Play Button (Only for Fallback Mode when Blocked) */}
+                    {mode === 'fallback' && showManualPlay && (
                         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded-full">
                             <button
                                 onClick={handleManualPlay}
