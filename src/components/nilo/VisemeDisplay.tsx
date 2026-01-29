@@ -17,6 +17,7 @@ interface VisemeDisplayProps {
 export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [shouldBlink, setShouldBlink] = useState(false);
+    const [showManualPlay, setShowManualPlay] = useState(false); // State for manual play button
     const synthesizerRef = useRef<sdk.SpeechSynthesizer | null>(null);
     const blinkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null); // For fallback
@@ -24,6 +25,7 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
     // Debugging
     useEffect(() => {
         console.log("VisemeDisplay mounted/updated. Text:", text ? text.substring(0, 20) + "..." : "Empty");
+        setShowManualPlay(false); // Reset on new text
     }, [text]);
 
     // Blinking Logic (Preserved from original theme)
@@ -46,6 +48,14 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
         };
     }, []);
 
+    const handleManualPlay = () => {
+        if (audioRef.current) {
+            audioRef.current.play()
+                .then(() => setShowManualPlay(false))
+                .catch(e => console.error("Manual play failed:", e));
+        }
+    };
+
     // Azure Speech Logic
     useEffect(() => {
         if (text) {
@@ -64,11 +74,21 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
         const speechKey = import.meta.env.VITE_AZURE_SPEECH_KEY;
         const speechRegion = import.meta.env.VITE_AZURE_SPEECH_REGION;
 
+        console.log("Initializing Azure Speech. Key Present:", !!speechKey, "Region Present:", !!speechRegion);
+
         if (!speechKey || !speechRegion) {
-            // Only toast once to avoid spamming
-            if (!toast.dismiss("azure-missing")) {
-                console.error("Azure Speech Key or Region missing in .env");
-                // toast.error("Azure Speech credentials missing", { id: "azure-missing" });
+            console.error("Azure Speech credentials missing. Trying fallback audio.");
+            // Fallback: Play the backend provided audio if available
+            if (audioSrc && audioRef.current) {
+                console.log("Playing fallback audioSrc...");
+                audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
+                audioRef.current.onended = onAudioEnd || null;
+                audioRef.current.play().catch(e => {
+                    console.error("Fallback play error:", e);
+                    setShowManualPlay(true); // Show button if blocked
+                });
+            } else {
+                console.warn("No fallback audioSrc available.");
             }
             return;
         }
@@ -101,12 +121,23 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
                     const cancellation = sdk.CancellationDetails.fromResult(result);
                     console.error("VisemeDisplay: CANCELED. Reason=" + cancellation.reason);
                     if (cancellation.reason === sdk.CancellationReason.Error) {
+                        console.error("VisemeDisplay: Azure Authentication Failed or Network Error. Check your KEYS.");
                         console.error("VisemeDisplay: ErrorDetails=" + cancellation.errorDetails);
+
+                        // Check for Auth failure patterns
+                        if (cancellation.errorDetails.includes("1006") || cancellation.errorDetails.includes("401")) {
+                            console.warn("!!! YOUR AZURE CREDENTIALS APPEAR INVALID !!!");
+                        }
+
                         // Trigger fallback if Azure fails
                         if (audioSrc && audioRef.current) {
                             console.log("VisemeDisplay: Switching to fallback audio due to Azure error.");
                             audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
-                            audioRef.current.play();
+                            audioRef.current.onended = onAudioEnd || null;
+                            audioRef.current.play().catch(e => {
+                                console.error("Fallback autoplay blocked:", e);
+                                setShowManualPlay(true);
+                            });
                         }
                     }
                 }
@@ -153,6 +184,22 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
                             "w-[30%] sm:w-[28%] md:w-[25%] lg:w-[20%] xl:w-[18%]"
                         )}
                     />
+
+                    {/* Manual Play Button Overlay */}
+                    {showManualPlay && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded-full">
+                            <button
+                                onClick={handleManualPlay}
+                                className="flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-full font-bold shadow-lg animate-bounce transition-transform transform hover:scale-105"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Tap to Speak
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
