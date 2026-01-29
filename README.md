@@ -1,4 +1,4 @@
-# Accenture Assessment Simulator
+# HARRY THE BLAZE
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-HarryTheBlaze.site-2ea44f?style=for-the-badge&logo=vercel)](https://www.harrytheblaze.site/)
 [![React](https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61dafb)](https://reactjs.org/)
@@ -10,7 +10,7 @@
 
 ## 🚀 About The Project
 
-**Accenture Assessment Simulator** is a full-stack educational platform designed to help students prepare for high-pressure recruitment assessments. Unlike standard quiz apps, this project focuses on **psychological conditioning** by replicating the exact UI/UX, time constraints, and cognitive load of real-world enterprise assessments.
+**HARRY THE BLAZE** is a full-stack educational platform designed to help students prepare for high-pressure recruitment assessments. Unlike standard quiz apps, this project focuses on **psychological conditioning** by replicating the exact UI/UX, time constraints, and cognitive load of real-world enterprise assessments.
 
 I built this project to demonstrate **end-to-end full-stack engineering skills**, combining a high-performance React frontend with a robust Python/AWS backend to deliver a seamless, low-latency user experience.
 
