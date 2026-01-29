@@ -120,6 +120,12 @@ export const useAIInterview = () => {
             }
 
             const data = await response.json();
+            console.log("startInterview: Backend Response:", {
+                session_id: data.session_id,
+                ai_message_preview: data.ai_message?.substring(0, 30),
+                has_audio: !!data.audio_content,
+                audio_length: data.audio_content?.length
+            });
 
             setSessionId(data.session_id);
             setInterviewStarted(true);
@@ -127,8 +133,11 @@ export const useAIInterview = () => {
 
             // Play Audio
             if (data.audio_content) {
+                console.log("startInterview: Setting audioSrc immediately (length: " + data.audio_content.length + ")");
                 setAudioSrc(data.audio_content);
                 setStatus("speaking");
+            } else {
+                console.warn("startInterview: No audio_content received from backend");
             }
 
         } catch (error) {
@@ -231,10 +240,16 @@ export const useAIInterview = () => {
             }
 
             const data = await response.json();
+            console.log("processText: Backend Response:", {
+                status: data.status,
+                ai_message_preview: data.ai_message?.substring(0, 30),
+                has_audio: !!data.audio_content
+            });
 
             setTextToSpeak(data.ai_message);
 
             if (data.audio_content) {
+                console.log("processText: Setting audioSrc (length: " + data.audio_content.length + ")");
                 setAudioSrc(data.audio_content);
                 setStatus("speaking");
             } else if (data.status === "completed") {
@@ -244,6 +259,7 @@ export const useAIInterview = () => {
                     setFeedback(data.feedback);
                 }
             } else {
+                console.warn("processText: No audio content and not completed. State set to idle.");
                 setStatus("idle");
             }
 

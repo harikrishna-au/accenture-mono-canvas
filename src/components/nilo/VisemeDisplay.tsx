@@ -14,11 +14,17 @@ interface VisemeDisplayProps {
     onAudioEnd?: () => void;
 }
 
-export const VisemeDisplay = ({ text, onAudioEnd }: VisemeDisplayProps) => {
+export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [shouldBlink, setShouldBlink] = useState(false);
     const synthesizerRef = useRef<sdk.SpeechSynthesizer | null>(null);
     const blinkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null); // For fallback
+
+    // Debugging
+    useEffect(() => {
+        console.log("VisemeDisplay mounted/updated. Text:", text ? text.substring(0, 20) + "..." : "Empty");
+    }, [text]);
 
     // Blinking Logic (Preserved from original theme)
     useEffect(() => {
@@ -83,18 +89,33 @@ export const VisemeDisplay = ({ text, onAudioEnd }: VisemeDisplayProps) => {
             setImageIndex(e.visemeId);
         };
 
+        console.log("VisemeDisplay: Starting Azure Synthesis for:", textToSpeak.substring(0, 20) + "...");
         synthesizer.speakTextAsync(
             textToSpeak,
             (result) => {
+                console.log("VisemeDisplay: Synthesis Result Reason:", result.reason);
                 if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+                    console.log("VisemeDisplay: Audio synthesis completed successfully.");
                     onAudioEnd?.();
+                } else if (result.reason === sdk.ResultReason.Canceled) {
+                    const cancellation = sdk.CancellationDetails.fromResult(result);
+                    console.error("VisemeDisplay: CANCELED. Reason=" + cancellation.reason);
+                    if (cancellation.reason === sdk.CancellationReason.Error) {
+                        console.error("VisemeDisplay: ErrorDetails=" + cancellation.errorDetails);
+                        // Trigger fallback if Azure fails
+                        if (audioSrc && audioRef.current) {
+                            console.log("VisemeDisplay: Switching to fallback audio due to Azure error.");
+                            audioRef.current.src = `data:audio/mp3;base64,${audioSrc}`;
+                            audioRef.current.play();
+                        }
+                    }
                 }
                 synthesizer.close();
                 synthesizerRef.current = null;
                 setImageIndex(0); // Reset to neutral after speech
             },
             (err) => {
-                console.error("Azure TTS Error:", err);
+                console.error("VisemeDisplay: Azure TTS Fatal Error:", err);
                 synthesizer.close();
                 synthesizerRef.current = null;
             }
@@ -103,6 +124,7 @@ export const VisemeDisplay = ({ text, onAudioEnd }: VisemeDisplayProps) => {
 
     return (
         <div className="w-full h-full flex items-center justify-center p-4">
+            <audio ref={audioRef} className="hidden" />
             <div className="relative w-full max-w-[600px] aspect-square bg-transparent">
                 <div className="relative w-full h-full flex items-center justify-center">
                     {/* Base layer */}
