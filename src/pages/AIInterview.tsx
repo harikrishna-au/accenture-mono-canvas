@@ -59,6 +59,18 @@ const AIInterview = () => {
         openEndConfirmation();
     };
 
+    const [hasStarted, setHasStarted] = useState(false);
+
+    const handleStartSession = () => {
+        // Create an empty AudioContext to unlock the browser engine immediately on click
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const ctx = new AudioContextClass();
+        ctx.resume().then(() => {
+            ctx.close(); // Just warming it up / validating gesture
+            setHasStarted(true);
+        });
+    };
+
     return (
         <>
             {/* Japandi Background */}
@@ -92,8 +104,35 @@ const AIInterview = () => {
                             onUpload={uploadResumeToS3}
                             isSubmitting={isResumeSubmitting}
                         />
+                    ) : !hasStarted ? (
+                        /* --- GET READY SCREEN (New) --- */
+                        <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in zoom-in-95 duration-500">
+                            <div className="bg-white p-10 rounded-3xl shadow-xl border border-stone-200 max-w-md w-full text-center space-y-8 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-400 to-rose-600" />
+
+                                <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
+                                    <span className="text-3xl">🎙️</span>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-serif text-stone-800">Interviewer Ready</h2>
+                                    <p className="text-stone-500">Your AI interviewer has reviewed your resume and prepared the first question.</p>
+                                </div>
+
+                                <button
+                                    onClick={handleStartSession}
+                                    className="w-full py-4 bg-stone-900 text-white rounded-xl font-bold text-lg hover:bg-stone-800 hover:scale-105 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    <span>Start Interview</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                </button>
+
+                                <p className="text-xs text-stone-400 uppercase tracking-widest">Tap to begin session</p>
+                            </div>
+                        </div>
                     ) : (
-                        <div className="flex flex-col items-center min-h-[calc(100vh-100px)] pt-6 pb-12 font-sans">
+                        /* --- MAIN INTERVIEW UI --- */
+                        <div className="flex flex-col items-center min-h-[calc(100vh-100px)] pt-6 pb-12 font-sans animate-in fade-in slide-in-from-bottom-4 duration-700">
                             {/* Earphone Recommendation Banner */}
                             <div className="w-full max-w-4xl px-4 mb-8">
                                 <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm animate-fade-in">
