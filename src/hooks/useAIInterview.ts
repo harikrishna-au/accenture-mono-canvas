@@ -311,11 +311,12 @@ export const useAIInterview = () => {
         };
 
         recognition.onerror = (event: any) => {
-            console.error("Speech Recognition Error:", event.error);
             setIsRecording(false);
             setStatus("idle");
-            if (event.error === 'not-allowed') {
-                alert("Microphone access denied. Please allow microphone access.");
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                console.warn("Microphone access blocked/denied. Waiting for user interaction.");
+            } else {
+                console.error("Speech Recognition Error:", event.error);
             }
         };
 
