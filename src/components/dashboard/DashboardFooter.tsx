@@ -1,5 +1,5 @@
 
-import { MessageSquare, Coffee } from "lucide-react";
+import { MessageSquare, Coffee, Youtube, Linkedin, Mail, Heart } from "lucide-react";
 
 interface DashboardFooterProps {
     onFeedbackClick: () => void;
@@ -11,37 +11,69 @@ interface DashboardFooterProps {
 export const DashboardFooter = ({ onFeedbackClick, onSupportClick, onMouseEnter, onMouseLeave }: DashboardFooterProps) => {
     return (
         <div
-            className="w-full py-8 border-t border-neutral-100 flex flex-col items-center justify-center relative z-50 bg-white/80 backdrop-blur-md"
+            className="w-full py-24 flex flex-col items-center justify-center relative z-50 pointer-events-none"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            <div className="group relative flex flex-wrap justify-center items-center gap-4 bg-neutral-50 px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm mx-4">
-                <span className="font-bold text-neutral-900 text-lg mr-2">Enjoying the practice?</span>
+            <div className="pointer-events-auto flex flex-col items-center gap-8">
 
-                <button
-                    onClick={onFeedbackClick}
-                    className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-neutral-200 text-neutral-700 rounded-xl font-bold hover:bg-neutral-50 hover:border-neutral-300 transition-all hover:scale-105 active:scale-95"
-                >
-                    <MessageSquare className="w-5 h-5" />
-                    Feedback
-                </button>
+                {/* Main Actions Card */}
+                <div className="bg-[#f5f5f0] px-8 py-5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap justify-center items-center gap-6 transition-all duration-500">
+                    <span className="font-medium text-stone-600 font-['Merriweather'] italic">Enjoying the practice?</span>
 
-                <button
-                    onClick={onSupportClick}
-                    className="flex items-center gap-2 px-6 py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition-all hover:scale-105 active:scale-95 shadow-sm"
-                >
-                    <Coffee className="w-5 h-5" />
-                    Buy me a chai
-                </button>
+                    <button
+                        onClick={onFeedbackClick}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-xl font-semibold hover:border-stone-400 hover:text-stone-900 transition-all active:scale-95 font-['Inter']"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        Feedback
+                    </button>
 
-                <div className="absolute bottom-full left-0 right-0 mb-4 flex justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 ease-out pointer-events-none">
-                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.1)] border border-neutral-100 flex items-center gap-1.5 whitespace-nowrap group-hover:shadow-[0_0_30px_rgba(255,50,50,0.3)] transition-shadow duration-700">
-                        <span className="text-neutral-400 font-medium text-sm">Designed and developed by</span>
-                        <span className="text-neutral-900 font-bold text-sm">Hari Krishna</span>
-                        <span className="text-neutral-400 font-medium text-sm">with</span>
-                        <span className="text-red-500 animate-pulse text-sm">❤️</span>
+                    <button
+                        onClick={onSupportClick}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#e8dcb5] text-[#5c4b35] border border-[#d4c5a0] rounded-xl font-semibold hover:bg-[#decfa5] transition-all hover:-translate-y-0.5 active:scale-95 shadow-sm font-['Inter']"
+                    >
+                        <Coffee className="w-4 h-4" />
+                        Buy me a chai
+                    </button>
+                </div>
+
+                {/* Developer / Social Section */}
+                <div className="flex flex-col items-center gap-3">
+                    <div className="flex items-center gap-2 text-stone-400 text-xs uppercase tracking-widest font-medium">
+                        <span>Crafted by Hari Krishna</span>
+                        <Heart className="w-3 h-3 text-rose-400 fill-rose-400 animate-pulse" />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <a
+                            href="https://www.youtube.com/@HARIKRISHNA-AU"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 bg-white border border-stone-200 rounded-full text-stone-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all duration-300"
+                            title="YouTube"
+                        >
+                            <Youtube className="w-4 h-4" />
+                        </a>
+                        <a
+                            href="https://www.linkedin.com/in/hari-krishna-nallana-33949b277/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 bg-white border border-stone-200 rounded-full text-stone-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all duration-300"
+                            title="LinkedIn"
+                        >
+                            <Linkedin className="w-4 h-4" />
+                        </a>
+                        <a
+                            href="mailto:nallanahk@gmail.com"
+                            className="p-2.5 bg-white border border-stone-200 rounded-full text-stone-500 hover:text-stone-900 hover:border-stone-400 hover:bg-stone-50 transition-all duration-300"
+                            title="Contact Me"
+                        >
+                            <Mail className="w-4 h-4" />
+                        </a>
                     </div>
                 </div>
+
             </div>
         </div>
     );

@@ -23,9 +23,10 @@ interface GameCardProps {
     onSubscribe: () => void;
     onFeedback: () => void;
     id?: string;
+    className?: string;
 }
 
-export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameCardProps) => {
+export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id, className = "" }: GameCardProps) => {
     const navigate = useNavigate();
 
     const handleCardClick = async () => {
@@ -72,19 +73,22 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameC
         <div
             id={id}
             onClick={handleCardClick}
-            className={`relative h-32 border-2 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden transition-all duration-300
+            className={`relative h-32 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden transition-all duration-300 ${className}
+        /* Base Japandi Card - Matte, Warm, Handcrafted */
+        bg-card border border-stone-200/60 shadow-sm
+        
         ${game.name === "Connect with me"
-                    ? "bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-400 shadow-lg shadow-yellow-200/50 hover:shadow-yellow-300 hover:scale-105 hover:-translate-y-1 group"
+                    ? "bg-[#fffcf5] border-secondary/30 hover:border-secondary hover:shadow-md hover:-translate-y-1 group"
                     : game.special
                         ? game.survey
-                            ? "bg-gradient-to-br from-emerald-500 to-teal-600 border-transparent shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                            ? "bg-[#f2fcf5] border-primary/20 hover:border-primary/50 hover:shadow-md hover:-translate-y-1 cursor-pointer group"
                             : isPremium
-                                ? "bg-gradient-to-br from-amber-900 to-amber-950 border-amber-700/50 shadow-xl shadow-amber-900/20 cursor-default"
-                                : "bg-gradient-to-br from-violet-600 to-rose-600 border-transparent shadow-xl shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/50 hover:scale-105 hover:-translate-y-1 cursor-pointer group"
+                                ? "bg-[#fffbf0] border-amber-500/30 cursor-default"
+                                : "bg-[#fff5f5] border-rose-200 hover:border-rose-400 hover:shadow-md hover:-translate-y-1 cursor-pointer group"
                         : game.name
-                            ? "bg-white border-black" + (game.name === "Communication Round" && !isPremium ? " border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]" : "") + " hover:bg-black hover:text-white cursor-pointer group hover:scale-105"
-                            : "bg-gray-50 border-black cursor-not-allowed"}
-        ${game.disabled ? "cursor-not-allowed opacity-60" : ""}
+                            ? "hover:bg-white hover:border-stone-300 hover:shadow-md cursor-pointer group hover:-translate-y-1" + (game.name === "Communication Round" && !isPremium ? " border-amber-200 bg-[#fffdf5]" : "")
+                            : "bg-stone-50 border-stone-100 cursor-not-allowed opacity-60 text-stone-300"}
+        ${game.disabled ? "cursor-not-allowed opacity-40 grayscale" : ""}
       `}
         >
             {game.name === "Connect with me" && (
@@ -108,12 +112,12 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id }: GameC
                             />
                         )}
 
-                        <span className={`text-lg font-bold text-center leading-tight mt-2 ${game.name === "Connect with me" ? "text-yellow-900" : game.special ? "text-white" : ""}`}>
+                        <span className={`text-lg font-bold text-center leading-tight mt-2 font-['Inter'] ${game.name === "Connect with me" ? "text-stone-800" : "text-stone-700 group-hover:text-stone-900 transition-colors"}`}>
                             {game.name}
                         </span>
 
                         {game.subtitle && (
-                            <span className={`text-[10px] font-medium text-center uppercase tracking-wide mt-1 animate-pulse ${game.special ? "text-white/90" : "text-amber-600"}`}>
+                            <span className={`text-[10px] font-semibold text-center uppercase tracking-wider mt-1 font-['Inter'] ${game.special ? "text-stone-500" : "text-secondary"}`}>
                                 {game.subtitle}
                             </span>
                         )}

@@ -9,7 +9,7 @@ interface TourStep {
     position: 'center' | 'target';
 }
 
-const STEPS: TourStep[] = [
+const JOURNEY_STEPS: TourStep[] = [
     {
         title: "Welcome to Harry The Blaze",
         description: "This is a practice environment designed to help you eliminate fear before your real Accenture exams. Practice repeatedly to build confidence.",
@@ -35,12 +35,27 @@ const STEPS: TourStep[] = [
     }
 ];
 
+const LANDING_STEPS: TourStep[] = [
+    {
+        title: "Why Harry The Blaze?",
+        description: "We built this platform to bridge the gap between preparation and performance. Many candidates fail not because of ability, but fear of the unknown. We're here to fix that.",
+        position: 'center'
+    },
+    {
+        title: "What is the Benefit?",
+        description: "By practicing with realistic simulations of Accenture's Cognitive and Communication rounds, you'll walk into your exam knowing exactly what to expect, giving you a massive confident edge.",
+        position: 'center'
+    }
+];
+
 interface OnboardingTourProps {
     isOpen: boolean;
     onClose: () => void;
+    mode?: 'landing' | 'journey';
 }
 
-export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
+export const OnboardingTour = ({ isOpen, onClose, mode = 'journey' }: OnboardingTourProps) => {
+    const steps = mode === 'landing' ? LANDING_STEPS : JOURNEY_STEPS;
     // Internal step state remains
     const [currentStep, setCurrentStep] = useState(0);
     const [spotlightStyle, setSpotlightStyle] = useState<React.CSSProperties>({});
@@ -57,7 +72,7 @@ export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
 
 
     const updateSpotlight = () => {
-        const step = STEPS[currentStep];
+        const step = steps[currentStep];
 
         if (step.position === 'center' || !step.targetId) {
             setSpotlightStyle({
@@ -133,7 +148,7 @@ export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
     }, [currentStep, isOpen]);
 
     const handleNext = () => {
-        if (currentStep < STEPS.length - 1) {
+        if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
         } else {
             handleClose();
@@ -153,7 +168,9 @@ export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
 
     if (!isOpen) return null;
 
-    const step = STEPS[currentStep];
+    const step = steps[currentStep];
+
+    if (!step) return null;
 
     return (
         <div className="fixed inset-0 z-[100] overflow-hidden">
@@ -201,7 +218,7 @@ export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
 
                     <div className="flex justify-between items-center pt-2">
                         <div className="flex gap-1">
-                            {STEPS.map((_, idx) => (
+                            {steps.map((_, idx) => (
                                 <div
                                     key={idx}
                                     className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentStep ? 'w-6 bg-emerald-500' : 'w-1.5 bg-neutral-200'}`}
@@ -216,7 +233,7 @@ export const OnboardingTour = ({ isOpen, onClose }: OnboardingTourProps) => {
                                 </Button>
                             )}
                             <Button onClick={handleNext} className="bg-neutral-900 text-white hover:bg-neutral-800">
-                                {currentStep === STEPS.length - 1 ? "Get Started" : "Next"}
+                                {currentStep === steps.length - 1 ? "Get Started" : "Next"}
                             </Button>
                         </div>
                     </div>

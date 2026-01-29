@@ -2,33 +2,27 @@
 <html lang="en">
 
 <head>
-  <script>
-    // Polyfill for requestIdleCallback (Safari and older browsers)
-    // This must run before any other scripts to ensure React can use it
-    (function () {
-      if (!window.requestIdleCallback) {
-        window.requestIdleCallback = function (cb) {
-          var start = Date.now();
-          return setTimeout(function () {
-            cb({
-              didTimeout: false,
-              timeRemaining: function () {
-                return Math.max(0, 50 - (Date.now() - start));
-              }
-            });
-          }, 1);
-        };
-      }
-
-      if (!window.cancelIdleCallback) {
-        window.cancelIdleCallback = function (id) {
-          clearTimeout(id);
-        };
-      }
-    })();
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Polyfill for requestIdleCallback (Must be first) -->
+  <script>
+    window.requestIdleCallback = window.requestIdleCallback || function (cb) {
+      var start = Date.now();
+      return setTimeout(function () {
+        cb({
+          didTimeout: false,
+          timeRemaining: function () {
+            return Math.max(0, 50 - (Date.now() - start));
+          }
+        });
+      }, 1);
+    };
+
+    window.cancelIdleCallback = window.cancelIdleCallback || function (id) {
+      clearTimeout(id);
+    };
+  </script>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>Harry The Blaze</title>

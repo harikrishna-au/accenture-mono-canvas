@@ -1,77 +1,104 @@
+/* Typography Imports - Japandi (Refined, Humanist) */
+@import "@fontsource/merriweather/400.css";
+@import "@fontsource/merriweather/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Pure black/white skeleton design */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    /* Japandi Sanctuary Palette - Warm, Minimal, Earthy */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    /* Base: Warm Paper / Rice Paper */
+    --background: 60 7% 97%;
+    /* #fcfcf9 - Warm Off-White */
+    --foreground: 30 5% 25%;
+    /* #423e3b - Soft Charcoal/Iron */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    /* Cards: Matte, Handcrafted Feel */
+    --card: 40 10% 94%;
+    /* #f2efe9 - Stone/Beige */
+    --card-foreground: 30 5% 25%;
 
-    --primary: 0 0% 0%;
+    --popover: 60 7% 97%;
+    --popover-foreground: 30 5% 25%;
+
+    /* Primary: Deep Moss / Zen Garden Green */
+    --primary: 156 20% 41%;
+    /* #557d6b - Muted Sage/Moss */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 0 0% 0%;
-
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 40%;
-
-    --accent: 0 0% 100%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 0 0% 0%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 0%;
-    --input: 0 0% 0%;
-    --ring: 0 0% 0%;
-
-    --radius: 0.25rem;
-
-    /* Transition for smooth theme switching */
-    --transition-smooth: all 0.2s ease;
-  }
-
-  .dark {
-    /* Inverted colors for dark mode */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
-
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 0 0% 0%;
+    /* Secondary: Terracotta / Warm Wood */
+    --secondary: 24 35% 58%;
+    /* #bd8c6d - Warm Wood/Clay */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
+    /* Muted: River Stone Gray */
+    --muted: 30 5% 88%;
+    --muted-foreground: 30 5% 50%;
 
-    --accent: 0 0% 0%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Soft Cream / Bamboo */
+    --accent: 40 20% 92%;
+    --accent-foreground: 30 5% 30%;
 
-    --destructive: 0 0% 100%;
-    --destructive-foreground: 0 0% 0%;
+    --destructive: 0 55% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 100%;
-    --input: 0 0% 100%;
-    --ring: 0 0% 100%;
+    /* Border: Subtle, like pencil lines */
+    --border: 30 5% 85%;
+    --input: 30 5% 85%;
+    --ring: 156 20% 41%;
+    /* Moss Focus Ring */
+
+    /* Radius: Gentle, crafted curves (not fully round, not sharp) */
+    --radius: 0.75rem;
+
+    /* Transition: Slow design, gentle easing */
+    --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Dark Mode: "Evening Tea Room" - Dim, warm, cozy (NOT pitch black) */
+  .dark {
+    --background: 30 6% 14%;
+    /* #262422 - Dark Wood/Charcoal */
+    --foreground: 40 10% 90%;
+    /* #ebe9e4 - Washi Paper White */
+
+    --card: 30 6% 18%;
+    /* #2e2b29 - slightly lighter wood */
+    --card-foreground: 40 10% 90%;
+
+    --popover: 30 6% 14%;
+    --popover-foreground: 40 10% 90%;
+
+    --primary: 156 15% 50%;
+    /* #6d8e80 - Lighter Moss */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 24 30% 65%;
+    /* #c49a7f - Light Clay */
+    --secondary-foreground: 30 6% 14%;
+
+    --muted: 30 6% 25%;
+    --muted-foreground: 40 5% 60%;
+
+    --accent: 30 6% 22%;
+    --accent-foreground: 40 10% 90%;
+
+    --destructive: 0 50% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 6% 25%;
+    --input: 30 6% 25%;
+    --ring: 156 15% 50%;
   }
 }
 

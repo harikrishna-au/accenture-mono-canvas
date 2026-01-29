@@ -17,11 +17,12 @@ const IntroScrollText = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fcfcf9]">
       <h1
-        className="text-6xl md:text-8xl font-bold text-foreground"
+        className="text-5xl md:text-7xl font-bold text-stone-800 tracking-tight"
         style={{
-          animation: "fadeUpward 3s ease-in-out forwards"
+          fontFamily: "'Merriweather', serif",
+          animation: "beholdReveal 4s cubic-bezier(0.22, 1, 0.36, 1) forwards"
         }}
       >
         HARRY THE BLAZE
@@ -30,30 +31,39 @@ const IntroScrollText = () => {
         href="https://www.youtube.com/@HarryTheBlaze"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-20 text-neutral-500 text-sm hover:text-red-500 transition-colors duration-300"
+        className="absolute bottom-20 text-stone-400 text-xs font-semibold tracking-[0.2em] uppercase hover:text-secondary transition-colors duration-700"
         style={{
-          animation: "fadeIn 1s ease-in-out 0.5s forwards",
+          fontFamily: "'Inter', sans-serif",
+          animation: "calmFadeIn 2s ease-out 1.5s forwards",
           opacity: 0
         }}
       >
-        Subscribe to Channel ❤️
+        Subscribe to Channel <span className="text-secondary/70">●</span>
       </a>
       <style>{`
-        @keyframes fadeUpward {
+        @keyframes beholdReveal {
           0% {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(15px);
+            filter: blur(8px);
           }
-          30% {
+          40% {
             opacity: 1;
-            transform: translateY(-10px);
+            transform: translateY(0);
+            filter: blur(0px);
+          }
+          90% {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0px);
           }
           100% {
             opacity: 0;
-            transform: translateY(-40px);
+            transform: translateY(-20px);
+            filter: blur(5px);
           }
         }
-        @keyframes fadeIn {
+        @keyframes calmFadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
