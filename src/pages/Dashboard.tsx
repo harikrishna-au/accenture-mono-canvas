@@ -158,7 +158,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center overflow-y-auto font-sans selection:bg-secondary/20 selection:text-secondary-foreground">
+    <div className={`min-h-screen w-full flex flex-col items-center font-sans selection:bg-secondary/20 selection:text-secondary-foreground ${companyId ? 'h-screen overflow-hidden justify-center' : 'overflow-y-auto'}`}>
       <SEO
         title="Harry The Blaze | Dashboard"
         description="Your central hub for Accenture practice rounds. Track progress, access new games, and prepare for success with Harry the Blaze."
@@ -170,10 +170,13 @@ const Dashboard = () => {
         <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-stone-50 to-transparent opacity-60"></div>
       </div>
 
-      <div className={`w-full flex flex-col items-center transition-all duration-700 z-50 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
-        {/* Header - Transparent/Minimal */}
-        <Header onStartTour={() => setShowTour(true)} />
-      </div>
+      {!companyId && (
+        <div className={`w-full flex flex-col items-center transition-all duration-700 z-50 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+          {/* Header - Transparent/Minimal */}
+          <Header onStartTour={() => setShowTour(true)} />
+        </div>
+      )}
+
       <CompletionPopup />
       <SupportPopup isOpen={showSupportPopup} onClose={() => setShowSupportPopup(false)} />
       <FeedbackPopup
@@ -188,9 +191,9 @@ const Dashboard = () => {
         mode={companyId ? 'journey' : 'landing'}
       />
 
-      <div className={`relative z-10 flex-1 flex flex-col items-center w-full p-4 pt-20 md:p-8 transition-all duration-500 ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`relative z-10 flex-1 flex flex-col items-center w-full transition-all duration-500 ${companyId ? 'justify-center p-0' : 'p-4 pt-20 md:p-8'} ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
-          <div className="flex flex-col items-center w-full max-w-6xl flex-1 justify-center min-h-[60vh]">
+          <div className={`flex flex-col items-center w-full max-w-6xl flex-1 ${companyId ? 'justify-center h-full' : 'min-h-[60vh] justify-start'}`}>
 
             {/* Conditional Views */}
             {!companyId ? (
@@ -204,50 +207,14 @@ const Dashboard = () => {
                 onSupportClick={() => setShowSupportPopup(true)}
               />
             ) : (
-              // VIEW 2: Company Details (Accenture, etc.)
-              <div className="w-full animate-in slide-in-from-right fade-in duration-500">
-                <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="flex items-center gap-2 text-stone-500 hover:text-stone-800 font-bold text-sm tracking-wide uppercase transition-colors"
-                  >
-                    <ArrowLeft className="w-4 h-4" /> Back to Selection
-                  </button>
-                  <h1 className="text-3xl font-bold text-stone-800 font-['Merriweather'] capitalize">
-                    {companyId} Journey
-                  </h1>
-                </div>
-
-                {/* Removed DashboardHero as requested for inner view */}
-
-                <div className="w-full mb-12">
-                  <div className="flex flex-wrap justify-center gap-6">
-                    {/* Technical Round Group */}
-                    <div id="onboarding-tr-group" style={{ display: 'contents' }}>
-                      {games.slice(0, 3).map((game) => (
-                        <GameCard
-                          key={game.id}
-                          game={game}
-                          isPremium={isPremium}
-                          onSubscribe={handleSubscribe}
-                          onFeedback={() => {
-                            setFeedbackType('recruitment');
-                            setShowFeedbackPopup(true);
-                          }}
-                          className="w-full sm:w-72 md:w-64 lg:w-72"
-                        />
-                      ))}
-                    </div>
-
-                    {/* Remaining Games */}
-                    {games.slice(3).map((game) => (
+              // VIEW 2: Company Details - Simplified (Cards Only)
+              <div className="w-full h-full flex items-center justify-center animate-in zoom-in-95 duration-500">
+                <div className="flex flex-wrap justify-center items-center gap-8 max-w-[90vw]">
+                  {/* Technical Round Group */}
+                  <div id="onboarding-tr-group" style={{ display: 'contents' }}>
+                    {games.slice(0, 3).map((game) => (
                       <GameCard
                         key={game.id}
-                        id={
-                          game.name === "Communication Round" ? "onboarding-comm-card" :
-                            (game.name === "Unlock All Levels" || game.name === "Premium Active") ? "onboarding-premium-card" :
-                              undefined
-                        }
                         game={game}
                         isPremium={isPremium}
                         onSubscribe={handleSubscribe}
@@ -258,6 +225,35 @@ const Dashboard = () => {
                         className="w-full sm:w-72 md:w-64 lg:w-72"
                       />
                     ))}
+                  </div>
+
+                  {/* Remaining Games */}
+                  {games.slice(3).map((game) => (
+                    <GameCard
+                      key={game.id}
+                      id={
+                        game.name === "Communication Round" ? "onboarding-comm-card" :
+                          (game.name === "Unlock All Levels" || game.name === "Premium Active") ? "onboarding-premium-card" :
+                            undefined
+                      }
+                      game={game}
+                      isPremium={isPremium}
+                      onSubscribe={handleSubscribe}
+                      onFeedback={() => {
+                        setFeedbackType('recruitment');
+                        setShowFeedbackPopup(true);
+                      }}
+                      className="w-full sm:w-72 md:w-64 lg:w-72"
+                    />
+                  ))}
+
+                  <div className="w-full flex justify-center mt-8">
+                    <button
+                      onClick={() => navigate('/dashboard')}
+                      className="text-stone-400 hover:text-stone-600 text-sm font-medium transition-colors"
+                    >
+                      Need to switch? Go Back
+                    </button>
                   </div>
                 </div>
               </div>
@@ -280,15 +276,17 @@ const Dashboard = () => {
 
       {!companyId && <TestimonialScroller />}
 
-      <DashboardFooter
-        onFeedbackClick={() => {
-          setFeedbackType('platform');
-          setShowFeedbackPopup(true);
-        }}
-        onSupportClick={() => setShowSupportPopup(true)}
-        onMouseEnter={() => setIsFooterHovered(true)}
-        onMouseLeave={() => setIsFooterHovered(false)}
-      />
+      {!companyId && (
+        <DashboardFooter
+          onFeedbackClick={() => {
+            setFeedbackType('platform');
+            setShowFeedbackPopup(true);
+          }}
+          onSupportClick={() => setShowSupportPopup(true)}
+          onMouseEnter={() => setIsFooterHovered(true)}
+          onMouseLeave={() => setIsFooterHovered(false)}
+        />
+      )}
     </div>
   );
 };
