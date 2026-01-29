@@ -33,36 +33,32 @@ High-level data flow demonstrating the integration between the Client, API, and 
 
 ```mermaid
 graph TD
-    Client[React Client] -->|HTTP/REST| API[Python Backend API]
-    Client -->|Direct Query| DB[(Supabase/PostgreSQL)]
-    Client -->|Secure Order| Edge[Supabase Edge Functions]
-    
-    API -->|Validation & Logic| Logic{Service Layer}
-    Logic -->|GenAI Request| Bedrock[AWS Bedrock]
-    Logic -->|Data Persistence| DynamoDB[(AWS DynamoDB)]
-    
-    Edge -->|Payment Intent| Razorpay[Razorpay API]
-    Razorpay -->|Webhook| Edge
-    
-    Bedrock -->|Analysis Result| Logic
-    Logic -->|JSON Response| Client
-    
-    subgraph "Frontend Layer"
-        Client
+    User([User / Candidate]) -->|Interacts| Client[React Frontend]
+
+    subgraph "Client Side (Browser)"
+        Client -->|Hybrid Audio| Viseme[Viseme/Lip-Sync Engine]
+        Viseme -- Primary --> AzureSDK[Azure Speech SDK]
+        Viseme -- Fallback --> WebAudio[Web Audio API (Volume Analysis)]
     end
-    
-    subgraph "Backend Layer"
-        API
-        Logic
-        Edge
+
+    Client -->|Upload Resume| API[FastAPI Backend]
+    Client -->|Interview WebSocket/HTTP| API
+
+    subgraph "Backend Services (Python)"
+        API -->|Boto3| AWS_Services
+        API -->|Speech Config| Azure[Azure Cognitive Services]
     end
-    
-    subgraph "Data & AI Layer"
-        DB
-        DynamoDB
-        Bedrock
-        Razorpay
+
+    subgraph "AWS Cloud Infrastructure"
+        AWS_Services -->|Store Resume| S3[Amazon S3]
+        AWS_Services -->|GenAI Question/Feedback| Bedrock[Amazon Bedrock (LLM)]
+        AWS_Services -->|Session State| DynamoDB[Amazon DynamoDB]
+        AWS_Services -->|Text-to-Speech| Polly[Amazon Polly]
     end
+
+    Azure -->|Viseme Data| AzureSDK
+    Polly -->|MP3 Audio| API
+    API -->|Audio + Text| Client
 ```
 
 ## 🧠 Engineering Decisions & Trade-offs
