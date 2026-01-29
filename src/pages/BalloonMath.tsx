@@ -313,7 +313,7 @@ const BalloonMathGame: React.FC = () => {
                         </p>
 
                         <Button
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/dashboard/Accenture')}
                             className="w-full h-14 text-lg bg-neutral-900 text-white hover:bg-neutral-800 rounded-xl"
                         >
                             Go Back

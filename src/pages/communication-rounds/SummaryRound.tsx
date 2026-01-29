@@ -31,7 +31,7 @@ export function SummaryRound() {
 
     const handleReturnToDashboard = () => {
         resetGame();
-        navigate('/dashboard');
+        navigate('/dashboard/Accenture');
     };
 
     if (isAnalyzing) {

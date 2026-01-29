@@ -120,20 +120,28 @@ export const VisemeDisplay = ({ audioSrc, onAudioEnd }: VisemeDisplayProps) => {
 
             const playAudio = async () => {
                 try {
-                    // Wait 400ms before playing to avoid browser audio cut-off/clipping
-                    setTimeout(async () => {
-                        if (audioRef.current && audioRef.current.src) {
+                    if (audioRef.current && audioRef.current.src) {
+                        try {
                             await audioRef.current.play();
-                            initAudioContext();
-
-                            // Resume context if suspended (browser policy)
-                            if (audioContextRef.current?.state === 'suspended') {
-                                await audioContextRef.current.resume();
+                            setAudioError(false); // Clear any previous error
+                        } catch (playError) {
+                            if (playError instanceof Error && playError.name === 'NotAllowedError') {
+                                console.warn("Autoplay blocked. Waiting for user interaction.");
+                                setAudioError(true);
+                                return;
                             }
-
-                            animate();
+                            throw playError;
                         }
-                    }, 400);
+
+                        initAudioContext();
+
+                        // Resume context if suspended (browser policy)
+                        if (audioContextRef.current?.state === 'suspended') {
+                            await audioContextRef.current.resume();
+                        }
+
+                        animate();
+                    }
                 } catch (e) {
                     console.error("Audio playback error:", e);
                     setAudioError(true);

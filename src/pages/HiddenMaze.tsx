@@ -583,7 +583,7 @@ const HiddenMaze = () => {
                         {levelsWon === 0 && "Keep practicing! Try to map out the path step-by-step and learn from each reset."}
                     </p>
                     <Button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/dashboard/Accenture')}
                         className="w-full h-14 text-lg bg-neutral-900 text-white hover:bg-neutral-800 rounded-xl"
                     >
                         Go Home
@@ -734,7 +734,7 @@ const HiddenMaze = () => {
                         </Button>
                         <Button
                             variant="ghost"
-                            onClick={() => window.location.href = "/dashboard"}
+                            onClick={() => window.location.href = "/dashboard/Accenture"}
                             className="text-neutral-400 hover:text-neutral-600"
                         >
                             Maybe Later
