@@ -50,6 +50,7 @@ export const VisemeDisplay = ({ text, audioSrc, onAudioEnd }: VisemeDisplayProps
     useEffect(() => {
         if (!audioSrc) return;
 
+        console.log("VisemeDisplay Loaded: v2 (Force Audio)");
         console.log("VisemeDisplay: New Audio Source received.");
         setImageIndex(0);
         setShowManualPlay(false);

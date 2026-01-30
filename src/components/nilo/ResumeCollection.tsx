@@ -37,7 +37,7 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting }: ResumeCol
             // Try to extract text for convenience
             try {
                 const text = await extractTextFromPDF(resumeFile);
-                if (text) setResumeText(text);
+                if (text) setResumeText(text.slice(0, 5000));
             } catch (ignored) {
                 // Ignore extraction error, user can paste
             }
@@ -145,12 +145,18 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting }: ResumeCol
                         <div className="relative">
                             <textarea
                                 value={resumeText}
-                                onChange={(e) => setResumeText(e.target.value)}
+                                onChange={(e) => {
+                                    const text = e.target.value;
+                                    if (text.length <= 5000) {
+                                        setResumeText(text);
+                                    }
+                                }}
+                                maxLength={5000}
                                 placeholder="Paste your resume content here..."
                                 className="w-full h-64 p-4 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none transition-all text-sm font-mono leading-relaxed bg-gray-50/50"
                             />
                             <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-medium bg-white px-2 py-1 rounded-md border border-gray-100 shadow-sm">
-                                {resumeText.length} chars
+                                {resumeText.length}/5000 chars
                             </div>
                         </div>
 
