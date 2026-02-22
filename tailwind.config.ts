@@ -88,6 +88,10 @@ export default {
           "from, to": { borderColor: "transparent" },
           "50%": { borderColor: "orange" },
         },
+        "scroll-left": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -95,6 +99,7 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "fade-in-up": "fade-in-up 0.5s ease-out",
         "typing": "typing 3.5s steps(40, end), blink .75s step-end infinite",
+        "scroll-left": "scroll-left 18s linear infinite",
       },
     },
   },

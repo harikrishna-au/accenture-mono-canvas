@@ -53,7 +53,7 @@ export const CompanySelection = ({ onSelectCompany, onFeedbackClick, onSupportCl
             id: "cognizant",
             name: "Cognizant",
             description: "Prepare for GenC and GenC Next roles with tailored technical and HR interview simulations.",
-            status: "coming-soon" as const,
+            status: "active" as const,
             color: "bg-blue-100"
         },
         {
@@ -101,16 +101,27 @@ export const CompanySelection = ({ onSelectCompany, onFeedbackClick, onSupportCl
                     </p>
                 </div>
 
-                {/* NEW AI Interview Button */}
-                <button
-                    onClick={() => navigate('/ai-interview')}
-                    className="group relative inline-flex items-center gap-3 px-8 py-4 bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                >
-                    <div className="absolute inset-0 rounded-full border border-white/10" />
-                    <Bot className="w-5 h-5 text-emerald-400" />
-                    <span className="font-medium tracking-wide">Try New AI Interview</span>
-                    <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
-                </button>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    {/* NEW AI Interview Button */}
+                    <button
+                        onClick={() => navigate('/ai-interview')}
+                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                    >
+                        <div className="absolute inset-0 rounded-full border border-white/10" />
+                        <Bot className="w-5 h-5 text-emerald-400" />
+                        <span className="font-medium tracking-wide">Try New AI Interview</span>
+                        <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+                    </button>
+
+                    {/* Connect Button */}
+                    <button
+                        onClick={() => navigate('/connect')}
+                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 border-2 border-stone-200 rounded-full hover:border-stone-400 transition-all shadow-sm hover:shadow-md hover:-translate-y-1"
+                    >
+                        <MessageSquare className="w-5 h-5 text-stone-600" />
+                        <span className="font-medium tracking-wide">Connect</span>
+                    </button>
+                </div>
             </div>
 
             {/* Clean Grid */}

@@ -94,7 +94,9 @@ const Dashboard = () => {
     setShowPaymentPopup(true);
   };
 
-  const games = [
+  const companyName = companyId ? companyId.charAt(0).toUpperCase() + companyId.slice(1) : 'Accenture';
+
+  const accentureGames = [
     { id: 1, name: "Matrix Flow", path: "/game/matrix", premiumBottomBarText: "EXTRA LEVELS with Premium" },
     { id: 2, name: "Balloon Math", path: "/game/balloon" },
     { id: 3, name: "Hidden Maze", path: "/game/hidden-maze", premiumBottomBarText: "EXTRA LEVELS with Premium" },
@@ -109,7 +111,7 @@ const Dashboard = () => {
     {
       id: 5,
       name: "Connect with me",
-      subtitle: "Accenture Interview Guidance – Paid 1-on-1 Session",
+      subtitle: `${companyName} Interview Guidance – Paid 1-on-1 Session`,
       path: "https://topmate.io/hari_krishna_nallana/",
       isExternal: true,
       typingHighlight: true,
@@ -145,10 +147,10 @@ const Dashboard = () => {
       isExternal: true,
       icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
     },
-    { id: 6, name: "Accenture Resources", path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
+    { id: 6, name: `${companyName} Resources`, path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
     {
       id: 11,
-      name: "Accenture Community",
+      name: `${companyName} Community`,
       subtitle: "Join the WhatsApp Group",
       path: "https://chat.whatsapp.com/CBORD8aR3x91d5rmwo87de",
       isExternal: true,
@@ -156,6 +158,29 @@ const Dashboard = () => {
     },
     { id: 12, name: "", path: "" },
   ];
+
+  const cognizantGames = [
+    // You can add different games/endpoints here for Cognizant
+    {
+      id: 5,
+      name: "Connect with me",
+      subtitle: `${companyName} Interview Guidance – Paid 1-on-1 Session`,
+      path: "https://topmate.io/hari_krishna_nallana/",
+      isExternal: true,
+      typingHighlight: true,
+      typingText: "BOOK 1:1 SESSION"
+    },
+    {
+      id: 9,
+      name: "LinkedIn Profile",
+      subtitle: "Connect with me on LinkedIn",
+      path: "https://www.linkedin.com/in/hari-krishna-nallana-33949b277/",
+      isExternal: true,
+      icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
+    },
+  ];
+
+  const games = companyId === 'cognizant' ? cognizantGames : accentureGames;
 
   return (
     <div className={`min-h-screen w-full flex flex-col items-center font-sans selection:bg-secondary/20 selection:text-secondary-foreground ${companyId ? 'h-screen overflow-hidden justify-center' : 'overflow-y-auto'}`}>

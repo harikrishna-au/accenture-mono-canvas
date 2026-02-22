@@ -52,7 +52,13 @@ const Header = ({ onStartTour }: HeaderProps) => {
           )}
           {showExit && (
             <button
-              onClick={() => navigate("/dashboard/Accenture")}
+              onClick={() => {
+                if (location.pathname === '/connect' || location.pathname === '/ai-interview') {
+                  navigate('/');
+                } else {
+                  navigate('/dashboard/Accenture');
+                }
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-700/80 rounded-lg font-medium hover:bg-rose-100 transition-colors text-sm font-['Inter']"
             >
               <LogOut className="w-4 h-4" />
