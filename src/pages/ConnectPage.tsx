@@ -1,10 +1,41 @@
-import React from 'react';
-import { Bot, Sparkles, MessageSquare, ArrowLeft, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, Sparkles, Lock, Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
+import { supabase } from '@/integrations/supabase/client';
+import ExpertCard, { Expert } from './connect/ExpertCard';
+import BookingModal from './connect/BookingModal';
 
 const ConnectPage = () => {
     const navigate = useNavigate();
+    const [experts, setExperts] = useState<Expert[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        const fetchExperts = async () => {
+            setLoading(true);
+            const { data } = await supabase
+                .from('experts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (data) setExperts(data as unknown as Expert[]);
+            setLoading(false);
+        };
+        fetchExperts();
+    }, []);
+
+    const filteredExperts = experts.filter((e) => {
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            e.name.toLowerCase().includes(q) ||
+            (e.title?.toLowerCase().includes(q)) ||
+            (e.bio?.toLowerCase().includes(q)) ||
+            (e.skills?.some((s) => s.toLowerCase().includes(q)))
+        );
+    });
 
     return (
         <div className="min-h-screen bg-[#fcfcf9] text-stone-900 font-sans selection:bg-stone-200">
@@ -12,18 +43,9 @@ const ConnectPage = () => {
                 <Header onStartTour={() => { }} />
             </div>
 
-            <div className="max-w-4xl mx-auto px-6 py-12">
-                <button
-                    onClick={() => navigate('/')}
-                    className="group flex items-center gap-2 text-stone-500 hover:text-stone-900 transition-colors mb-12"
-                >
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium tracking-wide">Exit</span>
-                </button>
-
-                {/* Cool Hero Header */}
-                <div className="relative flex flex-col items-center justify-center text-center mb-24 space-y-8 pt-16 w-full">
-                    {/* Clean, seamless color blend */}
+            <div className="max-w-5xl mx-auto px-6 py-12">
+                {/* Hero Header — preserving original design */}
+                <div className="relative flex flex-col items-center justify-center text-center mb-16 space-y-8 pt-16 w-full">
                     <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-50 pointer-events-none">
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-emerald-200 rounded-full mix-blend-multiply blur-3xl -translate-x-20 -translate-y-4" />
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-sky-200 rounded-full mix-blend-multiply blur-3xl translate-x-10 translate-y-10" />
@@ -31,11 +53,8 @@ const ConnectPage = () => {
                     </div>
 
                     <div className="relative inline-flex items-center group mt-8">
-                        {/* Direct glowing light directly behind the text - Made much brighter and wider */}
                         <div className="absolute -inset-8 bg-yellow-400 rounded-full blur-[60px] opacity-40 -z-10 group-hover:opacity-70 transition-opacity duration-700" />
                         <div className="absolute -inset-4 bg-amber-500 rounded-full blur-[40px] opacity-30 -z-10 group-hover:opacity-60 transition-opacity duration-700" />
-
-                        {/* Solid text color with a very subtle gradient */}
                         <h1 className="text-7xl md:text-9xl font-serif tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-stone-800 to-stone-600 z-10 pb-4">
                             Connect.
                         </h1>
@@ -47,12 +66,10 @@ const ConnectPage = () => {
                         Learn directly from peers who just cracked the same interviews.
                     </p>
 
-                    {/* Company Filter Scroll (Marquee style) */}
+                    {/* Company Filter Scroll */}
                     <div className="w-full max-w-4xl mt-12 overflow-hidden relative pb-4">
-                        {/* Fade edges */}
                         <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#fcfcf9] to-transparent z-10" />
                         <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#fcfcf9] to-transparent z-10" />
-
                         <div className="flex items-center gap-4 min-w-max px-4 animate-scroll-left hover:[animation-play-state:paused]">
                             {[
                                 { name: 'All', locked: false },
@@ -62,7 +79,6 @@ const ConnectPage = () => {
                                 { name: 'TCS', locked: false },
                                 { name: 'Wipro', locked: true },
                                 { name: 'IBM', locked: true },
-                                // Duplicate for seamless infinite scroll
                                 { name: 'All', locked: false },
                                 { name: 'Accenture', locked: false },
                                 { name: 'Infosys', locked: false },
@@ -90,14 +106,61 @@ const ConnectPage = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100 text-center py-20">
-                    <Sparkles className="w-12 h-12 text-stone-300 mx-auto mb-6" />
-                    <h2 className="text-2xl font-serif text-stone-800 mb-4">Coming Soon</h2>
-                    <p className="text-stone-500 max-w-md mx-auto">
-                        We're building a new way to connect. Check back later for updates!
-                    </p>
+                {/* Search */}
+                <div className="relative mb-8 max-w-sm">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search by name, skill, or company..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
+                    />
                 </div>
+
+                {/* Expert Grid */}
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+                        <span className="text-stone-400 text-sm font-['Inter']">Finding experts...</span>
+                    </div>
+                ) : filteredExperts.length === 0 ? (
+                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100 text-center py-20">
+                        <Sparkles className="w-12 h-12 text-stone-300 mx-auto mb-6" />
+                        {experts.length === 0 ? (
+                            <>
+                                <h2 className="text-2xl font-serif text-stone-800 mb-4">Coming Soon</h2>
+                                <p className="text-stone-500 max-w-md mx-auto">
+                                    We're onboarding mentors right now. Check back soon!
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h2 className="text-xl font-serif text-stone-800 mb-3">No matches found</h2>
+                                <p className="text-stone-500 text-sm">Try searching for a different skill or name.</p>
+                            </>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {filteredExperts.map((expert) => (
+                            <ExpertCard
+                                key={expert.id}
+                                expert={expert}
+                                onBook={setSelectedExpert}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
+
+            {/* Booking Modal */}
+            {selectedExpert && (
+                <BookingModal
+                    expert={selectedExpert}
+                    onClose={() => setSelectedExpert(null)}
+                />
+            )}
         </div>
     );
 };

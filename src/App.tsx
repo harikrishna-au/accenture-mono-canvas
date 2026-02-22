@@ -20,6 +20,7 @@ import CouponDashboard from "./pages/CouponDashboard";
 import AIInterview from "./pages/AIInterview";
 import PremiumRoute from "@/components/PremiumRoute";
 import ConnectPage from "./pages/ConnectPage";
+import PlacedGuruPage from "./pages/PlacedGuruPage";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
@@ -69,6 +70,7 @@ const App = () => {
               <Route path="/coupon-stats" element={<CouponDashboard />} />
               <Route path="/ai-interview" element={<AIInterview />} />
               <Route path="/connect" element={<ConnectPage />} />
+              <Route path="/placed-guru" element={<PlacedGuruPage />} />
 
               {/* Matrix Flow Game */}
               <Route path="/game/matrix" element={<Guidelines />} />

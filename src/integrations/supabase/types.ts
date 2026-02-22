@@ -177,6 +177,136 @@ export type Database = {
         }
         Relationships: []
       }
+      experts: {
+        Row: {
+          id: string
+          name: string
+          title: string | null
+          bio: string | null
+          skills: string[] | null
+          photo_url: string | null
+          price_inr: number
+          company: string | null
+          interview_date: string | null
+          package_lpa: number | null
+          proof_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          title?: string | null
+          bio?: string | null
+          skills?: string[] | null
+          photo_url?: string | null
+          price_inr?: number
+          company?: string | null
+          interview_date?: string | null
+          package_lpa?: number | null
+          proof_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          title?: string | null
+          bio?: string | null
+          skills?: string[] | null
+          photo_url?: string | null
+          price_inr?: number
+          company?: string | null
+          interview_date?: string | null
+          package_lpa?: number | null
+          proof_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      availability: {
+        Row: {
+          id: string
+          expert_id: string | null
+          day_of_week: number | null
+          start_time: string
+          end_time: string
+        }
+        Insert: {
+          id?: string
+          expert_id?: string | null
+          day_of_week?: number | null
+          start_time: string
+          end_time: string
+        }
+        Update: {
+          id?: string
+          expert_id?: string | null
+          day_of_week?: number | null
+          start_time?: string
+          end_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      bookings: {
+        Row: {
+          id: string
+          expert_id: string | null
+          user_name: string | null
+          user_email: string | null
+          message: string | null
+          date: string | null
+          start_time: string | null
+          end_time: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          expert_id?: string | null
+          user_name?: string | null
+          user_email?: string | null
+          message?: string | null
+          date?: string | null
+          start_time?: string | null
+          end_time?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          expert_id?: string | null
+          user_name?: string | null
+          user_email?: string | null
+          message?: string | null
+          date?: string | null
+          start_time?: string | null
+          end_time?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

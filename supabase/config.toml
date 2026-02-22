@@ -1,1 +1,14 @@
 project_id = "scerfpfizvzvylejyksv"
+
+# ── New public edge functions (called without a user session) ──────────────
+# verify_jwt = false lets the Supabase gateway accept the anon key Bearer token
+# without requiring a signed-in user JWT.
+
+[functions.create-expert-profile]
+verify_jwt = false
+
+[functions.create-booking-order]
+verify_jwt = false
+
+[functions.verify-booking-payment]
+verify_jwt = false
