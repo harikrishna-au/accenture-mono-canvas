@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Booking {
@@ -44,23 +45,37 @@ interface MyBookingsModalProps {
 }
 
 const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
-  const [email, setEmail] = useState('');
+  const { user: clerkUser } = useUser();
+  const clerkEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+
+  const [email, setEmail] = useState(clerkEmail);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [fetched, setFetched] = useState(false);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
+  const fetchBookings = async (emailToSearch: string) => {
+    if (!emailToSearch.trim()) return;
     setLoading(true);
     const { data } = await supabase
       .from('bookings')
       .select('*, experts(name, photo_url)')
-      .ilike('user_email', email.trim())
+      .ilike('user_email', emailToSearch.trim())
       .order('date', { ascending: false });
     setBookings((data as Booking[]) || []);
-    setSearched(true);
+    setFetched(true);
     setLoading(false);
+  };
+
+  // Auto-fetch on open if Clerk email is available
+  useEffect(() => {
+    if (clerkEmail) {
+      fetchBookings(clerkEmail);
+    }
+  }, [clerkEmail]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchBookings(email);
   };
 
   return (
@@ -81,13 +96,13 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-          {/* Email search */}
+          {/* Email row — pre-filled from Clerk, still editable */}
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your booking email"
+              placeholder="your@email.com"
               className="flex-1 px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
             />
             <button
@@ -104,7 +119,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
             <div className="flex justify-center py-10">
               <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
             </div>
-          ) : searched && bookings.length === 0 ? (
+          ) : fetched && bookings.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-stone-400 text-sm font-['Inter']">No bookings found for this email.</p>
             </div>
@@ -132,7 +147,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                           {booking.experts?.name ?? 'Unknown Expert'}
                         </span>
                       </div>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium font-['Inter'] ${status.cls}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium font-['Inter'] flex-shrink-0 ${status.cls}`}>
                         {status.icon}
                         {status.label}
                       </span>
