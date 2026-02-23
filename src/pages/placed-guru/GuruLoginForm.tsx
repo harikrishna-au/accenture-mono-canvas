@@ -25,7 +25,11 @@ const GuruLoginForm = ({ onSuccess }: GuruLoginFormProps) => {
         toast.success('Signed in!');
         onSuccess();
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/placed-guru` },
+        });
         if (error) throw error;
         toast.success('Account created! Check your email to confirm, then sign in.');
         setMode('signin');
