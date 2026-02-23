@@ -94,7 +94,7 @@ const BookingModal = ({ expert, onClose }: BookingModalProps) => {
         .select('start_time, end_time')
         .eq('expert_id', expert.id)
         .eq('date', dateStr)
-        .eq('status', 'confirmed');
+        .in('status', ['confirmed', 'paid']);
 
       const bookedIntervals = (bookings || []).map((b: any) => ({
         start: parseTimeToMinutes(b.start_time as string),

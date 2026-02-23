@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, Sparkles, Lock, Search, Loader2 } from 'lucide-react';
+import { Bot, Sparkles, Lock, Search, Loader2, CalendarDays } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import ExpertCard, { Expert } from './connect/ExpertCard';
 import BookingModal from './connect/BookingModal';
+import MyBookingsModal from './connect/MyBookingsModal';
 
 const ConnectPage = () => {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ const ConnectPage = () => {
     const [loading, setLoading] = useState(true);
     const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showMyBookings, setShowMyBookings] = useState(false);
 
     useEffect(() => {
         const fetchExperts = async () => {
@@ -106,8 +108,9 @@ const ConnectPage = () => {
                     </div>
                 </div>
 
-                {/* Search */}
-                <div className="relative mb-8 max-w-sm">
+                {/* Search + My Bookings */}
+                <div className="flex items-center gap-3 mb-8">
+                <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
                     <input
                         type="text"
@@ -116,6 +119,14 @@ const ConnectPage = () => {
                         placeholder="Search by name, skill, or company..."
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
                     />
+                </div>
+                <button
+                    onClick={() => setShowMyBookings(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:border-stone-400 hover:text-stone-900 transition-all whitespace-nowrap shadow-sm"
+                >
+                    <CalendarDays className="w-4 h-4" />
+                    My Bookings
+                </button>
                 </div>
 
                 {/* Expert Grid */}
@@ -154,12 +165,14 @@ const ConnectPage = () => {
                 )}
             </div>
 
-            {/* Booking Modal */}
             {selectedExpert && (
                 <BookingModal
                     expert={selectedExpert}
                     onClose={() => setSelectedExpert(null)}
                 />
+            )}
+            {showMyBookings && (
+                <MyBookingsModal onClose={() => setShowMyBookings(false)} />
             )}
         </div>
     );

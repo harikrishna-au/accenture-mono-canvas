@@ -16,19 +16,19 @@ const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, onClo
     <div className="flex flex-col items-center text-center py-4 space-y-6">
       {/* Icon */}
       <div className="relative mt-2">
-        <div className="absolute inset-0 bg-emerald-200 rounded-full blur-2xl opacity-60" />
-        <div className="relative w-20 h-20 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center">
-          <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+        <div className="absolute inset-0 bg-amber-200 rounded-full blur-2xl opacity-60" />
+        <div className="relative w-20 h-20 bg-amber-50 border border-amber-100 rounded-full flex items-center justify-center">
+          <CheckCircle2 className="w-10 h-10 text-amber-500" />
         </div>
       </div>
 
       {/* Title */}
       <div>
-        <h3 className="text-2xl font-['Merriweather'] text-stone-900 mb-2">You're booked!</h3>
+        <h3 className="text-2xl font-['Merriweather'] text-stone-900 mb-2">Payment received!</h3>
         <p className="text-stone-500 text-sm leading-relaxed font-['Inter']">
-          Your session with{' '}
-          <span className="font-semibold text-stone-700">{expertName}</span>{' '}
-          is confirmed.
+          Your request has been sent to{' '}
+          <span className="font-semibold text-stone-700">{expertName}</span>.
+          You'll be notified once they confirm.
         </p>
       </div>
 
@@ -61,7 +61,7 @@ const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, onClo
       </div>
 
       <p className="text-stone-400 text-xs max-w-xs leading-relaxed font-['Inter']">
-        Your expert will reach out to you at the scheduled time with meeting details.
+        Check "My Bookings" on the connect page anytime to track your booking status.
       </p>
 
       <button

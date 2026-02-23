@@ -94,7 +94,7 @@ serve(async (req: Request) => {
         end_time,
         razorpay_order_id,
         razorpay_payment_id,
-        status: 'confirmed',
+        status: 'paid',
       })
       .select('id')
       .single();

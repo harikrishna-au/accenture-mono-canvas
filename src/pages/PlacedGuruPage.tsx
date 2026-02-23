@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut } from 'lucide-react';
+import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { toast } from 'sonner';
 import type { User } from '@supabase/supabase-js';
 import Header from '@/components/Header';
 import GuruLoginForm from './placed-guru/GuruLoginForm';
@@ -88,11 +90,191 @@ const MyExpertCard = ({
   </div>
 );
 
+/* ── Booking status config ─────────────────────────────────────────── */
+
+const BOOKING_STATUS: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
+  paid: {
+    label: 'Awaiting Acceptance',
+    icon: <Hourglass className="w-3 h-3" />,
+    cls: 'bg-amber-50 text-amber-700 border border-amber-100',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    icon: <CheckCircle2 className="w-3 h-3" />,
+    cls: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+  },
+  declined: {
+    label: 'Declined',
+    icon: <XCircle className="w-3 h-3" />,
+    cls: 'bg-red-50 text-red-600 border border-red-100',
+  },
+};
+
+/* ── Expert bookings panel ─────────────────────────────────────────── */
+
+interface ExpertBooking {
+  id: string;
+  expert_id: string;
+  user_name: string;
+  user_email: string;
+  message: string | null;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  experts: { name: string; photo_url: string | null } | null;
+}
+
+const BookingsPanel = ({ user }: { user: User }) => {
+  const [bookings, setBookings] = useState<ExpertBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    const { data: myExperts } = await supabase
+      .from('experts')
+      .select('id')
+      .eq('user_id', user.id);
+
+    if (!myExperts || myExperts.length === 0) {
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
+
+    const ids = myExperts.map((e) => e.id);
+    const { data } = await supabase
+      .from('bookings')
+      .select('*, experts(name, photo_url)')
+      .in('expert_id', ids)
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true });
+
+    setBookings((data as ExpertBooking[]) || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchBookings(); }, []);
+
+  const updateStatus = async (bookingId: string, status: 'confirmed' | 'declined') => {
+    setUpdating(bookingId);
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status })
+      .eq('id', bookingId);
+
+    if (error) {
+      toast.error('Failed to update booking. Try again.');
+    } else {
+      toast.success(status === 'confirmed' ? 'Booking confirmed!' : 'Booking declined.');
+      fetchBookings();
+    }
+    setUpdating(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-6 h-6 border-2 border-stone-200 border-t-stone-700 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (bookings.length === 0) {
+    return (
+      <div className="bg-white rounded-3xl p-12 shadow-sm border border-stone-100 flex flex-col items-center text-center">
+        <CalendarDays className="w-8 h-8 text-stone-300 mb-3" />
+        <p className="text-stone-400 text-sm font-['Inter']">No bookings yet.</p>
+      </div>
+    );
+  }
+
+  // Group: pending first, then confirmed, then declined
+  const order = ['paid', 'confirmed', 'declined'];
+  const sorted = [...bookings].sort(
+    (a, b) => order.indexOf(a.status) - order.indexOf(b.status)
+  );
+
+  return (
+    <div className="space-y-3">
+      {sorted.map((booking) => {
+        const st = BOOKING_STATUS[booking.status] ?? BOOKING_STATUS.declined;
+        const isPending = booking.status === 'paid';
+        return (
+          <div key={booking.id} className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 space-y-3">
+            {/* Top row */}
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-['Merriweather'] text-stone-900">{booking.user_name}</p>
+                <p className="text-xs text-stone-400 font-['Inter'] mt-0.5">{booking.user_email}</p>
+              </div>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium font-['Inter'] flex-shrink-0 ${st.cls}`}>
+                {st.icon}
+                {st.label}
+              </span>
+            </div>
+
+            {/* Date + time */}
+            <div className="flex items-center gap-4 text-xs text-stone-500 font-['Inter']">
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                {format(parseISO(booking.date), 'EEE, MMM d, yyyy')}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {booking.start_time.slice(0, 5)} – {booking.end_time.slice(0, 5)}
+              </span>
+            </div>
+
+            {/* Expert name (if multiple profiles) */}
+            {booking.experts && (
+              <p className="text-xs text-stone-400 font-['Inter']">
+                For: <span className="text-stone-600 font-medium">{booking.experts.name}</span>
+              </p>
+            )}
+
+            {/* Message */}
+            {booking.message && (
+              <p className="text-xs text-stone-500 font-['Inter'] bg-stone-50 rounded-xl px-3 py-2 line-clamp-3">
+                {booking.message}
+              </p>
+            )}
+
+            {/* Accept / Decline — only for pending */}
+            {isPending && (
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => updateStatus(booking.id, 'confirmed')}
+                  disabled={updating === booking.id}
+                  className="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-medium font-['Inter'] hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {updating === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                  Accept
+                </button>
+                <button
+                  onClick={() => updateStatus(booking.id, 'declined')}
+                  disabled={updating === booking.id}
+                  className="flex-1 py-2 bg-stone-100 text-stone-600 rounded-xl text-xs font-medium font-['Inter'] hover:bg-red-50 hover:text-red-600 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <XCircle className="w-3 h-3" />
+                  Decline
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 /* ── Management panel (only shown when signed in) ──────────────────── */
 
 type View = 'list' | 'add' | 'edit';
 
 const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => void }) => {
+  const [tab, setTab] = useState<'profiles' | 'bookings'>('profiles');
   const [view, setView] = useState<View>('list');
   const [experts, setExperts] = useState<Expert[]>([]);
   const [editingExpert, setEditingExpert] = useState<Expert | null>(null);
@@ -146,34 +328,12 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
   return (
     <div className="max-w-2xl mx-auto px-6 pt-28 pb-12">
       {/* Top bar */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
-            {headingMap[view]}
-          </h1>
-          <p className="text-stone-400 text-sm font-['Inter'] mt-2">
-            {view === 'list' ? (
-              <>
-                Your expert profiles on{' '}
-                <a href="/connect" className="text-stone-600 hover:underline transition-colors">
-                  /connect
-                </a>
-                .
-              </>
-            ) : (
-              <>
-                Changes appear immediately on{' '}
-                <a href="/connect" className="text-stone-600 hover:underline transition-colors">
-                  /connect
-                </a>
-                .
-              </>
-            )}
-          </p>
-        </div>
-
-        {view === 'list' && (
-          <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
+          {tab === 'profiles' ? headingMap[view] : 'Bookings'}
+        </h1>
+        <div className="flex items-center gap-2">
+          {tab === 'profiles' && view === 'list' && (
             <button
               onClick={() => setView('add')}
               className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all whitespace-nowrap"
@@ -181,19 +341,39 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
               <Plus className="w-4 h-4" />
               Add Profile
             </button>
-            <button
-              onClick={onSignOut}
-              title="Sign out"
-              className="p-2.5 bg-stone-100 text-stone-500 rounded-xl hover:bg-stone-200 active:scale-95 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+          )}
+          <button
+            onClick={onSignOut}
+            title="Sign out"
+            className="p-2.5 bg-stone-100 text-stone-500 rounded-xl hover:bg-stone-200 active:scale-95 transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* List view */}
-      {view === 'list' && (
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-stone-100 rounded-2xl mb-6">
+        {([['profiles', 'My Profiles'], ['bookings', 'Bookings']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => { setTab(key); if (key === 'profiles') setView('list'); }}
+            className={`flex-1 py-2 text-sm font-medium font-['Inter'] rounded-xl transition-all ${
+              tab === key
+                ? 'bg-white text-stone-900 shadow-sm'
+                : 'text-stone-500 hover:text-stone-700'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Bookings tab */}
+      {tab === 'bookings' && <BookingsPanel user={user} />}
+
+      {/* Profiles tab */}
+      {tab === 'profiles' && view === 'list' && (
         <>
           {fetching ? (
             <div className="flex items-center justify-center py-16">
@@ -227,7 +407,7 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
       )}
 
       {/* Add / Edit form */}
-      {(view === 'add' || view === 'edit') && (
+      {tab === 'profiles' && (view === 'add' || view === 'edit') && (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100">
           <GuruProfileForm
             key={editingExpert?.id ?? 'new'}
