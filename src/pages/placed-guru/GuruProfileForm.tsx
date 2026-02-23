@@ -1,36 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { CheckCircle2, Loader2, X, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PhotoUploader from './PhotoUploader';
 import AvailabilityScheduler, { WeeklyAvailability } from './AvailabilityScheduler';
+import { Expert } from '../connect/ExpertCard';
 
 const MAIN_COMPANIES = ['Accenture', 'Infosys', 'TCS', 'Cognizant'] as const;
+const MAIN_COMPANIES_LIST = [...MAIN_COMPANIES] as string[];
 
-const GuruProfileForm = () => {
-  // Core info
-  const [name, setName] = useState('');
-  const [title, setTitle] = useState('');
-  const [bio, setBio] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [price, setPrice] = useState(100);
+interface GuruProfileFormProps {
+  userId: string;
+  expertId?: string;
+  initialData?: Expert | null;
+  onSuccess?: (id: string) => void;
+  onCancel?: () => void;
+}
+
+const GuruProfileForm = ({ userId, expertId, initialData, onSuccess, onCancel }: GuruProfileFormProps) => {
+  const isEdit = Boolean(expertId);
+
+  /* ── Core info ──────────────────────────────────────────────────── */
+  const [name, setName] = useState(initialData?.name ?? '');
+  const [title, setTitle] = useState(initialData?.title ?? '');
+  const [bio, setBio] = useState(initialData?.bio ?? '');
+  const [photoUrl, setPhotoUrl] = useState(initialData?.photo_url ?? '');
+  const [price, setPrice] = useState(initialData?.price_inr ?? 100);
   const [skillInput, setSkillInput] = useState('');
-  const [skills, setSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>(initialData?.skills ?? []);
 
-  // Placement info
-  const [company, setCompany] = useState('');
-  const [customCompany, setCustomCompany] = useState('');
-  const [interviewDate, setInterviewDate] = useState('');
-  const [packageLpa, setPackageLpa] = useState('');
-  const [proofUrl, setProofUrl] = useState('');
+  /* ── Placement info ─────────────────────────────────────────────── */
+  const [company, setCompany] = useState(() => {
+    if (!initialData?.company) return '';
+    return MAIN_COMPANIES_LIST.includes(initialData.company) ? initialData.company : 'Other';
+  });
+  const [customCompany, setCustomCompany] = useState(() => {
+    if (!initialData?.company) return '';
+    return MAIN_COMPANIES_LIST.includes(initialData.company) ? '' : initialData.company;
+  });
+  const [interviewDate, setInterviewDate] = useState(initialData?.interview_date ?? '');
+  const [packageLpa, setPackageLpa] = useState(
+    initialData?.package_lpa != null ? String(initialData.package_lpa) : ''
+  );
+  const [proofUrl, setProofUrl] = useState(initialData?.proof_url ?? '');
 
-  // Availability
+  /* ── Availability ───────────────────────────────────────────────── */
   const [availability, setAvailability] = useState<WeeklyAvailability>({});
+  const [fetchingAvailability, setFetchingAvailability] = useState(false);
 
-  // UI
+  // In edit mode: load existing availability from DB
+  useEffect(() => {
+    if (!expertId) return;
+    setFetchingAvailability(true);
+    supabase
+      .from('availability')
+      .select('*')
+      .eq('expert_id', expertId)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const avail: WeeklyAvailability = {};
+          data.forEach((row: any) => {
+            if (!avail[row.day_of_week]) avail[row.day_of_week] = [];
+            avail[row.day_of_week].push({
+              start: String(row.start_time).slice(0, 5),
+              end: String(row.end_time).slice(0, 5),
+            });
+          });
+          setAvailability(avail);
+        }
+        setFetchingAvailability(false);
+      });
+  }, [expertId]);
+
+  /* ── UI state ───────────────────────────────────────────────────── */
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  /* ── Helpers ────────────────────────────────────────────────────── */
   const addSkill = () => {
     const s = skillInput.trim();
     if (s && !skills.includes(s)) {
@@ -59,58 +105,92 @@ const GuruProfileForm = () => {
       return;
     }
 
+    const payload = {
+      name: name.trim(),
+      title: title.trim() || null,
+      bio: bio.trim() || null,
+      photo_url: photoUrl || null,
+      skills: skills.length > 0 ? skills : null,
+      price_inr: price,
+      company: resolvedCompany,
+      interview_date: interviewDate || null,
+      package_lpa: packageLpa ? parseFloat(packageLpa) : null,
+      proof_url: proofUrl || null,
+      user_id: userId,
+    };
+
+    const availabilityRows = Object.entries(availability).flatMap(([dayStr, windows]) =>
+      windows.map((w) => ({
+        day_of_week: Number(dayStr),
+        start_time: `${w.start}:00`,
+        end_time: `${w.end}:00`,
+      }))
+    );
+
     setLoading(true);
     try {
-      // Insert expert row
-      const { data: expertData, error: expertError } = await supabase
-        .from('experts')
-        .insert({
-          name: name.trim(),
-          title: title.trim() || null,
-          bio: bio.trim() || null,
-          photo_url: photoUrl || null,
-          skills: skills.length > 0 ? skills : null,
-          price_inr: price,
-          company: resolvedCompany,
-          interview_date: interviewDate || null,
-          package_lpa: packageLpa ? parseFloat(packageLpa) : null,
-          proof_url: proofUrl || null,
-        })
-        .select('id')
-        .single();
+      if (isEdit && expertId) {
+        /* ── UPDATE ── */
+        const { error: expertError } = await supabase
+          .from('experts')
+          .update(payload)
+          .eq('id', expertId);
+        if (expertError) throw expertError;
 
-      if (expertError) throw expertError;
+        // Replace availability: delete old, insert new
+        const { error: delError } = await supabase
+          .from('availability')
+          .delete()
+          .eq('expert_id', expertId);
+        if (delError) throw delError;
 
-      // Insert availability rows
-      const availabilityRows = Object.entries(availability).flatMap(([dayStr, windows]) =>
-        windows.map((w) => ({
-          expert_id: expertData.id,
-          day_of_week: Number(dayStr),
-          start_time: `${w.start}:00`,
-          end_time: `${w.end}:00`,
-        }))
-      );
+        if (availabilityRows.length > 0) {
+          const { error: availError } = await supabase
+            .from('availability')
+            .insert(availabilityRows.map((r) => ({ ...r, expert_id: expertId })));
+          if (availError) throw availError;
+        }
 
-      if (availabilityRows.length > 0) {
-        const { error: availError } = await supabase.from('availability').insert(availabilityRows);
-        if (availError) throw availError;
+        toast.success('Profile updated!');
+        onSuccess?.(expertId);
+      } else {
+        /* ── INSERT ── */
+        const { data: expertData, error: expertError } = await supabase
+          .from('experts')
+          .insert(payload)
+          .select('id')
+          .single();
+        if (expertError) throw expertError;
+
+        if (availabilityRows.length > 0) {
+          const { error: availError } = await supabase
+            .from('availability')
+            .insert(availabilityRows.map((r) => ({ ...r, expert_id: expertData.id })));
+          if (availError) throw availError;
+        }
+
+        toast.success('Expert profile created and live on /connect!');
+        if (onSuccess) {
+          onSuccess(expertData.id);
+        } else {
+          setSuccess(true);
+        }
       }
-
-      setSuccess(true);
-      toast.success('Expert profile created and live on /connect!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create profile. Please try again.');
+      toast.error(err.message || 'Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  /* ── Styles ─────────────────────────────────────────────────────── */
   const inputCls =
     "w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']";
   const labelCls = "block text-sm font-medium text-stone-700 mb-1.5 font-['Inter']";
   const sectionLabel =
     "text-xs font-semibold text-stone-400 uppercase tracking-widest mb-4 font-['Inter']";
 
+  /* ── Success screen (only when used standalone, no onSuccess prop) ── */
   if (success) {
     return (
       <div className="flex flex-col items-center text-center py-10 space-y-5">
@@ -292,20 +372,39 @@ const GuruProfileForm = () => {
       {/* ── Availability ───────────────────────────────────────────── */}
       <div>
         <p className={sectionLabel}>Availability</p>
-        <AvailabilityScheduler value={availability} onChange={setAvailability} />
+        {fetchingAvailability ? (
+          <div className="flex items-center gap-2 py-4 text-stone-400 text-sm font-['Inter']">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading availability...
+          </div>
+        ) : (
+          <AvailabilityScheduler value={availability} onChange={setAvailability} />
+        )}
       </div>
 
-      {/* Submit */}
-      <button
-        type="submit" disabled={loading}
-        className="w-full py-3.5 bg-stone-900 text-white rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Creating Profile...</>
-        ) : (
-          'Create Expert Profile'
+      {/* ── Actions ────────────────────────────────────────────────── */}
+      <div className={onCancel ? 'flex gap-3' : ''}>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 py-3.5 bg-stone-100 text-stone-700 rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-200 active:scale-95 transition-all duration-200"
+          >
+            Cancel
+          </button>
         )}
-      </button>
+        <button
+          type="submit"
+          disabled={loading || fetchingAvailability}
+          className={`${onCancel ? 'flex-1' : 'w-full'} py-3.5 bg-stone-900 text-white rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+        >
+          {loading ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> {isEdit ? 'Saving...' : 'Creating Profile...'}</>
+          ) : (
+            isEdit ? 'Save Changes' : 'Create Expert Profile'
+          )}
+        </button>
+      </div>
     </form>
   );
 };
