@@ -5,6 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+// Matches Chrome "Failed to fetch", Firefox "NetworkError when attempting to fetch resource", etc.
+const isNetworkError = (msg?: string) =>
+    !msg || msg.includes('fetch') || msg.includes('NetworkError') || msg.includes('network');
+
 export function usePremiumStatus() {
     const { user, isLoaded } = useUser();
     const [isPremium, setIsPremium] = useState(false);
@@ -27,20 +31,17 @@ export function usePremiumStatus() {
                         .maybeSingle();
 
                     if (error) {
-                        // Network-level error — retry with backoff
-                        if (error.message?.includes('Failed to fetch') && attempt < MAX_RETRIES - 1) {
+                        if (isNetworkError(error.message) && attempt < MAX_RETRIES - 1) {
                             await delay(1000 * Math.pow(2, attempt)); // 1s, 2s, 4s
                             continue;
                         }
                         console.error("Error fetching premium status:", error);
                     }
 
-                    if (data?.is_premium) {
-                        setIsPremium(true);
-                    }
-                    break; // success — exit retry loop
+                    if (data?.is_premium) setIsPremium(true);
+                    break;
                 } catch (e: any) {
-                    if (e?.message?.includes('Failed to fetch') && attempt < MAX_RETRIES - 1) {
+                    if (isNetworkError(e?.message) && attempt < MAX_RETRIES - 1) {
                         await delay(1000 * Math.pow(2, attempt));
                         continue;
                     }
