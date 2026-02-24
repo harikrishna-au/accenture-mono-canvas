@@ -1,4 +1,4 @@
-import { MatrixShape } from "./MatrixShape";
+import type { MatrixShape } from "./MatrixShape";
 import { Connector } from "./directions";
 
 export type TileType = "straight" | "corner" | "tee" | "cross";
