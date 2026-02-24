@@ -8,6 +8,7 @@ const COUPON_MAP: Record<string, string> = {
     "390045773": "SRAVANTHI (₹79)",
     "2072602638": "K.P.R (₹99)",
     "869997654": "ROISIN (₹69)",
+    "-1492342457": "ONERUPEE (₹1)",
 };
 
 interface CouponUsage {
