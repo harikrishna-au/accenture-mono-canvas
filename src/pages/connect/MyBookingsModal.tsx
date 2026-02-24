@@ -56,14 +56,19 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
   const fetchBookings = async (emailToSearch: string) => {
     if (!emailToSearch.trim()) return;
     setLoading(true);
-    const { data } = await supabase
-      .from('bookings')
-      .select('*, experts(name, photo_url)')
-      .ilike('user_email', emailToSearch.trim())
-      .order('date', { ascending: false });
-    setBookings((data as Booking[]) || []);
-    setFetched(true);
-    setLoading(false);
+    try {
+      const { data } = await supabase
+        .from('bookings')
+        .select('*, experts(name, photo_url)')
+        .ilike('user_email', emailToSearch.trim())
+        .order('date', { ascending: false });
+      setBookings((data as Booking[]) || []);
+    } catch {
+      setBookings([]);
+    } finally {
+      setFetched(true);
+      setLoading(false);
+    }
   };
 
   // Auto-fetch on open if Clerk email is available

@@ -62,12 +62,17 @@ const ConnectPage = () => {
     useEffect(() => {
         const fetchExperts = async () => {
             setLoading(true);
-            const { data } = await supabase
-                .from('experts')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (data) setExperts(data as unknown as Expert[]);
-            setLoading(false);
+            try {
+                const { data } = await supabase
+                    .from('experts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (data) setExperts(data as unknown as Expert[]);
+            } catch {
+                // Network error — experts list stays empty, page still renders
+            } finally {
+                setLoading(false);
+            }
         };
         fetchExperts();
     }, []);
