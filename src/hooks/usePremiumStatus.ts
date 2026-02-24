@@ -42,6 +42,7 @@ export function usePremiumStatus() {
         if (cached !== null) {
             setIsPremium(cached);
             setLoading(false);
+            return; // Cache is fresh — skip network call entirely
         }
 
         async function checkPremium() {
