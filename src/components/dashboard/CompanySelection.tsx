@@ -113,14 +113,27 @@ export const CompanySelection = ({ onSelectCompany, onFeedbackClick, onSupportCl
                         <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
                     </button>
 
-                    {/* Connect Button */}
-                    <button
-                        onClick={() => navigate('/connect')}
-                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 border-2 border-stone-200 rounded-full hover:border-stone-400 transition-all shadow-sm hover:shadow-md hover:-translate-y-1"
-                    >
-                        <MessageSquare className="w-5 h-5 text-stone-600" />
-                        <span className="font-medium tracking-wide">Connect</span>
-                    </button>
+                    {/* Connect Button — Premium */}
+                    <div className="relative">
+
+                        <button
+                            onClick={() => navigate('/connect')}
+                            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:scale-[1.03]"
+                            style={{
+                                background: 'linear-gradient(135deg, #7c3aed, #4f46e5, #2563eb)',
+                                boxShadow: '0 0 0 1px rgba(139,92,246,0.4), 0 8px 30px rgba(124,58,237,0.4), 0 16px 50px rgba(59,130,246,0.2)',
+                            }}
+                        >
+                            {/* Shimmer sweep */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
+                            {/* Sparkle dots */}
+                            <div className="absolute top-2 left-5 w-1 h-1 rounded-full bg-purple-200 opacity-70 animate-pulse" />
+                            <div className="absolute bottom-2.5 right-7 w-0.5 h-0.5 rounded-full bg-blue-200 opacity-60 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                            <MessageSquare className="w-5 h-5 text-white/90 group-hover:scale-110 transition-transform duration-300" />
+                            <span className="font-semibold tracking-wide text-white">Connect</span>
+                            <Sparkles className="w-4 h-4 text-purple-200 animate-pulse" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

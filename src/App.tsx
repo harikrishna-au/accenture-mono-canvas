@@ -70,6 +70,7 @@ const App = () => {
               <Route path="/coupon-stats" element={<CouponDashboard />} />
               <Route path="/ai-interview" element={<AIInterview />} />
               <Route path="/connect" element={<ConnectPage />} />
+              <Route path="/connect/:expertId" element={<ConnectPage />} />
               <Route path="/placed-guru" element={<PlacedGuruPage />} />
 
               {/* Matrix Flow Game */}

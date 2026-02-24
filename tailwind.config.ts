@@ -92,6 +92,14 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "scroll-left-slow": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -100,6 +108,8 @@ export default {
         "fade-in-up": "fade-in-up 0.5s ease-out",
         "typing": "typing 3.5s steps(40, end), blink .75s step-end infinite",
         "scroll-left": "scroll-left 18s linear infinite",
+        "scroll-left-slow": "scroll-left-slow 40s linear infinite",
+        "slide-in-right": "slide-in-right 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },

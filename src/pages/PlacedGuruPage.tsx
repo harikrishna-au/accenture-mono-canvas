@@ -1,10 +1,10 @@
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
-import type { User } from '@supabase/supabase-js';
 import Header from '@/components/Header';
-import GuruLoginForm from './placed-guru/GuruLoginForm';
 import GuruProfileForm from './placed-guru/GuruProfileForm';
 import { supabase } from '@/integrations/supabase/client';
 import { Expert } from './connect/ExpertCard';
@@ -125,7 +125,7 @@ interface ExpertBooking {
   experts: { name: string; photo_url: string | null } | null;
 }
 
-const BookingsPanel = ({ user }: { user: User }) => {
+const BookingsPanel = ({ userId }: { userId: string }) => {
   const [bookings, setBookings] = useState<ExpertBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -135,7 +135,7 @@ const BookingsPanel = ({ user }: { user: User }) => {
     const { data: myExperts } = await supabase
       .from('experts')
       .select('id')
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (!myExperts || myExperts.length === 0) {
       setBookings([]);
@@ -190,7 +190,6 @@ const BookingsPanel = ({ user }: { user: User }) => {
     );
   }
 
-  // Group: pending first, then confirmed, then declined
   const order = ['paid', 'confirmed', 'declined'];
   const sorted = [...bookings].sort(
     (a, b) => order.indexOf(a.status) - order.indexOf(b.status)
@@ -203,7 +202,6 @@ const BookingsPanel = ({ user }: { user: User }) => {
         const isPending = booking.status === 'paid';
         return (
           <div key={booking.id} className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 space-y-3">
-            {/* Top row */}
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-['Merriweather'] text-stone-900">{booking.user_name}</p>
@@ -215,7 +213,6 @@ const BookingsPanel = ({ user }: { user: User }) => {
               </span>
             </div>
 
-            {/* Date + time */}
             <div className="flex items-center gap-4 text-xs text-stone-500 font-['Inter']">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
@@ -227,21 +224,18 @@ const BookingsPanel = ({ user }: { user: User }) => {
               </span>
             </div>
 
-            {/* Expert name (if multiple profiles) */}
             {booking.experts && (
               <p className="text-xs text-stone-400 font-['Inter']">
                 For: <span className="text-stone-600 font-medium">{booking.experts.name}</span>
               </p>
             )}
 
-            {/* Message */}
             {booking.message && (
               <p className="text-xs text-stone-500 font-['Inter'] bg-stone-50 rounded-xl px-3 py-2 line-clamp-3">
                 {booking.message}
               </p>
             )}
 
-            {/* Accept / Decline — only for pending */}
             {isPending && (
               <div className="flex gap-2 pt-1">
                 <button
@@ -269,11 +263,13 @@ const BookingsPanel = ({ user }: { user: User }) => {
   );
 };
 
-/* ── Management panel (only shown when signed in) ──────────────────── */
+/* ── Management panel ──────────────────────────────────────────────── */
 
 type View = 'list' | 'add' | 'edit';
 
-const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => void }) => {
+const ManagementPanel = ({ userId }: { userId: string }) => {
+  const { signOut } = useClerk();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<'profiles' | 'bookings'>('profiles');
   const [view, setView] = useState<View>('list');
   const [experts, setExperts] = useState<Expert[]>([]);
@@ -286,7 +282,7 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
       const { data } = await supabase
         .from('experts')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       setExperts((data as Expert[]) || []);
     } finally {
@@ -294,30 +290,12 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
     }
   };
 
-  useEffect(() => {
-    fetchMyExperts();
-  }, []);
+  useEffect(() => { fetchMyExperts(); }, []);
 
-  const handleAddSuccess = () => {
-    fetchMyExperts();
-    setView('list');
-  };
-
-  const handleEditSuccess = () => {
-    fetchMyExperts();
-    setView('list');
-    setEditingExpert(null);
-  };
-
-  const handleEdit = (expert: Expert) => {
-    setEditingExpert(expert);
-    setView('edit');
-  };
-
-  const handleCancel = () => {
-    setView('list');
-    setEditingExpert(null);
-  };
+  const handleAddSuccess = () => { fetchMyExperts(); setView('list'); };
+  const handleEditSuccess = () => { fetchMyExperts(); setView('list'); setEditingExpert(null); };
+  const handleEdit = (expert: Expert) => { setEditingExpert(expert); setView('edit'); };
+  const handleCancel = () => { setView('list'); setEditingExpert(null); };
 
   const headingMap: Record<View, string> = {
     list: 'My Profiles',
@@ -327,11 +305,22 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
 
   return (
     <div className="max-w-2xl mx-auto px-6 pt-28 pb-12">
-      {/* Top bar */}
       <div className="flex items-start justify-between mb-6">
-        <h1 className="text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
-          {tab === 'profiles' ? headingMap[view] : 'Bookings'}
-        </h1>
+        <div className="flex items-center gap-3">
+          {/* Back button — visible when in add/edit form */}
+          {tab === 'profiles' && (view === 'add' || view === 'edit') && (
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-1.5 px-3 py-2 bg-stone-100 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-200 active:scale-95 transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+          )}
+          <h1 className="text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
+            {tab === 'profiles' ? headingMap[view] : 'Bookings'}
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
           {tab === 'profiles' && view === 'list' && (
             <button
@@ -343,36 +332,32 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
             </button>
           )}
           <button
-            onClick={onSignOut}
+            onClick={() => signOut().then(() => navigate('/connect'))}
             title="Sign out"
-            className="p-2.5 bg-stone-100 text-stone-500 rounded-xl hover:bg-stone-200 active:scale-95 transition-all"
+            className="p-2.5 bg-stone-100 text-stone-500 rounded-xl hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 p-1 bg-stone-100 rounded-2xl mb-6">
         {([['profiles', 'My Profiles'], ['bookings', 'Bookings']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => { setTab(key); if (key === 'profiles') setView('list'); }}
-            className={`flex-1 py-2 text-sm font-medium font-['Inter'] rounded-xl transition-all ${
-              tab === key
-                ? 'bg-white text-stone-900 shadow-sm'
-                : 'text-stone-500 hover:text-stone-700'
-            }`}
+            className={`flex-1 py-2 text-sm font-medium font-['Inter'] rounded-xl transition-all ${tab === key
+              ? 'bg-white text-stone-900 shadow-sm'
+              : 'text-stone-500 hover:text-stone-700'
+              }`}
           >
             {label}
           </button>
         ))}
       </div>
 
-      {/* Bookings tab */}
-      {tab === 'bookings' && <BookingsPanel user={user} />}
+      {tab === 'bookings' && <BookingsPanel userId={userId} />}
 
-      {/* Profiles tab */}
       {tab === 'profiles' && view === 'list' && (
         <>
           {fetching ? (
@@ -381,9 +366,7 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
             </div>
           ) : experts.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 shadow-sm border border-stone-100 flex flex-col items-center text-center">
-              <p className="text-stone-400 text-sm font-['Inter'] mb-5">
-                No expert profiles yet.
-              </p>
+              <p className="text-stone-400 text-sm font-['Inter'] mb-5">No expert profiles yet.</p>
               <button
                 onClick={() => setView('add')}
                 className="flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-medium font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all"
@@ -406,12 +389,24 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
         </>
       )}
 
-      {/* Add / Edit form */}
       {tab === 'profiles' && (view === 'add' || view === 'edit') && (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100">
+          {/* Form header with X close button */}
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest font-['Inter']">
+              {view === 'add' ? 'New Profile' : 'Editing Profile'}
+            </p>
+            <button
+              onClick={handleCancel}
+              className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 active:scale-95 transition-all"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
           <GuruProfileForm
             key={editingExpert?.id ?? 'new'}
-            userId={user.id}
+            userId={userId}
             expertId={view === 'edit' ? editingExpert?.id : undefined}
             initialData={view === 'edit' ? editingExpert : undefined}
             onSuccess={view === 'add' ? handleAddSuccess : handleEditSuccess}
@@ -426,34 +421,19 @@ const ManagementPanel = ({ user, onSignOut }: { user: User; onSignOut: () => voi
 /* ── Root page ─────────────────────────────────────────────────────── */
 
 const PlacedGuruPage = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [checking, setChecking] = useState(true);
+  const { user, isLoaded } = useUser();
+  const navigate = useNavigate();
 
+  // Move redirect into a useEffect so it never fires during
+  // unrelated re-renders (e.g. closing the form with the X button)
   useEffect(() => {
-    // Check existing session
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setChecking(false);
-    });
+    if (isLoaded && !user) {
+      navigate('/?redirect=/placed-guru', { replace: true });
+    }
+  }, [isLoaded, user]);
 
-    // Listen for auth changes (login / logout / email confirmation redirect)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      // Clean the access_token hash from the URL after email confirmation
-      if (_event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  // Still resolving session
-  if (checking) {
+  // Still resolving Clerk session OR about to redirect
+  if (!isLoaded || !user) {
     return (
       <div className="min-h-screen bg-[#fcfcf9] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-stone-200 border-t-stone-700 rounded-full animate-spin" />
@@ -461,18 +441,12 @@ const PlacedGuruPage = () => {
     );
   }
 
-  // Not signed in → show login
-  if (!user) {
-    return <GuruLoginForm onSuccess={() => {}} />;
-  }
-
-  // Signed in → show management panel
   return (
     <div className="min-h-screen bg-[#fcfcf9]">
       <div className="w-full flex flex-col items-center z-50">
-        <Header onStartTour={() => {}} />
+        <Header onStartTour={() => { }} />
       </div>
-      <ManagementPanel user={user} onSignOut={handleSignOut} />
+      <ManagementPanel userId={user.id} />
     </div>
   );
 };

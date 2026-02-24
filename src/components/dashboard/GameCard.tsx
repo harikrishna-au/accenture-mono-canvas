@@ -69,6 +69,73 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id, classNa
         }
     };
 
+    // Special premium render for "Connect with me"
+    if (game.typingHighlight) {
+        return (
+            <div
+                id={id}
+                onClick={handleCardClick}
+                className={`relative h-32 rounded-xl overflow-hidden cursor-pointer group transition-all duration-500 hover:-translate-y-2 hover:scale-[1.03] ${className}`}
+                style={{
+                    background: 'linear-gradient(135deg, #0f0c29, #1a1a2e, #16213e)',
+                    boxShadow: '0 0 0 1px rgba(139,92,246,0.3), 0 8px 32px rgba(139,92,246,0.25), 0 20px 60px rgba(59,130,246,0.15)',
+                }}
+            >
+                {/* Animated glow rings */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div
+                        className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-30 group-hover:opacity-60 transition-opacity duration-700"
+                        style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }}
+                    />
+                    <div
+                        className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full opacity-20 group-hover:opacity-50 transition-opacity duration-700"
+                        style={{ background: 'radial-gradient(circle, #3b82f6, transparent 70%)' }}
+                    />
+                    {/* Shimmer sweep */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                </div>
+
+                {/* Sparkle dots */}
+                <div className="absolute top-3 left-4 w-1 h-1 rounded-full bg-purple-400 opacity-70 animate-pulse" />
+                <div className="absolute top-6 left-8 w-0.5 h-0.5 rounded-full bg-blue-300 opacity-50 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                <div className="absolute bottom-4 right-6 w-1 h-1 rounded-full bg-violet-300 opacity-60 animate-pulse" style={{ animationDelay: '0.7s' }} />
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1.5 px-4">
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🤝</span>
+                        <span className="text-base font-bold text-white font-['Inter'] tracking-tight">
+                            {game.name}
+                        </span>
+                    </div>
+
+                    {/* Glowing CTA badge */}
+                    <div
+                        className="mt-1 px-3 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase text-white"
+                        style={{
+                            background: 'linear-gradient(90deg, #7c3aed, #4f46e5)',
+                            boxShadow: '0 0 12px rgba(124,58,237,0.7)',
+                        }}
+                    >
+                        {game.typingText || 'BOOK SESSION'}
+                    </div>
+
+                    {game.subtitle && (
+                        <span className="text-[9px] text-center text-blue-300/80 font-medium tracking-wide leading-snug max-w-[160px]">
+                            {game.subtitle}
+                        </span>
+                    )}
+                </div>
+
+                {/* Bottom accent line */}
+                <div
+                    className="absolute bottom-0 inset-x-0 h-0.5 group-hover:opacity-100 opacity-60 transition-opacity duration-500"
+                    style={{ background: 'linear-gradient(90deg, transparent, #a855f7, #3b82f6, transparent)' }}
+                />
+            </div>
+        );
+    }
+
     return (
         <div
             id={id}
@@ -146,25 +213,6 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id, classNa
                     <div className="w-full h-6 bg-amber-500 shadow-md flex items-center justify-center border-t border-amber-300/50">
                         <span className="text-white font-bold text-[10px] tracking-widest uppercase drop-shadow-sm">{game.premiumBottomBarText}</span>
                     </div>
-                </div>
-            )}
-            {/* Typing Highlight Effect */}
-            {game.typingHighlight && (
-                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-all duration-300 group-hover:bg-white/95">
-                    <div className="relative">
-                        <span className="text-4xl absolute -top-12 left-1/2 -translate-x-1/2 mb-4 animate-bounce">👇</span>
-                        <div className="overflow-hidden whitespace-nowrap border-r-4 border-amber-600 animate-typing text-sm font-bold text-amber-900 tracking-widest uppercase">
-                            {game.typingText || "BOOK NOW"}
-                        </div>
-                    </div>
-                    <span className={`text-lg font-bold text-center leading-tight mt-6 text-amber-950`}>
-                        {game.name}
-                    </span>
-                    {game.subtitle && (
-                        <span className="text-xs text-center text-amber-700/80 mt-2 font-medium">
-                            {game.subtitle}
-                        </span>
-                    )}
                 </div>
             )}
         </div>

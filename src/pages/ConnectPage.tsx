@@ -1,19 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import { Bot, Sparkles, Lock, Search, Loader2, CalendarDays } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Bot, Sparkles, Lock, Search, Loader2, CalendarDays, UserPlus, ChevronDown } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import ExpertCard, { Expert } from './connect/ExpertCard';
-import BookingModal from './connect/BookingModal';
+import BookingScreen from './connect/BookingScreen';
 import MyBookingsModal from './connect/MyBookingsModal';
 
 const ConnectPage = () => {
     const navigate = useNavigate();
+    const { expertId } = useParams<{ expertId?: string }>();
     const [experts, setExperts] = useState<Expert[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCompany, setSelectedCompany] = useState('All');
     const [showMyBookings, setShowMyBookings] = useState(false);
+
+    const COMPANIES = ['All', 'Accenture', 'Infosys', 'Cognizant', 'TCS', 'Wipro', 'IBM'];
+
+    // Smooth ticker scroll — no CSS animation so speed changes never reset position
+    const tickerRef = useRef<HTMLDivElement>(null);
+    const rafRef = useRef<number | null>(null);
+    const posRef = useRef(0);
+    const currentSpeedRef = useRef(1);   // px per frame, interpolated
+    const targetSpeedRef = useRef(1);    // 1 = normal, 0.25 = slow
+    const halfWidthRef = useRef(0);
+
+    useEffect(() => {
+        const el = tickerRef.current;
+        if (!el) return;
+        // Measure after first paint so children have rendered
+        const measure = () => { halfWidthRef.current = el.scrollWidth / 2; };
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+
+        const tick = () => {
+            // Smooth lerp toward target speed
+            currentSpeedRef.current += (targetSpeedRef.current - currentSpeedRef.current) * 0.06;
+            posRef.current -= currentSpeedRef.current;
+            if (halfWidthRef.current > 0 && posRef.current <= -halfWidthRef.current) {
+                posRef.current += halfWidthRef.current;
+            }
+            if (tickerRef.current) {
+                tickerRef.current.style.transform = `translateX(${posRef.current}px)`;
+            }
+            rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            ro.disconnect();
+            if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        };
+    }, []);
+
+    const handleTickerEnter = useCallback(() => { targetSpeedRef.current = 0.25; }, []);
+    const handleTickerLeave = useCallback(() => { targetSpeedRef.current = 1; }, []);
 
     useEffect(() => {
         const fetchExperts = async () => {
@@ -28,7 +72,34 @@ const ConnectPage = () => {
         fetchExperts();
     }, []);
 
+    // When navigating directly to /connect/:expertId, fetch and open that expert
+    useEffect(() => {
+        if (!expertId) {
+            setSelectedExpert(null);
+            return;
+        }
+        supabase
+            .from('experts')
+            .select('*')
+            .eq('id', expertId)
+            .single()
+            .then(({ data }) => {
+                if (data) setSelectedExpert(data as unknown as Expert);
+            });
+    }, [expertId]);
+
+    const handleBook = (expert: Expert) => {
+        navigate(`/connect/${expert.id}`);
+    };
+
+    const handleClose = () => {
+        setSelectedExpert(null);
+        navigate('/connect');
+    };
+
     const filteredExperts = experts.filter((e) => {
+        const matchesCompany = selectedCompany === 'All' || (e.company?.toLowerCase() === selectedCompany.toLowerCase());
+        if (!matchesCompany) return false;
         if (!searchQuery.trim()) return true;
         const q = searchQuery.toLowerCase();
         return (
@@ -69,10 +140,14 @@ const ConnectPage = () => {
                     </p>
 
                     {/* Company Filter Scroll */}
-                    <div className="w-full max-w-4xl mt-12 overflow-hidden relative pb-4">
+                    <div
+                        className="w-full max-w-4xl mt-12 overflow-hidden relative pb-4"
+                        onMouseEnter={handleTickerEnter}
+                        onMouseLeave={handleTickerLeave}
+                    >
                         <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#fcfcf9] to-transparent z-10" />
                         <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#fcfcf9] to-transparent z-10" />
-                        <div className="flex items-center gap-4 min-w-max px-4 animate-scroll-left hover:[animation-play-state:paused]">
+                        <div ref={tickerRef} className="flex items-center gap-4 min-w-max px-4">
                             {[
                                 { name: 'All', locked: false },
                                 { name: 'Accenture', locked: false },
@@ -108,15 +183,21 @@ const ConnectPage = () => {
                     </div>
                 </div>
 
-                {/* Search + My Bookings */}
+                {/* Search + Willing to Share + My Bookings */}
                 <div className="flex items-center gap-3 mb-8">
-                    <button
-                        onClick={() => setShowMyBookings(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:border-stone-400 hover:text-stone-900 transition-all whitespace-nowrap shadow-sm"
-                    >
-                        <CalendarDays className="w-4 h-4" />
-                        My Bookings
-                    </button>
+                    {/* Company dropdown */}
+                    <div className="relative">
+                        <select
+                            value={selectedCompany}
+                            onChange={(e) => setSelectedCompany(e.target.value)}
+                            className="appearance-none pl-4 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-700 font-medium font-['Inter'] focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all shadow-sm cursor-pointer hover:border-stone-400"
+                        >
+                            {COMPANIES.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                    </div>
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
                         <input
@@ -127,6 +208,20 @@ const ConnectPage = () => {
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
                         />
                     </div>
+                    <button
+                        onClick={() => navigate('/placed-guru')}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-sm font-medium font-['Inter'] transition-all whitespace-nowrap shadow-sm hover:shadow-md"
+                    >
+                        <UserPlus className="w-4 h-4" />
+                        Willing to Share Your Experience?
+                    </button>
+                    <button
+                        onClick={() => setShowMyBookings(true)}
+                        className="ml-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:border-stone-400 hover:text-stone-900 transition-all whitespace-nowrap shadow-sm"
+                    >
+                        <CalendarDays className="w-4 h-4" />
+                        My Bookings
+                    </button>
                 </div>
 
                 {/* Expert Grid */}
@@ -158,7 +253,7 @@ const ConnectPage = () => {
                             <ExpertCard
                                 key={expert.id}
                                 expert={expert}
-                                onBook={setSelectedExpert}
+                                onBook={handleBook}
                             />
                         ))}
                     </div>
@@ -166,9 +261,9 @@ const ConnectPage = () => {
             </div>
 
             {selectedExpert && (
-                <BookingModal
+                <BookingScreen
                     expert={selectedExpert}
-                    onClose={() => setSelectedExpert(null)}
+                    onClose={handleClose}
                 />
             )}
             {showMyBookings && (
