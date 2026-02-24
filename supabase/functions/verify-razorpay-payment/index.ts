@@ -49,6 +49,19 @@ serve(async (req: Request) => {
 
         if (profileError) throw profileError;
 
+        // Sync premium status to Clerk publicMetadata so frontend reads it without a DB call
+        const clerkSecret = Deno.env.get('CLERK_SECRET_KEY');
+        if (clerkSecret) {
+            await fetch(`https://api.clerk.com/v1/users/${clerk_user_id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${clerkSecret}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ public_metadata: { isPremium: true } }),
+            });
+        }
+
         // Log transaction (Optional update to existing transaction)
         await supabaseAdmin.from('payment_transactions').update({
             status: 'verified_client_side',
