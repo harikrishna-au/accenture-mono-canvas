@@ -49,22 +49,20 @@ serve(async (req: Request) => {
 
         if (profileError) throw profileError;
 
-        // Sync premium status to Clerk publicMetadata so frontend reads it without a DB call
-        // Non-critical — wrapped in try/catch so payment success is never blocked by this
-        try {
-            const clerkSecret = Deno.env.get('CLERK_SECRET_KEY');
-            if (clerkSecret) {
-                await fetch(`https://api.clerk.com/v1/users/${clerk_user_id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${clerkSecret}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ public_metadata: { isPremium: true } }),
-                });
-            }
-        } catch (clerkError) {
-            console.warn("Clerk metadata update failed (non-critical):", clerkError);
+        // Sync premium status to Clerk publicMetadata — frontend reads from here
+        const clerkSecret = Deno.env.get('CLERK_SECRET_KEY');
+        if (!clerkSecret) throw new Error("Server Misconfiguration: Clerk secret missing");
+        const clerkRes = await fetch(`https://api.clerk.com/v1/users/${clerk_user_id}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${clerkSecret}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ public_metadata: { isPremium: true } }),
+        });
+        if (!clerkRes.ok) {
+            const body = await clerkRes.text();
+            throw new Error(`Clerk metadata update failed (${clerkRes.status}): ${body}`);
         }
 
         // Log transaction (Optional update to existing transaction)
