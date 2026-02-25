@@ -11,15 +11,15 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
     {
-        text: "The Harry The Blaze is really helpful, especially for candidates who are not very familiar with the Accenture exam process, and I genuinely appreciate the effort put into creating it. However, when it comes to the AI-enabled interview feature, I felt that the questions were somewhat repetitive and mostly focused on past activities. Including a wider range of questions or more depth could make it feel closer to a real interview. Overall, the platform is useful, and the work behind it is truly appreciated.",
+        text: "Harry The Blaze is really helpful, especially for candidates who are not very familiar with the MNC assessment process, and I genuinely appreciate the effort put into creating it. However, when it comes to the AI-enabled interview feature, I felt that the questions were somewhat repetitive and mostly focused on past activities. Including a wider range of questions or more depth could make it feel closer to a real interview. Overall, the platform is useful, and the work behind it is truly appreciated.",
         author: "Aspiring Candidate",
     },
     {
-        text: "Overall, my experience with the app was very good. The app is well designed and the user experience was excellent. When I attempted the assessment directly on Accenture’s platform, I noticed that some of the games were different compared to the practice ones. However, the way you’ve designed and structured the practice on the app is really helpful.",
+        text: "Overall, my experience with the app was very good. The app is well designed and the user experience was excellent. When I attempted the assessment directly on the company’s platform, I noticed that some of the games were different compared to the practice ones. However, the way you’ve designed and structured the practice on the app is really helpful.",
         author: "User Feedback",
     },
     {
-        text: "One suggestion would be to please add the updated Communication Round pattern and also include Accenture cracking tips and strategies from Round 1 till final selection, which would be very helpful for candidates.",
+        text: "One suggestion would be to please add the updated Communication Round pattern and also include tips and strategies from Round 1 till final selection, which would be very helpful for candidates.",
         author: "Community Member",
     },
     {
@@ -27,11 +27,11 @@ const testimonials: Testimonial[] = [
         author: "Student",
     },
     {
-        text: "Thanks for your portal buddy .... really helped a lot with cognitive assessment. Accenture conducted a selection round yesterday for on campus.",
+        text: "Thanks for your portal buddy .... really helped a lot with cognitive assessment. The company conducted a selection round yesterday for on campus.",
         author: "On-Campus Student",
     },
     {
-        text: "I haven’t tried the Communication Round yet. Recently, I attempted Accenture through the off-campus process, but unfortunately I couldn’t clear the gaming round. This app is a lifesaver for practice.",
+        text: "I haven’t tried the Communication Round yet. Recently, I attempted the assessment through the off-campus process, but unfortunately I couldn’t clear the gaming round. This app is a lifesaver for practice.",
         author: "Off-Campus Applicant",
     },
 ];

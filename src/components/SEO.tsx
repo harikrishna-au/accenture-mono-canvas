@@ -11,10 +11,10 @@ interface SEOProps {
 
 const SEO = ({
     title = "Harry The Blaze",
-    description = "Minimal practice platform for Accenture rounds including game-based and communication simulations",
+    description = "Cognitive skill training platform for MNC assessments — game-based aptitude and communication simulations",
     name = "Harry The Blaze",
     type = "website",
-    keywords = "Harry the Blaze, Accenture, Practice, Mock Interview, Communication Round, Accenture Mono Canvas",
+    keywords = "Harry the Blaze, cognitive assessment, MNC practice, aptitude training, game-based assessment, communication round, placement preparation",
     canonical
 }: SEOProps) => { // Use proper React functional component syntax if preferred
     return (
