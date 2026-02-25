@@ -1,10 +1,50 @@
 
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePremiumStatus() {
     const { user, isLoaded } = useUser();
+    const [isPremium, setIsPremium] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const isPremium = !!(user?.publicMetadata?.isPremium);
+    useEffect(() => {
+        if (!isLoaded) return;
 
-    return { isPremium, loading: !isLoaded };
+        if (!user) {
+            setIsPremium(false);
+            setLoading(false);
+            return;
+        }
+
+        // Fast path: Clerk metadata is already set
+        if (user.publicMetadata?.isPremium) {
+            setIsPremium(true);
+            setLoading(false);
+            return;
+        }
+
+        // Fallback: check Supabase for users who paid before Clerk sync was added
+        async function checkSupabase() {
+            const { data } = await supabase
+                .from('profiles')
+                .select('is_premium')
+                .eq('user_id', user!.id)
+                .maybeSingle();
+
+            if (data?.is_premium) {
+                setIsPremium(true);
+                // Auto-heal: sync to Clerk so future checks are instant
+                await supabase.functions.invoke('sync-premium-to-clerk', {
+                    body: { clerk_user_id: user!.id },
+                }).catch(() => {}); // non-critical
+            }
+
+            setLoading(false);
+        }
+
+        checkSupabase();
+    }, [user, isLoaded]);
+
+    return { isPremium, loading };
 }
