@@ -44,29 +44,29 @@ export const CompanySelection = ({ onSelectCompany, onFeedbackClick, onSupportCl
     const companies = [
         {
             id: "accenture",
-            name: "Accenture",
-            description: "Master the communication rounds and cognitive assessments specific to Accenture's recruitment process.",
+            name: "Cognitive Track",
+            description: "Master game-based cognitive puzzles and communication simulations used in top MNC hiring.",
             status: "active" as const,
             color: "bg-purple-100"
         },
         {
             id: "cognizant",
-            name: "Cognizant",
-            description: "Prepare for GenC and GenC Next roles with tailored technical and HR interview simulations.",
+            name: "Technical Track",
+            description: "Sharpen your analytical and reasoning skills with technical assessments and HR interview simulations.",
             status: "active" as const,
             color: "bg-blue-100"
         },
         {
             id: "ibm",
-            name: "IBM",
-            description: "Crack the IPAT and coding challenges with resources designed for IBM's hiring standards.",
+            name: "Reasoning Track",
+            description: "Build strong analytical and problem-solving skills with aptitude and coding challenges.",
             status: "coming-soon" as const,
             color: "bg-indigo-100"
         },
         {
             id: "wipro",
-            name: "Wipro",
-            description: "Get ready for NLTH (Elite) and Turbo challenges with comprehensive practice modules.",
+            name: "Aptitude Track",
+            description: "Strengthen your aptitude and logical reasoning with comprehensive practice modules.",
             status: "coming-soon" as const,
             color: "bg-sky-100"
         },

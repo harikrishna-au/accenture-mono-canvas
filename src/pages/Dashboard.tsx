@@ -94,7 +94,7 @@ const Dashboard = () => {
     setShowPaymentPopup(true);
   };
 
-  const companyName = companyId ? companyId.charAt(0).toUpperCase() + companyId.slice(1) : 'Accenture';
+  const companyName = companyId ? companyId.charAt(0).toUpperCase() + companyId.slice(1) : 'Assessment';
 
   const accentureGames = [
     { id: 1, name: "Matrix Flow", path: "/game/matrix", premiumBottomBarText: "EXTRA LEVELS with Premium" },
@@ -186,7 +186,7 @@ const Dashboard = () => {
     <div className={`min-h-screen w-full flex flex-col items-center font-sans selection:bg-secondary/20 selection:text-secondary-foreground ${companyId ? 'h-screen overflow-hidden justify-center' : 'overflow-y-auto'}`}>
       <SEO
         title="Harry The Blaze | Dashboard"
-        description="Your central hub for Accenture practice rounds. Track progress, access new games, and prepare for success with Harry the Blaze."
+        description="Your central hub for MNC cognitive practice. Track progress, access games, and sharpen your skills for top company assessments."
       />
       {/* Japandi / Zen Sanctuary Background */}
       {/* Japandi / Zen Sanctuary Background */}

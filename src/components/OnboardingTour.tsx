@@ -12,13 +12,13 @@ interface TourStep {
 const JOURNEY_STEPS: TourStep[] = [
     {
         title: "Welcome to Harry The Blaze",
-        description: "This is a practice environment designed to help you eliminate fear before your real Accenture exams. Practice repeatedly to build confidence.",
+        description: "This is a practice environment designed to help you eliminate fear before your real placement assessments. Practice repeatedly to build confidence.",
         position: 'center'
     },
     {
         targetId: 'onboarding-tr-group',
         title: "Technical Round (TR) Practice",
-        description: "Accenture's TR includes 3 distinct logic puzzles. We have replicated these exact games here so you can master the logic before the exam.",
+        description: "The Technical Round includes 3 distinct cognitive puzzles. We have built these games from scratch so you can master the logic before your real assessment.",
         position: 'target'
     },
     {
@@ -43,7 +43,7 @@ const LANDING_STEPS: TourStep[] = [
     },
     {
         title: "What is the Benefit?",
-        description: "By practicing with realistic simulations of Accenture's Cognitive and Communication rounds, you'll walk into your exam knowing exactly what to expect, giving you a massive confident edge.",
+        description: "By practicing with realistic cognitive and communication simulations, you'll walk into your assessment knowing exactly what to expect, giving you a massive confident edge.",
         position: 'center'
     }
 ];

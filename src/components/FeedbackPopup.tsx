@@ -109,7 +109,7 @@ const FeedbackPopup = ({ isOpen, onClose, feedbackType = 'recruitment' }: Feedba
                             <div className="space-y-3">
                                 <h2 className="text-2xl font-black text-neutral-900 leading-tight">Important for On-Campus Students</h2>
                                 <p className="text-neutral-600 text-sm leading-relaxed">
-                                    If Accenture is visiting your college for on-campus placements, this is crucial.
+                                    If an MNC is visiting your college for on-campus placements, this is crucial.
                                 </p>
                                 <p className="text-neutral-600 text-sm leading-relaxed">
                                     Please connect with us and fill the feedback form. Your input helps us bring this game-based practice directly to your campus before the real assessment.
@@ -126,7 +126,7 @@ const FeedbackPopup = ({ isOpen, onClose, feedbackType = 'recruitment' }: Feedba
                                     }}
                                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-bold shadow-lg shadow-blue-200"
                                 >
-                                    🔵 Yes, Accenture is coming to my campus
+                                    🔵 Yes, a company is coming to my campus
                                 </Button>
                                 <Button
                                     onClick={() => {
