@@ -17,16 +17,19 @@ export function usePremiumStatus() {
             return;
         }
 
-        // Fast path: Clerk metadata is already set
-        if (user.publicMetadata?.isPremium) {
-            console.log('[PremiumStatus] premium via Clerk metadata');
-            setIsPremium(true);
-            setLoading(false);
-            return;
-        }
+        async function checkPremium() {
+            // Reload to get latest metadata from Clerk server (not cached session)
+            await user!.reload();
 
-        // Fallback: check Supabase for users who paid before Clerk sync was added
-        async function checkSupabase() {
+            // Fast path: check Clerk metadata after fresh reload
+            if (user!.publicMetadata?.isPremium) {
+                console.log('[PremiumStatus] premium via Clerk metadata');
+                setIsPremium(true);
+                setLoading(false);
+                return;
+            }
+
+            // Fallback: check Supabase for users who paid before Clerk sync was added
             const { data } = await supabase
                 .from('profiles')
                 .select('is_premium')
@@ -47,7 +50,7 @@ export function usePremiumStatus() {
             setLoading(false);
         }
 
-        checkSupabase();
+        checkPremium();
     }, [user, isLoaded]);
 
     return { isPremium, loading };
