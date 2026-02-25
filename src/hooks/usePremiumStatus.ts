@@ -19,6 +19,7 @@ export function usePremiumStatus() {
 
         // Fast path: Clerk metadata is already set
         if (user.publicMetadata?.isPremium) {
+            console.log('[PremiumStatus] premium via Clerk metadata');
             setIsPremium(true);
             setLoading(false);
             return;
@@ -33,11 +34,14 @@ export function usePremiumStatus() {
                 .maybeSingle();
 
             if (data?.is_premium) {
+                console.log('[PremiumStatus] premium via Supabase fallback — syncing to Clerk');
                 setIsPremium(true);
                 // Auto-heal: sync to Clerk so future checks are instant
                 await supabase.functions.invoke('sync-premium-to-clerk', {
                     body: { clerk_user_id: user!.id },
                 }).catch(() => {}); // non-critical
+            } else {
+                console.log('[PremiumStatus] not premium (Clerk: false, Supabase: false)');
             }
 
             setLoading(false);
