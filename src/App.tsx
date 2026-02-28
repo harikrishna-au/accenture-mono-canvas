@@ -13,11 +13,13 @@ import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { CommunicationRounds } from "./pages/communication-rounds";
+import { CommunicationPatternsPage } from "@/components/dashboard/CommunicationPatternsPage";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
 import CouponDashboard from "./pages/CouponDashboard";
 import AIInterview from "./pages/AIInterview";
+import AIInterviewSelection from "./pages/AIInterviewSelection";
 import PremiumRoute from "@/components/PremiumRoute";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
@@ -68,7 +70,8 @@ const App = () => {
               <Route path="/refund" element={<RefundPolicy />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/coupon-stats" element={<CouponDashboard />} />
-              <Route path="/ai-interview" element={<AIInterview />} />
+              <Route path="/ai-interview" element={<AIInterviewSelection />} />
+              <Route path="/ai-interview/:type" element={<AIInterview />} />
               <Route path="/connect" element={<ConnectPage />} />
               <Route path="/connect/:expertId" element={<ConnectPage />} />
               <Route path="/placed-guru" element={<PlacedGuruPage />} />
@@ -82,6 +85,12 @@ const App = () => {
 
               {/* Hidden Maze Game */}
               <Route path="/game/hidden-maze" element={<HiddenMaze />} />
+
+              {/* Communication Pattern Selector */}
+              <Route
+                path="/game/communication-patterns"
+                element={<CommunicationPatternsPage />}
+              />
 
               {/* Communication Game - Refactored */}
               <Route

@@ -13,9 +13,9 @@ import { toast } from "sonner";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
-import { GameCard } from "@/components/dashboard/GameCard";
 import { CompanySelection } from "@/components/dashboard/CompanySelection";
 import { TestimonialScroller } from "@/components/dashboard/TestimonialScroller";
+import { CognitiveGamesPage } from "@/components/dashboard/CognitiveGamesPage";
 import PaymentPopup from "@/components/PaymentPopup";
 
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
@@ -103,8 +103,8 @@ const Dashboard = () => {
     {
       id: 4,
       name: "Communication Round",
-      path: "/game/communication",
-      // Removed isReleased check; effectively enabled (free trial)
+      path: "/game/communication-patterns",
+      // Navigates to pattern selector page first
       disabled: false,
       premiumBottomBarText: "UNLOCK WITH PREMIUM"
     },
@@ -183,7 +183,7 @@ const Dashboard = () => {
   const games = companyId === 'cognizant' ? cognizantGames : accentureGames;
 
   return (
-    <div className={`min-h-screen w-full flex flex-col items-center font-sans selection:bg-secondary/20 selection:text-secondary-foreground ${companyId ? 'h-screen overflow-hidden justify-center' : 'overflow-y-auto'}`}>
+    <div className={`min-h-screen w-full flex flex-col items-center font-sans selection:bg-secondary/20 selection:text-secondary-foreground ${companyId ? 'overflow-y-auto' : 'overflow-y-auto'}`}>
       <SEO
         title="Harry The Blaze | Dashboard"
         description="Your central hub for MNC cognitive practice. Track progress, access games, and sharpen your skills for top company assessments."
@@ -216,9 +216,9 @@ const Dashboard = () => {
         mode={companyId ? 'journey' : 'landing'}
       />
 
-      <div className={`relative z-10 flex-1 flex flex-col items-center w-full transition-all duration-500 ${companyId ? 'justify-center p-0' : 'p-4 pt-20 md:p-8'} ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`relative z-10 flex-1 flex flex-col items-center w-full transition-all duration-500 ${companyId ? 'justify-start pt-20 p-4' : 'p-4 pt-20 md:p-8'} ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
-          <div className={`flex flex-col items-center w-full max-w-6xl flex-1 ${companyId ? 'justify-center h-full' : 'min-h-[60vh] justify-start'}`}>
+          <div className={`flex flex-col items-center w-full max-w-6xl flex-1 ${companyId ? 'justify-start' : 'min-h-[60vh] justify-start'}`}>
 
             {/* Conditional Views */}
             {!companyId ? (
@@ -232,56 +232,8 @@ const Dashboard = () => {
                 onSupportClick={() => setShowSupportPopup(true)}
               />
             ) : (
-              // VIEW 2: Company Details - Simplified (Cards Only)
-              <div className="w-full h-full flex items-center justify-center animate-in zoom-in-95 duration-500">
-                <div className="flex flex-wrap justify-center items-center gap-8 max-w-[90vw]">
-                  {/* Technical Round Group */}
-                  <div id="onboarding-tr-group" style={{ display: 'contents' }}>
-                    {games.slice(0, 3).map((game) => (
-                      <GameCard
-                        key={game.id}
-                        game={game}
-                        isPremium={isPremium}
-                        onSubscribe={handleSubscribe}
-                        onFeedback={() => {
-                          setFeedbackType('recruitment');
-                          setShowFeedbackPopup(true);
-                        }}
-                        className="w-full sm:w-72 md:w-64 lg:w-72"
-                      />
-                    ))}
-                  </div>
-
-                  {/* Remaining Games */}
-                  {games.slice(3).map((game) => (
-                    <GameCard
-                      key={game.id}
-                      id={
-                        game.name === "Communication Round" ? "onboarding-comm-card" :
-                          (game.name === "Unlock All Levels" || game.name === "Premium Active") ? "onboarding-premium-card" :
-                            undefined
-                      }
-                      game={game}
-                      isPremium={isPremium}
-                      onSubscribe={handleSubscribe}
-                      onFeedback={() => {
-                        setFeedbackType('recruitment');
-                        setShowFeedbackPopup(true);
-                      }}
-                      className="w-full sm:w-72 md:w-64 lg:w-72"
-                    />
-                  ))}
-
-                  <div className="w-full flex justify-center mt-8">
-                    <button
-                      onClick={() => navigate('/dashboard')}
-                      className="text-stone-400 hover:text-stone-600 text-sm font-medium transition-colors"
-                    >
-                      Need to switch? Go Back
-                    </button>
-                  </div>
-                </div>
-              </div>
+              // VIEW 2: Cognitive Games
+              <CognitiveGamesPage isPremium={isPremium} onSubscribe={handleSubscribe} />
             )}
 
           </div>

@@ -84,7 +84,7 @@ export const useAIInterview = () => {
         }
     };
 
-    const startInterview = async (resume: string, userId?: string | null) => {
+    const startInterview = async (resume: string, userId?: string | null, interviewType: "hr" | "technical" = "hr") => {
 
         // Request Mic immediately
         const hasMic = await requestMicPermission();
@@ -96,6 +96,7 @@ export const useAIInterview = () => {
             const formData = new FormData();
             // Always text now
             formData.append("resume_text", resume);
+            formData.append("interview_type", interviewType);
 
             if (userId) {
                 formData.append("user_id", userId);

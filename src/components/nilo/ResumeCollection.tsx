@@ -8,9 +8,10 @@ interface ResumeCollectionProps {
     onSubmit: (resumeText: string) => Promise<void>;
     onUpload: (file: File) => Promise<void>;
     isSubmitting: boolean;
+    interviewType?: "hr" | "technical";
 }
 
-export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting }: ResumeCollectionProps) => {
+export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewType = "hr" }: ResumeCollectionProps) => {
     const [step, setStep] = useState<1 | 2>(1);
     const [resumeText, setResumeText] = useState("");
     const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -68,6 +69,19 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting }: ResumeCol
                 </div>
 
                 <div className="text-center space-y-3">
+                    {/* Interview type badge */}
+                    <div className="flex justify-center mb-2">
+                        <span
+                            className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] uppercase font-['Inter'] border"
+                            style={
+                                interviewType === "technical"
+                                    ? { color: "#059669", background: "rgba(5,150,105,0.07)", borderColor: "rgba(5,150,105,0.2)" }
+                                    : { color: "#e11d48", background: "rgba(225,29,72,0.07)", borderColor: "rgba(225,29,72,0.2)" }
+                            }
+                        >
+                            {interviewType === "technical" ? "Technical Interview" : "HR Interview"}
+                        </span>
+                    </div>
                     <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         {step === 1 ? <Upload className="w-8 h-8" /> : <FileText className="w-8 h-8" />}
                     </div>

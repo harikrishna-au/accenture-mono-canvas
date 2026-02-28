@@ -35,25 +35,6 @@ export const GameCard = ({ game, isPremium, onSubscribe, onFeedback, id, classNa
             return;
         }
 
-        // Special handling for Communication Round
-        // Allows Free Trial access (bypass subscription check if specific logic allows)
-        if (game.name === "Communication Round") {
-            // Logic: Allow if it's the Communication Round (Free Trial Mode)
-            // Check permissions
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                navigate(game.path);
-            } catch (error: any) {
-                console.error("Permission check failed:", error);
-                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                    toast.error("Microphone permission denied. Please click the lock icon in your address bar and allow microphone access.");
-                } else {
-                    toast.error("Microphone access validation failed. Please ensure your microphone is connected and accessible.");
-                }
-            }
-            return;
-        }
 
         if (game.special && !isPremium) {
             onSubscribe();
