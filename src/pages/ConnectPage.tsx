@@ -116,14 +116,14 @@ const ConnectPage = () => {
     });
 
     return (
-        <div className="min-h-screen bg-[#fcfcf9] text-stone-900 font-sans selection:bg-stone-200">
+        <div className="min-h-screen bg-[#fcfcf9] text-stone-900 font-sans selection:bg-stone-200 overflow-x-hidden">
             <div className={`w-full flex flex-col items-center transition-all duration-700 z-50`}>
                 <Header onStartTour={() => { }} />
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 py-12">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 {/* Hero Header — preserving original design */}
-                <div className="relative flex flex-col items-center justify-center text-center mb-16 space-y-8 pt-16 w-full">
+                <div className="relative flex flex-col items-center justify-center text-center mb-8 md:mb-16 space-y-6 sm:space-y-8 pt-16 w-full">
                     <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-50 pointer-events-none">
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-emerald-200 rounded-full mix-blend-multiply blur-3xl -translate-x-20 -translate-y-4" />
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-sky-200 rounded-full mix-blend-multiply blur-3xl translate-x-10 translate-y-10" />
@@ -133,14 +133,14 @@ const ConnectPage = () => {
                     <div className="relative inline-flex items-center group mt-8">
                         <div className="absolute -inset-8 bg-yellow-400 rounded-full blur-[60px] opacity-40 -z-10 group-hover:opacity-70 transition-opacity duration-700" />
                         <div className="absolute -inset-4 bg-amber-500 rounded-full blur-[40px] opacity-30 -z-10 group-hover:opacity-60 transition-opacity duration-700" />
-                        <h1 className="text-7xl md:text-9xl font-serif tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-stone-800 to-stone-600 z-10 pb-4">
+                        <h1 className="text-5xl sm:text-7xl md:text-9xl font-serif tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-stone-800 to-stone-600 z-10 pb-4">
                             Connect.
                         </h1>
-                        <Sparkles className="absolute -top-4 -right-12 w-10 h-10 text-emerald-400 animate-pulse opacity-100 transition-opacity duration-700 z-20" />
-                        <Bot className="absolute -bottom-2 -left-10 w-8 h-8 text-sky-400 opacity-100 group-hover:-translate-y-2 transition-all duration-700 z-20" />
+                        <Sparkles className="absolute -top-3 -right-8 sm:-top-4 sm:-right-12 w-7 h-7 sm:w-10 sm:h-10 text-emerald-400 animate-pulse opacity-100 transition-opacity duration-700 z-20" />
+                        <Bot className="absolute -bottom-2 -left-7 sm:-left-10 w-6 h-6 sm:w-8 sm:h-8 text-sky-400 opacity-100 group-hover:-translate-y-2 transition-all duration-700 z-20" />
                     </div>
 
-                    <p className="text-xl md:text-2xl text-stone-500 max-w-2xl font-light leading-relaxed mt-4">
+                    <p className="text-base sm:text-xl md:text-2xl text-stone-500 max-w-2xl font-light leading-relaxed mt-2 sm:mt-4 px-4 sm:px-0">
                         Learn directly from peers who just cracked the same interviews.
                     </p>
 
@@ -189,44 +189,50 @@ const ConnectPage = () => {
                 </div>
 
                 {/* Search + Willing to Share + My Bookings */}
-                <div className="flex items-center gap-3 mb-8">
-                    {/* Company dropdown */}
-                    <div className="relative">
-                        <select
-                            value={selectedCompany}
-                            onChange={(e) => setSelectedCompany(e.target.value)}
-                            className="appearance-none pl-4 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-700 font-medium font-['Inter'] focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all shadow-sm cursor-pointer hover:border-stone-400"
+                <div className="flex flex-col gap-3 mb-8">
+                    {/* Row 1: Company dropdown + Search input */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="relative flex-shrink-0">
+                            <select
+                                value={selectedCompany}
+                                onChange={(e) => setSelectedCompany(e.target.value)}
+                                className="appearance-none pl-3 sm:pl-4 pr-8 sm:pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-700 font-medium font-['Inter'] focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all shadow-sm cursor-pointer hover:border-stone-400"
+                            >
+                                {COMPANIES.map((c) => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                        </div>
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search by name, skill, or company..."
+                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
+                            />
+                        </div>
+                    </div>
+                    {/* Row 2: Action buttons — full width on mobile, auto on desktop */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => navigate('/placed-guru')}
+                            className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-sm font-medium font-['Inter'] transition-all shadow-sm hover:shadow-md"
                         >
-                            {COMPANIES.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                            <UserPlus className="w-4 h-4 flex-shrink-0" />
+                            <span className="sm:hidden">Share Experience</span>
+                            <span className="hidden sm:inline">Willing to Share Your Experience?</span>
+                        </button>
+                        <button
+                            onClick={() => setShowMyBookings(true)}
+                            className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:border-stone-400 hover:text-stone-900 transition-all shadow-sm"
+                        >
+                            <CalendarDays className="w-4 h-4 flex-shrink-0" />
+                            My Bookings
+                        </button>
                     </div>
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search by name, skill, or company..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:border-transparent transition-all font-['Inter']"
-                        />
-                    </div>
-                    <button
-                        onClick={() => navigate('/placed-guru')}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-sm font-medium font-['Inter'] transition-all whitespace-nowrap shadow-sm hover:shadow-md"
-                    >
-                        <UserPlus className="w-4 h-4" />
-                        Willing to Share Your Experience?
-                    </button>
-                    <button
-                        onClick={() => setShowMyBookings(true)}
-                        className="ml-auto flex items-center gap-2 px-4 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl text-sm font-medium font-['Inter'] hover:border-stone-400 hover:text-stone-900 transition-all whitespace-nowrap shadow-sm"
-                    >
-                        <CalendarDays className="w-4 h-4" />
-                        My Bookings
-                    </button>
                 </div>
 
                 {/* Expert Grid */}

@@ -11,7 +11,7 @@ interface PaymentHandlerProps {
   date: Date;
   slot: TimeSlot;
   formData: BookingFormData;
-  onSuccess: (paymentId: string, orderId: string) => void;
+  onSuccess: (meetLink: string | null) => void;
   onError: () => void;
 }
 
@@ -115,7 +115,8 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
             );
 
             if (verifyRes.ok) {
-              onSuccess(response.razorpay_payment_id, response.razorpay_order_id);
+              const verifyData = await verifyRes.json();
+              onSuccess(verifyData.meet_link ?? null);
             } else {
               toast.error('Payment received but booking failed. Please contact support.');
               onError();

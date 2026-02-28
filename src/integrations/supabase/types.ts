@@ -190,6 +190,7 @@ export type Database = {
           interview_date: string | null
           package_lpa: number | null
           proof_url: string | null
+          email: string | null
           created_at: string
         }
         Insert: {
@@ -204,6 +205,7 @@ export type Database = {
           interview_date?: string | null
           package_lpa?: number | null
           proof_url?: string | null
+          email?: string | null
           created_at?: string
         }
         Update: {
@@ -218,6 +220,7 @@ export type Database = {
           interview_date?: string | null
           package_lpa?: number | null
           proof_url?: string | null
+          email?: string | null
           created_at?: string
         }
         Relationships: []
@@ -266,6 +269,7 @@ export type Database = {
           end_time: string | null
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
+          meet_link: string | null
           status: string
           created_at: string
         }
@@ -280,6 +284,7 @@ export type Database = {
           end_time?: string | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          meet_link?: string | null
           status?: string
           created_at?: string
         }
@@ -294,6 +299,7 @@ export type Database = {
           end_time?: string | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          meet_link?: string | null
           status?: string
           created_at?: string
         }

@@ -67,6 +67,7 @@ const BookingModal = ({ expert, onClose }: BookingModalProps) => {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [formData, setFormData] = useState<BookingFormData>({ name: '', email: '', message: '' });
+  const [meetLink, setMeetLink] = useState<string | null>(null);
 
   // Fetch expert availability on mount
   useEffect(() => {
@@ -265,7 +266,7 @@ const BookingModal = ({ expert, onClose }: BookingModalProps) => {
               date={selectedDate}
               slot={selectedSlot}
               formData={formData}
-              onSuccess={() => setStep('success')}
+              onSuccess={(link) => { setMeetLink(link); setStep('success'); }}
               onError={() => {}}
             />
           )}
@@ -277,6 +278,7 @@ const BookingModal = ({ expert, onClose }: BookingModalProps) => {
               startTime={selectedSlot.start}
               endTime={selectedSlot.end}
               userEmail={formData.email}
+              meetLink={meetLink}
               onClose={onClose}
             />
           )}

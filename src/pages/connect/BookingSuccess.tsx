@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Calendar, Clock, Mail } from 'lucide-react';
+import { CheckCircle2, Calendar, Clock, Mail, Video } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface BookingSuccessProps {
@@ -8,10 +8,11 @@ interface BookingSuccessProps {
   startTime: string;
   endTime: string;
   userEmail: string;
+  meetLink: string | null;
   onClose: () => void;
 }
 
-const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, onClose }: BookingSuccessProps) => {
+const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, meetLink, onClose }: BookingSuccessProps) => {
   return (
     <div className="flex flex-col items-center text-center py-4 space-y-6">
       {/* Icon */}
@@ -24,11 +25,11 @@ const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, onClo
 
       {/* Title */}
       <div>
-        <h3 className="text-2xl font-['Merriweather'] text-stone-900 mb-2">Payment received!</h3>
+        <h3 className="text-2xl font-['Merriweather'] text-stone-900 mb-2">Booking confirmed!</h3>
         <p className="text-stone-500 text-sm leading-relaxed font-['Inter']">
-          Your request has been sent to{' '}
-          <span className="font-semibold text-stone-700">{expertName}</span>.
-          You'll be notified once they confirm.
+          Your session with{' '}
+          <span className="font-semibold text-stone-700">{expertName}</span> is locked in.
+          Check your email for the details.
         </p>
       </div>
 
@@ -60,9 +61,25 @@ const BookingSuccess = ({ expertName, date, startTime, endTime, userEmail, onClo
         </div>
       </div>
 
-      <p className="text-stone-400 text-xs max-w-xs leading-relaxed font-['Inter']">
-        Check "My Bookings" on the connect page anytime to track your booking status.
-      </p>
+      {/* Google Meet link */}
+      {meetLink ? (
+        <div className="w-full">
+          <a
+            href={meetLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1a73e8] hover:bg-[#1557b0] active:scale-95 text-white rounded-xl text-sm font-medium font-['Inter'] transition-all duration-200"
+          >
+            <Video className="w-4 h-4" />
+            Join Google Meet
+          </a>
+          <p className="text-stone-400 text-xs mt-2 font-['Inter'] break-all">{meetLink}</p>
+        </div>
+      ) : (
+        <p className="text-stone-400 text-xs max-w-xs leading-relaxed font-['Inter']">
+          Check "My Bookings" on the connect page anytime to track your booking status.
+        </p>
+      )}
 
       <button
         onClick={onClose}

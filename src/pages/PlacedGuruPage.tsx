@@ -304,7 +304,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-6 pt-28 pb-12">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12">
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
           {/* Back button — visible when in add/edit form */}
@@ -317,7 +317,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
               Back
             </button>
           )}
-          <h1 className="text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
             {tab === 'profiles' ? headingMap[view] : 'Bookings'}
           </h1>
         </div>
@@ -390,7 +390,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
       )}
 
       {tab === 'profiles' && (view === 'add' || view === 'edit') && (
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-stone-100">
           {/* Form header with X close button */}
           <div className="flex items-center justify-between mb-6">
             <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest font-['Inter']">

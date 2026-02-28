@@ -69,7 +69,7 @@ const Header = ({ onStartTour }: HeaderProps) => {
           >
             <Zap className="w-3.5 h-3.5 text-white" fill="white" />
           </div>
-          <span className="text-stone-800 text-[1.05rem] font-bold tracking-tight font-['Merriweather'] transition-colors duration-300 group-hover:text-stone-600">
+          <span className="hidden sm:inline text-stone-800 text-[1.05rem] font-bold tracking-tight font-['Merriweather'] transition-colors duration-300 group-hover:text-stone-600">
             HARRY THE BLAZE
           </span>
         </button>

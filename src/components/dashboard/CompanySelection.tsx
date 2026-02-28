@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useCallback } from "react";
-import { Brain, Mic2, Bot, Users, ArrowUpRight } from "lucide-react";
+import { Layers, Mic2, Bot, Users, ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { WaitlistPopup } from "./WaitlistPopup";
@@ -135,7 +135,7 @@ const ConnectViz = () => (
         fontFamily: "'Inter', sans-serif",
       }}
     >
-      200+ sessions
+      5000+ users
     </span>
   </div>
 );
@@ -322,7 +322,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
                         border: "1px solid rgba(124,58,237,0.16)",
                       }}
                     >
-                      <Brain className="w-5 h-5" style={{ color: "#7c3aed" }} />
+                      <Layers className="w-5 h-5" style={{ color: "#7c3aed" }} />
                     </div>
                   </div>
                   <CognitiveViz />

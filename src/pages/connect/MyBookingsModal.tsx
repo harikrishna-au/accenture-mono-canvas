@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass } from 'lucide-react';
+import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass, Video } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,7 @@ interface Booking {
   date: string;
   start_time: string;
   end_time: string;
+  meet_link: string | null;
   status: string;
   created_at: string;
   experts: { name: string; photo_url: string | null } | null;
@@ -175,6 +176,19 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                       <p className="text-xs text-stone-500 font-['Inter'] line-clamp-2 bg-stone-50 rounded-lg px-3 py-2">
                         {booking.message}
                       </p>
+                    )}
+
+                    {/* Meet link */}
+                    {booking.meet_link && (
+                      <a
+                        href={booking.meet_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg text-xs font-medium font-['Inter'] transition-colors"
+                      >
+                        <Video className="w-3 h-3" />
+                        Join Google Meet
+                      </a>
                     )}
                   </div>
                 );

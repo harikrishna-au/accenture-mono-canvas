@@ -22,6 +22,7 @@ const GuruProfileForm = ({ userId, expertId, initialData, onSuccess, onCancel }:
 
   /* ── Core info ──────────────────────────────────────────────────── */
   const [name, setName] = useState(initialData?.name ?? '');
+  const [email, setEmail] = useState((initialData as any)?.email ?? '');
   const [title, setTitle] = useState(initialData?.title ?? '');
   const [bio, setBio] = useState(initialData?.bio ?? '');
   const [photoUrl, setPhotoUrl] = useState(initialData?.photo_url ?? '');
@@ -86,7 +87,7 @@ const GuruProfileForm = ({ userId, expertId, initialData, onSuccess, onCancel }:
   };
 
   const resetForm = () => {
-    setName(''); setTitle(''); setBio(''); setPhotoUrl(''); setPrice(100);
+    setName(''); setEmail(''); setTitle(''); setBio(''); setPhotoUrl(''); setPrice(100);
     setSkills([]); setSkillInput('');
     setCompany(''); setCustomCompany(''); setInterviewDate('');
     setPackageLpa(''); setProofUrl('');
@@ -107,6 +108,7 @@ const GuruProfileForm = ({ userId, expertId, initialData, onSuccess, onCancel }:
 
     const payload = {
       name: name.trim(),
+      email: email.trim() || null,
       title: title.trim() || null,
       bio: bio.trim() || null,
       photo_url: photoUrl || null,
@@ -223,15 +225,26 @@ const GuruProfileForm = ({ userId, expertId, initialData, onSuccess, onCancel }:
       {/* ── Basic Info ─────────────────────────────────────────────── */}
       <div>
         <p className={sectionLabel}>Basic Info</p>
-        <div className="flex items-start gap-5">
+        <div className="flex flex-col sm:flex-row items-start gap-5">
           <PhotoUploader value={photoUrl} onChange={setPhotoUrl} label="Profile Photo" />
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 w-full space-y-3">
             <div>
               <label className={labelCls}>Full Name <span className="text-stone-400">*</span></label>
               <input
                 type="text" value={name} required
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Priya Sharma"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>
+                Your Email <span className="text-stone-400 font-normal text-xs">(for session notifications)</span>
+              </label>
+              <input
+                type="email" value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="priya@example.com"
                 className={inputCls}
               />
             </div>
