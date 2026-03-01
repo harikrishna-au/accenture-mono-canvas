@@ -191,6 +191,7 @@ export type Database = {
           package_lpa: number | null
           proof_url: string | null
           email: string | null
+          google_refresh_token: string | null
           created_at: string
         }
         Insert: {
@@ -206,6 +207,7 @@ export type Database = {
           package_lpa?: number | null
           proof_url?: string | null
           email?: string | null
+          google_refresh_token?: string | null
           created_at?: string
         }
         Update: {
@@ -221,6 +223,7 @@ export type Database = {
           package_lpa?: number | null
           proof_url?: string | null
           email?: string | null
+          google_refresh_token?: string | null
           created_at?: string
         }
         Relationships: []

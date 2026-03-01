@@ -1,7 +1,7 @@
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X } from 'lucide-react';
+import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X, Video, CalendarCheck } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
@@ -11,11 +11,19 @@ import { Expert } from './connect/ExpertCard';
 
 /* ── Profile mini-card ─────────────────────────────────────────────── */
 
+function startGoogleOAuth(expertId: string) {
+  const clientId    = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const redirectUri = `${window.location.origin}/oauth/google/callback`;
+  const scope       = 'https://www.googleapis.com/auth/meetings.space.created';
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${expertId}`;
+  window.location.href = url;
+}
+
 const MyExpertCard = ({
   expert,
   onEdit,
 }: {
-  expert: Expert;
+  expert: Expert & { google_refresh_token?: string | null };
   onEdit: () => void;
 }) => (
   <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 flex items-start gap-4">
@@ -86,6 +94,24 @@ const MyExpertCard = ({
           )}
         </div>
       )}
+
+      {/* Google Meet connection status */}
+      <div className="mt-3 pt-3 border-t border-stone-100">
+        {expert.google_refresh_token ? (
+          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-['Inter']">
+            <Video className="w-3 h-3" />
+            Google Meet connected
+          </span>
+        ) : (
+          <button
+            onClick={() => startGoogleOAuth(expert.id)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-xl text-xs font-medium font-['Inter'] active:scale-95 transition-all"
+          >
+            <Video className="w-3 h-3" />
+            Connect Google for Meet links
+          </button>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -121,6 +147,7 @@ interface ExpertBooking {
   date: string;
   start_time: string;
   end_time: string;
+  meet_link: string | null;
   status: string;
   experts: { name: string; photo_url: string | null } | null;
 }
@@ -129,6 +156,38 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
   const [bookings, setBookings] = useState<ExpertBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [meetLoading, setMeetLoading] = useState<string | null>(null);
+
+  const generateMeetLink = async (bookingId: string) => {
+    setMeetLoading(bookingId);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-meet-link`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ booking_id: bookingId }),
+        }
+      );
+      const data = await res.json();
+      if (data.error === 'GOOGLE_NOT_CONNECTED') {
+        toast.error('Connect your Google account first — see your profile card.');
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setBookings((prev) =>
+        prev.map((b) => b.id === bookingId ? { ...b, meet_link: data.meet_link } : b)
+      );
+      toast.success('Meet link generated and emailed to both parties!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to generate Meet link');
+    } finally {
+      setMeetLoading(null);
+    }
+  };
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -256,6 +315,30 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
                 </button>
               </div>
             )}
+
+            {/* Meet link */}
+            {booking.meet_link ? (
+              <a
+                href={booking.meet_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-xl text-xs font-medium font-['Inter'] transition-colors"
+              >
+                <Video className="w-3 h-3" />
+                Join Google Meet
+              </a>
+            ) : booking.status !== 'declined' ? (
+              <button
+                onClick={() => generateMeetLink(booking.id)}
+                disabled={meetLoading === booking.id}
+                className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 text-white rounded-xl text-xs font-medium font-['Inter'] active:scale-95 transition-all disabled:opacity-60"
+              >
+                {meetLoading === booking.id
+                  ? <Loader2 className="w-3 h-3 animate-spin" />
+                  : <CalendarCheck className="w-3 h-3" />}
+                {meetLoading === booking.id ? 'Generating...' : 'Generate Meet Link'}
+              </button>
+            ) : null}
           </div>
         );
       })}

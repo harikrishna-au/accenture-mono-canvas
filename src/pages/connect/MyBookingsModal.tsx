@@ -102,6 +102,10 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
         }
       );
       const data = await res.json();
+      if (data.error === 'GOOGLE_NOT_CONNECTED') {
+        toast.error('The expert hasn\'t connected their Google account yet. Please try again later.');
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Failed to generate Meet link');
 
       // Update the booking in local state with the new meet_link

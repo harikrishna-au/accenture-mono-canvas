@@ -1,80 +1,45 @@
 /**
  * generate-meet-link
- * Called when user clicks "Request Meeting" on a booking.
- * 1. Creates a Google Meet space via Meet API (service account).
- * 2. Stores meet_link on the booking row.
- * 3. Emails both the booker and the expert with the link.
+ * Uses the expert's stored Google OAuth refresh token to create a Meet space,
+ * stores the link, and emails both parties.
  *
  * Accepts: { booking_id }
  * Returns: { success: true, meet_link } | { error: string }
  *
  * Required env vars:
- *   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (auto-injected)
- *   GOOGLE_SERVICE_ACCOUNT_EMAIL
- *   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+ *   GOOGLE_CLIENT_ID
+ *   GOOGLE_CLIENT_SECRET
  *   RESEND_API_KEY
  *   FROM_EMAIL
+ *   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (auto-injected)
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// ── Google Meet helpers ────────────────────────────────────────────────────
-
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const b64 = pem
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s/g, '');
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer;
-}
-
-function b64url(data: ArrayBuffer | string): string {
-  const buf = typeof data === 'string' ? new TextEncoder().encode(data) : new Uint8Array(data);
-  return btoa(String.fromCharCode(...buf))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
-async function getGoogleAccessToken(serviceEmail: string, privateKeyPem: string): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const payload = b64url(JSON.stringify({
-    iss: serviceEmail,
-    scope: 'https://www.googleapis.com/auth/meetings.space.created',
-    aud: 'https://oauth2.googleapis.com/token',
-    exp: now + 3600,
-    iat: now,
-  }));
-
-  const signingInput = `${header}.${payload}`;
-  const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    pemToArrayBuffer(privateKeyPem),
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(signingInput));
-  const jwt = `${signingInput}.${b64url(sig)}`;
+async function getAccessTokenFromRefreshToken(refreshToken: string): Promise<string> {
+  const clientId     = Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  if (!clientId || !clientSecret) throw new Error('Google OAuth credentials not configured');
 
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+    body: new URLSearchParams({
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'refresh_token',
+    }),
   });
+
   const data = await res.json();
-  if (!data.access_token) throw new Error(`Google auth failed: ${JSON.stringify(data)}`);
+  if (!data.access_token) throw new Error(`Failed to refresh token: ${data.error_description ?? data.error}`);
   return data.access_token;
 }
 
@@ -93,47 +58,23 @@ async function createMeetSpace(accessToken: string): Promise<string> {
   return data.meetingUri;
 }
 
-// ── Email helpers ──────────────────────────────────────────────────────────
-
 async function sendEmail(params: {
-  to: string;
-  subject: string;
-  html: string;
-  resendKey: string;
-  from: string;
+  to: string; subject: string; html: string; resendKey: string; from: string;
 }): Promise<void> {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${params.resendKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: params.from,
-      to: [params.to],
-      subject: params.subject,
-      html: params.html,
-    }),
+    headers: { Authorization: `Bearer ${params.resendKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: params.from, to: [params.to], subject: params.subject, html: params.html }),
   });
-  if (!res.ok) {
-    console.error('[generate-meet-link] Resend error:', await res.text());
-  }
+  if (!res.ok) console.error('[generate-meet-link] Resend error:', await res.text());
 }
 
-function formatTime(t: string) {
-  return t.slice(0, 5);
-}
+function formatTime(t: string) { return t.slice(0, 5); }
 
-function meetEmailHtml(params: {
-  recipientName: string;
-  otherName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  meetLink: string;
-  isExpert: boolean;
-  userEmail?: string;
-  message?: string | null;
+function emailHtml(params: {
+  recipientName: string; otherName: string; date: string;
+  startTime: string; endTime: string; meetLink: string;
+  isExpert: boolean; userEmail?: string; message?: string | null;
 }): string {
   const { recipientName, otherName, date, startTime, endTime, meetLink, isExpert, userEmail, message } = params;
   return `
@@ -145,53 +86,25 @@ function meetEmailHtml(params: {
         <p style="color:#44403c;font-size:14px;line-height:1.6;margin:0 0 20px;">
           Hi <strong>${recipientName}</strong>,<br/>
           ${isExpert
-            ? `<strong>${otherName}</strong> (<a href="mailto:${userEmail}" style="color:#44403c;">${userEmail}</a>) has requested the meeting link for your upcoming session.`
-            : `Your meeting link for the session with <strong>${otherName}</strong> is ready.`
-          }
+            ? `<strong>${otherName}</strong> (<a href="mailto:${userEmail}" style="color:#44403c;">${userEmail}</a>) has requested the meeting link.`
+            : `Your Google Meet link for the session with <strong>${otherName}</strong> is ready.`}
         </p>
-
         <div style="background:#fff;border:1px solid #e7e5e4;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
           <table style="width:100%;border-collapse:collapse;font-size:13px;color:#44403c;">
-            <tr>
-              <td style="padding:6px 0;color:#78716c;">Date</td>
-              <td style="padding:6px 0;font-weight:600;text-align:right;">${date}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#78716c;">Time</td>
-              <td style="padding:6px 0;font-weight:600;text-align:right;">${formatTime(startTime)} – ${formatTime(endTime)} IST</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#78716c;">${isExpert ? 'Student' : 'Expert'}</td>
-              <td style="padding:6px 0;font-weight:600;text-align:right;">${otherName}</td>
-            </tr>
+            <tr><td style="padding:6px 0;color:#78716c;">Date</td><td style="padding:6px 0;font-weight:600;text-align:right;">${date}</td></tr>
+            <tr><td style="padding:6px 0;color:#78716c;">Time</td><td style="padding:6px 0;font-weight:600;text-align:right;">${formatTime(startTime)} – ${formatTime(endTime)} IST</td></tr>
+            <tr><td style="padding:6px 0;color:#78716c;">${isExpert ? 'Student' : 'Expert'}</td><td style="padding:6px 0;font-weight:600;text-align:right;">${otherName}</td></tr>
           </table>
-          ${isExpert && message ? `
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e7e5e4;">
-            <p style="color:#78716c;font-size:12px;margin:0 0 4px;">Message from student:</p>
-            <p style="color:#44403c;font-size:13px;margin:0;font-style:italic;">"${message}"</p>
-          </div>` : ''}
+          ${isExpert && message ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e7e5e4;"><p style="color:#78716c;font-size:12px;margin:0 0 4px;">Student's message:</p><p style="color:#44403c;font-size:13px;margin:0;font-style:italic;">"${message}"</p></div>` : ''}
         </div>
-
-        <a href="${meetLink}"
-           style="display:block;background:#1a73e8;color:#ffffff;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:16px;">
-          Join Google Meet
-        </a>
-
-        <p style="color:#78716c;font-size:12px;line-height:1.6;margin:0;">
-          Both you and ${otherName} share the same link:<br/>
-          <a href="${meetLink}" style="color:#44403c;">${meetLink}</a>
-        </p>
+        <a href="${meetLink}" style="display:block;background:#1a73e8;color:#fff;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:16px;">Join Google Meet</a>
+        <p style="color:#78716c;font-size:12px;line-height:1.6;margin:0;">Both you and ${otherName} share the same link:<br/><a href="${meetLink}" style="color:#44403c;">${meetLink}</a></p>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-// ── Main handler ───────────────────────────────────────────────────────────
-
 serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
     const { booking_id } = await req.json();
@@ -202,17 +115,17 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Fetch booking + expert details
+    // Fetch booking + expert (including refresh token)
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from('bookings')
-      .select('*, experts(name, email)')
+      .select('*, experts(name, email, google_refresh_token)')
       .eq('id', booking_id)
       .single();
 
     if (bookingError) throw bookingError;
     if (!booking) throw new Error('Booking not found');
 
-    // If already has a meet link, just return it
+    // Return existing link if already generated
     if (booking.meet_link) {
       return new Response(
         JSON.stringify({ success: true, meet_link: booking.meet_link }),
@@ -220,13 +133,19 @@ serve(async (req: Request) => {
       );
     }
 
-    // Generate Google Meet link
-    const serviceEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL');
-    const privateKey   = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY');
-    if (!serviceEmail || !privateKey) throw new Error('Google service account env vars missing');
+    const expert = booking.experts as { name: string; email: string | null; google_refresh_token: string | null };
 
-    const normalizedKey = privateKey.replace(/\\n/g, '\n');
-    const accessToken = await getGoogleAccessToken(serviceEmail, normalizedKey);
+    if (!expert.google_refresh_token) {
+      return new Response(
+        JSON.stringify({ error: 'GOOGLE_NOT_CONNECTED' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get a fresh access token using the expert's refresh token
+    const accessToken = await getAccessTokenFromRefreshToken(expert.google_refresh_token);
+
+    // Create the Meet space
     const meetLink = await createMeetSpace(accessToken);
 
     // Store meet_link on the booking
@@ -240,47 +159,22 @@ serve(async (req: Request) => {
     // Send emails to both parties
     const resendKey = Deno.env.get('RESEND_API_KEY');
     const from      = Deno.env.get('FROM_EMAIL') ?? 'onboarding@resend.dev';
-    const expert    = booking.experts as { name: string; email: string | null };
 
     if (resendKey) {
-      const emailBase = {
-        date: booking.date,
-        startTime: booking.start_time,
-        endTime: booking.end_time,
-        meetLink,
-      };
-
+      const base = { date: booking.date, startTime: booking.start_time, endTime: booking.end_time, meetLink };
       await Promise.allSettled([
-        // Email to booker
         sendEmail({
           to: booking.user_email,
           subject: `Your Google Meet link — session with ${expert.name}`,
-          html: meetEmailHtml({
-            recipientName: booking.user_name,
-            otherName: expert.name,
-            isExpert: false,
-            ...emailBase,
-          }),
-          resendKey,
-          from,
+          html: emailHtml({ recipientName: booking.user_name, otherName: expert.name, isExpert: false, ...base }),
+          resendKey, from,
         }),
-        // Email to expert (if they have an email)
-        ...(expert.email ? [
-          sendEmail({
-            to: expert.email,
-            subject: `Google Meet link — session with ${booking.user_name}`,
-            html: meetEmailHtml({
-              recipientName: expert.name,
-              otherName: booking.user_name,
-              isExpert: true,
-              userEmail: booking.user_email,
-              message: booking.message,
-              ...emailBase,
-            }),
-            resendKey,
-            from,
-          }),
-        ] : []),
+        ...(expert.email ? [sendEmail({
+          to: expert.email,
+          subject: `Google Meet link — session with ${booking.user_name}`,
+          html: emailHtml({ recipientName: expert.name, otherName: booking.user_name, isExpert: true, userEmail: booking.user_email, message: booking.message, ...base }),
+          resendKey, from,
+        })] : []),
       ]);
     }
 
@@ -288,10 +182,10 @@ serve(async (req: Request) => {
       JSON.stringify({ success: true, meet_link: meetLink }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    console.error('[generate-meet-link]', error);
+  } catch (err: any) {
+    console.error('[generate-meet-link]', err);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: err.message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

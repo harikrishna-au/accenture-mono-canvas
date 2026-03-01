@@ -23,6 +23,7 @@ import AIInterviewSelection from "./pages/AIInterviewSelection";
 import PremiumRoute from "@/components/PremiumRoute";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
+import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
@@ -75,6 +76,7 @@ const App = () => {
               <Route path="/connect" element={<ConnectPage />} />
               <Route path="/connect/:expertId" element={<ConnectPage />} />
               <Route path="/placed-guru" element={<PlacedGuruPage />} />
+              <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
 
               {/* Matrix Flow Game */}
               <Route path="/game/matrix" element={<Guidelines />} />
