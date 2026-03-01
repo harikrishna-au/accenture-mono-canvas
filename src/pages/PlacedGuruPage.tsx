@@ -14,7 +14,9 @@ import { Expert } from './connect/ExpertCard';
 function startGoogleOAuth(expertId: string) {
   const clientId    = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/oauth/google/callback`;
-  alert(`redirect_uri: ${redirectUri}\n\nclient_id: ${clientId}`);
+  const scope       = 'https://www.googleapis.com/auth/meetings.space.created';
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${expertId}`;
+  window.location.href = url;
 }
 
 const MyExpertCard = ({
