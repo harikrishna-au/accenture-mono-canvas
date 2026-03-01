@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass, Video } from 'lucide-react';
+import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass, Video, CalendarCheck } from 'lucide-react';
+import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,6 +54,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [meetLoading, setMeetLoading] = useState<string | null>(null);
 
   const fetchBookings = async (emailToSearch: string) => {
     if (!emailToSearch.trim()) return;
@@ -62,7 +64,8 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
         .from('bookings')
         .select('*, experts(name, photo_url)')
         .ilike('user_email', emailToSearch.trim())
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .returns<Booking[]>();
       setBookings((data as Booking[]) || []);
     } catch {
       setBookings([]);
@@ -82,6 +85,35 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchBookings(email);
+  };
+
+  const requestMeetLink = async (bookingId: string) => {
+    setMeetLoading(bookingId);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-meet-link`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ booking_id: bookingId }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate Meet link');
+
+      // Update the booking in local state with the new meet_link
+      setBookings((prev) =>
+        prev.map((b) => b.id === bookingId ? { ...b, meet_link: data.meet_link } : b)
+      );
+      toast.success('Google Meet link sent to your email!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to generate Meet link');
+    } finally {
+      setMeetLoading(null);
+    }
   };
 
   return (
@@ -178,8 +210,8 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                       </p>
                     )}
 
-                    {/* Meet link */}
-                    {booking.meet_link && (
+                    {/* Meet link / Request Meeting */}
+                    {booking.meet_link ? (
                       <a
                         href={booking.meet_link}
                         target="_blank"
@@ -189,7 +221,20 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                         <Video className="w-3 h-3" />
                         Join Google Meet
                       </a>
-                    )}
+                    ) : (booking.status === 'paid' || booking.status === 'confirmed') ? (
+                      <button
+                        onClick={() => requestMeetLink(booking.id)}
+                        disabled={meetLoading === booking.id}
+                        className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 active:scale-95 text-white rounded-lg text-xs font-medium font-['Inter'] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {meetLoading === booking.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <CalendarCheck className="w-3 h-3" />
+                        )}
+                        {meetLoading === booking.id ? 'Generating...' : 'Request Meeting'}
+                      </button>
+                    ) : null}
                   </div>
                 );
               })}
