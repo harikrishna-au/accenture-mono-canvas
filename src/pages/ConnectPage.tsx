@@ -65,7 +65,7 @@ const ConnectPage = () => {
             try {
                 const { data } = await supabase
                     .from('experts')
-                    .select('*')
+                    .select('*, availability(id)')
                     .order('created_at', { ascending: false });
                 if (data) setExperts(data as unknown as Expert[]);
             } catch {

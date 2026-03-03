@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function useRazorpay() {
@@ -38,8 +37,6 @@ export function useRazorpay() {
             setIsLoading(true);
 
             // 1. Create Order
-            const { data: { session } } = await supabase.auth.getSession();
-
             const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-razorpay-order`, {
                 method: 'POST',
                 headers: {
@@ -87,22 +84,26 @@ export function useRazorpay() {
                         });
 
                         if (verifyRes.ok) {
-                            toast.success("Payment Verified! Premium Unlocked. 🌟");
-                            // Clean up referral coupon on success
+                            toast.success("Payment Verified! Premium Unlocked.");
                             localStorage.removeItem("referral_coupon");
-                            setTimeout(() => {
+                            // Refresh Clerk session to pick up new isPremium metadata
+                            // Falls back to full reload if Clerk refresh fails
+                            try {
+                                await user.reload();
+                            } catch {
                                 window.location.reload();
-                            }, 1000);
+                            }
                         } else {
                             toast.error("Payment successful but verification failed. Please contact support.");
-                            // Even if verification details fail, we reload just in case webhook worked
-                            setTimeout(() => {
+                            try {
+                                await user.reload();
+                            } catch {
                                 window.location.reload();
-                            }, 2000);
+                            }
                         }
                     } catch (e) {
                         console.error("Verification error", e);
-                        window.location.reload();
+                        try { await user.reload(); } catch { window.location.reload(); }
                     }
                 },
                 "prefill": {

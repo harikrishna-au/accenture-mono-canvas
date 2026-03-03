@@ -9,6 +9,16 @@ interface DMModalProps {
   onClose: () => void;
 }
 
+const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const MAX = { name: 100, email: 254, subject: 200, body: 1000 };
+
+/** Strip HTML/script tags and trim to max length */
+const sanitize = (s: string, max: number) =>
+  s.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim().slice(0, max);
+
+const RATE_LIMIT_KEY = 'dm_last_sent';
+const COOLDOWN_MS = 30_000;
+
 const DMModal = ({ expert, onClose }: DMModalProps) => {
   const [name, setName]       = useState('');
   const [email, setEmail]     = useState('');
@@ -21,20 +31,40 @@ const DMModal = ({ expert, onClose }: DMModalProps) => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !body.trim()) {
+
+    // Client-side rate limit
+    const lastSent = Number(sessionStorage.getItem(RATE_LIMIT_KEY) ?? 0);
+    const remaining = COOLDOWN_MS - (Date.now() - lastSent);
+    if (remaining > 0) {
+      toast.error(`Please wait ${Math.ceil(remaining / 1000)}s before sending again`);
+      return;
+    }
+
+    const cleanName    = sanitize(name, MAX.name);
+    const cleanEmail   = sanitize(email, MAX.email);
+    const cleanSubject = sanitize(subject, MAX.subject);
+    const cleanBody    = sanitize(body, MAX.body);
+
+    if (!cleanName || !cleanEmail || !cleanBody) {
       toast.error('Please fill in all required fields');
       return;
     }
+    if (!EMAIL_RE.test(cleanEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.from('messages').insert({
         expert_id:    expert.id,
-        sender_name:  name.trim(),
-        sender_email: email.trim(),
-        subject:      subject.trim() || null,
-        body:         body.trim(),
+        sender_name:  cleanName,
+        sender_email: cleanEmail,
+        subject:      cleanSubject || null,
+        body:         cleanBody,
       });
       if (error) throw error;
+      sessionStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
       setSent(true);
     } catch (err: any) {
       toast.error(err.message || 'Failed to send message. Try again.');
@@ -45,7 +75,7 @@ const DMModal = ({ expert, onClose }: DMModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-[#fcfcf9] w-full sm:max-w-[420px] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]">
@@ -57,6 +87,7 @@ const DMModal = ({ expert, onClose }: DMModalProps) => {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors text-stone-400"
           >
             <X className="w-4 h-4" />
@@ -98,27 +129,60 @@ const DMModal = ({ expert, onClose }: DMModalProps) => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">Your Name <span className="text-stone-400">*</span></label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul Sharma" className={inputCls} required />
+                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">
+                  Your Name <span className="text-stone-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  maxLength={MAX.name}
+                  className={inputCls}
+                  required
+                />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">Your Email <span className="text-stone-400">*</span></label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rahul@example.com" className={inputCls} required />
+                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">
+                  Your Email <span className="text-stone-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="rahul@example.com"
+                  maxLength={MAX.email}
+                  className={inputCls}
+                  required
+                />
               </div>
               <div>
                 <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">Subject</label>
-                <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Question about Accenture interview" className={inputCls} />
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="e.g. Question about Accenture interview"
+                  maxLength={MAX.subject}
+                  className={inputCls}
+                />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">Message <span className="text-stone-400">*</span></label>
+                <label className="block text-xs font-medium text-stone-600 mb-1.5 font-['Inter']">
+                  Message <span className="text-stone-400">*</span>
+                </label>
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={4}
+                  maxLength={MAX.body}
                   placeholder="Ask anything about their placement journey, interview tips, or how they can help you..."
                   className={`${inputCls} resize-none`}
                   required
                 />
+                <p className="text-right text-[10px] text-stone-400 font-['Inter'] mt-1">
+                  {body.length}/{MAX.body}
+                </p>
               </div>
 
               <button

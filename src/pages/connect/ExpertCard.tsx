@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Tag, BadgeCheck, TrendingUp, Calendar } from 'lucide-react';
+import { Clock, Tag, BadgeCheck, TrendingUp, Calendar, CalendarOff } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
 export interface Expert {
@@ -15,6 +15,8 @@ export interface Expert {
   package_lpa: number | null;
   proof_url: string | null;
   created_at: string;
+  // Populated when fetched with availability join
+  availability?: { id: string }[];
 }
 
 interface ExpertCardProps {
@@ -145,6 +147,14 @@ const ExpertCard = ({ expert, onBook }: ExpertCardProps) => {
           </div>
         )}
 
+        {/* No availability warning */}
+        {expert.availability && expert.availability.length === 0 && (
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-stone-50 border border-stone-100 rounded-xl text-xs text-stone-400 font-['Inter']">
+            <CalendarOff className="w-3.5 h-3.5 flex-shrink-0" />
+            Not accepting bookings right now
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-between pt-3 mt-auto border-t border-stone-50">
           <div className="flex items-center gap-1.5 text-stone-500 text-sm font-['Inter']">
@@ -153,7 +163,8 @@ const ExpertCard = ({ expert, onBook }: ExpertCardProps) => {
           </div>
           <button
             onClick={() => onBook(expert)}
-            className="px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 active:scale-95 transition-all duration-200 font-['Inter']"
+            disabled={expert.availability !== undefined && expert.availability.length === 0}
+            className="px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 active:scale-95 transition-all duration-200 font-['Inter'] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             Book a Call
           </button>

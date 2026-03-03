@@ -85,6 +85,7 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
         },
         theme: { color: '#1c1917' },
         handler: async (response: any) => {
+          const orderId: string = response.razorpay_order_id;
           try {
             const bookingData = {
               expert_id: expert.id,
@@ -94,7 +95,7 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
               date: format(date, 'yyyy-MM-dd'),
               start_time: slot.start + ':00',
               end_time: slot.end + ':00',
-              razorpay_order_id: response.razorpay_order_id,
+              razorpay_order_id: orderId,
             };
 
             const verifyRes = await fetch(
@@ -106,7 +107,7 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
                   Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
                 },
                 body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_order_id: orderId,
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature: response.razorpay_signature,
                   booking_data: bookingData,
@@ -118,11 +119,20 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
               const verifyData = await verifyRes.json();
               onSuccess(verifyData.meet_link ?? null);
             } else {
-              toast.error('Payment received but booking failed. Please contact support.');
+              const errData = await verifyRes.json().catch(() => ({}));
+              const reason = (errData as any).error || 'Booking creation failed after payment.';
+              toast.error(reason, {
+                description: `Your payment was captured. If your booking doesn't appear in "My Bookings" within 5 minutes, contact support with Order ID: ${orderId}`,
+                duration: 12000,
+              });
               onError();
             }
-          } catch {
-            toast.error('Verification error. Please contact support.');
+          } catch (err: unknown) {
+            console.error('[PaymentHandler] Verification error:', err);
+            toast.error('Verification failed — your payment may have been captured.', {
+              description: `Contact support with Order ID: ${orderId}`,
+              duration: 12000,
+            });
             onError();
           }
         },

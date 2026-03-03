@@ -523,7 +523,6 @@ const MessagesPanel = ({ userId }: { userId: string }) => {
 type View = 'list' | 'add' | 'edit';
 
 const ManagementPanel = ({ userId }: { userId: string }) => {
-  const navigate = useNavigate();
   const [tab, setTab] = useState<'profiles' | 'bookings' | 'messages'>('profiles');
   const [view, setView] = useState<View>('list');
   const [experts, setExperts] = useState<Expert[]>([]);

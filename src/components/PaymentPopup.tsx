@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,82 +10,74 @@ interface PaymentPopupProps {
     onClose: () => void;
 }
 
-// Simple hash function for basic obfuscation
-const simpleHash = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = (hash << 5) - hash + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash.toString();
-};
+const BASE_PRICE = 120;
 
-// Hashed Coupon Codes (Obfuscated)
-const COUPONS: Record<string, number> = {
-    "1406405223": 69,
-    "84788870": 79,
-    "14110599": 59,
-    "390045773": 79,
-    "2072602638": 99,
-    "869997654": 69,
-    "2100205611": 78,
-    "462536737": 29,
-    "-1492342457": 1,
-};
+async function validateCouponServer(code: string): Promise<number | null> {
+    try {
+        const res = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-coupon`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                },
+                body: JSON.stringify({ coupon_code: code }),
+            }
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.valid ? data.amount : null;
+    } catch {
+        return null;
+    }
+}
 
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
-    const [coupon, setCoupon] = useState("");
+    const [coupon, setCoupon]               = useState("");
     const [appliedAmount, setAppliedAmount] = useState<number | null>(null);
-    const [appliedCouponHash, setAppliedCouponHash] = useState<string | undefined>();
-    const [error, setError] = useState("");
-    const { initiatePayment, isLoading } = useRazorpay();
+    const [validating, setValidating]       = useState(false);
+    const [error, setError]                 = useState("");
+    const { initiatePayment, isLoading }    = useRazorpay();
 
-    // Auto-apply referral coupon
+    // Auto-apply referral coupon from localStorage
     useEffect(() => {
-        if (isOpen && !appliedAmount) {
-            const storedCoupon = localStorage.getItem("referral_coupon");
-            if (storedCoupon) {
-                setCoupon(storedCoupon);
-                // Validate immediately
-                const code = storedCoupon.trim().toUpperCase();
-                const hashedCode = simpleHash(code); // Using existing simpleHash function
-                if (COUPONS[hashedCode]) {
-                    setAppliedAmount(COUPONS[hashedCode]);
-                    setAppliedCouponHash(hashedCode);
-                    setError("");
-                    toast.success("Referral coupon auto-applied!");
-                }
+        if (!isOpen || appliedAmount) return;
+        const stored = localStorage.getItem("referral_coupon");
+        if (!stored) return;
+        setCoupon(stored);
+        validateCouponServer(stored).then((amount) => {
+            if (amount !== null) {
+                setAppliedAmount(amount);
+                toast.success("Referral coupon applied!");
             }
-        }
+        });
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const originalAmount = 120; // Base price
-    const finalAmount = appliedAmount ?? originalAmount;
+    const finalAmount = appliedAmount ?? BASE_PRICE;
 
-    const handleApplyCoupon = () => {
-        const code = coupon.trim().toUpperCase();
-        const hashedCode = simpleHash(code);
-
-        if (COUPONS[hashedCode]) {
-            setAppliedAmount(COUPONS[hashedCode]);
-            setAppliedCouponHash(hashedCode);
+    const handleApplyCoupon = async () => {
+        const code = coupon.trim();
+        if (!code) return;
+        setValidating(true);
+        setError("");
+        const amount = await validateCouponServer(code);
+        setValidating(false);
+        if (amount !== null) {
+            setAppliedAmount(amount);
             setError("");
-            toast.success(`Coupon applied!`);
+            toast.success("Coupon applied!");
         } else {
             setError("Invalid coupon code");
             setAppliedAmount(null);
-            setAppliedCouponHash(undefined);
         }
     };
 
     const handlePayment = async () => {
-        const success = await initiatePayment(finalAmount, appliedCouponHash);
-        if (success) {
-            onClose();
-        }
+        const success = await initiatePayment(finalAmount);
+        if (success) onClose();
     };
 
     return (
@@ -94,6 +85,7 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
             <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-2xl space-y-6">
                 <button
                     onClick={onClose}
+                    aria-label="Close"
                     className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900 transition-colors"
                 >
                     <X className="w-5 h-5" />
@@ -110,11 +102,11 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                         <div className="flex flex-col items-end">
                             {appliedAmount ? (
                                 <>
-                                    <span className="text-neutral-400 line-through text-sm">₹{originalAmount}</span>
+                                    <span className="text-neutral-400 line-through text-sm">₹{BASE_PRICE}</span>
                                     <span className="text-2xl font-bold text-green-600">₹{finalAmount}</span>
                                 </>
                             ) : (
-                                <span className="text-2xl font-bold text-neutral-900">₹{originalAmount}</span>
+                                <span className="text-2xl font-bold text-neutral-900">₹{BASE_PRICE}</span>
                             )}
                         </div>
                     </div>
@@ -125,15 +117,25 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                             <Input
                                 placeholder="Enter Code"
                                 value={coupon}
-                                onChange={(e) => setCoupon(e.target.value)}
+                                onChange={(e) => { setCoupon(e.target.value); setError(""); }}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
                                 className="uppercase"
                             />
-                            <Button onClick={handleApplyCoupon} variant="outline" className="shrink-0">
-                                Apply
+                            <Button
+                                onClick={handleApplyCoupon}
+                                disabled={validating || !coupon.trim()}
+                                variant="outline"
+                                className="shrink-0 min-w-[72px]"
+                            >
+                                {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
                             </Button>
                         </div>
                         {error && <p className="text-red-500 text-xs font-medium">{error}</p>}
-                        {appliedAmount && <p className="text-green-600 text-xs font-medium flex items-center gap-1"><Check className="w-3 h-3" /> Coupon applied successfully!</p>}
+                        {appliedAmount && (
+                            <p className="text-green-600 text-xs font-medium flex items-center gap-1">
+                                <Check className="w-3 h-3" /> Coupon applied — you save ₹{BASE_PRICE - appliedAmount}!
+                            </p>
+                        )}
                     </div>
 
                     <Button
