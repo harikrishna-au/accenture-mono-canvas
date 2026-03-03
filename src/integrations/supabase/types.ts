@@ -192,6 +192,7 @@ export type Database = {
           proof_url: string | null
           email: string | null
           google_refresh_token: string | null
+          user_id: string | null
           created_at: string
         }
         Insert: {
@@ -208,6 +209,7 @@ export type Database = {
           proof_url?: string | null
           email?: string | null
           google_refresh_token?: string | null
+          user_id?: string | null
           created_at?: string
         }
         Update: {
@@ -224,6 +226,7 @@ export type Database = {
           proof_url?: string | null
           email?: string | null
           google_refresh_token?: string | null
+          user_id?: string | null
           created_at?: string
         }
         Relationships: []
@@ -315,6 +318,32 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      messages: {
+        Row: {
+          id: string
+          expert_id: string | null
+          sender_name: string
+          sender_email: string
+          subject: string | null
+          body: string
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          expert_id?: string | null
+          sender_name: string
+          sender_email: string
+          subject?: string | null
+          body: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          is_read?: boolean
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -1,6 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import { ArrowLeft, ArrowUpRight, Mic, Crown } from "lucide-react";
+import {
+    ArrowLeft, ArrowUpRight, Mic, Crown, Lock, X,
+    MessageSquare, Headphones, BookOpen, Repeat2,
+    PencilLine, AlertCircle, Radio, Mail, BarChart2, MonitorCheck,
+    Play,
+} from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { toast } from "sonner";
@@ -25,15 +30,282 @@ const ACTIVE_PATTERN = {
 };
 
 const COMING_SOON_PATTERNS = [
+    { num: "02", name: "Pattern 2" },
+    { num: "03", name: "Pattern 3" },
+];
+
+// ─── Exam sections shown inside the modal ─────────────────────────────────────
+
+const PATTERN_SECTIONS = [
     {
-        num: "02",
-        name: "Pattern 2",
+        label: "Microphone Setup",
+        detail: "Quick device check before the assessment begins",
+        icon: MonitorCheck,
+        tag: "Pre-check",
+        tagColor: "text-stone-400",
+        tagBg: "bg-stone-100",
     },
     {
-        num: "03",
-        name: "Pattern 3",
+        label: "Section A — Conversation",
+        detail: "6 questions · Have a natural spoken conversation with AI",
+        icon: MessageSquare,
+        tag: "Speaking",
+        tagColor: "text-violet-600",
+        tagBg: "bg-violet-50",
+    },
+    {
+        label: "Section B — Listening Comprehension",
+        detail: "6 questions · Listen to audio clips and answer questions",
+        icon: Headphones,
+        tag: "Listening",
+        tagColor: "text-blue-600",
+        tagBg: "bg-blue-50",
+    },
+    {
+        label: "Section C — Reading Aloud",
+        detail: "8 questions · Read passages aloud for pronunciation scoring",
+        icon: BookOpen,
+        tag: "Reading",
+        tagColor: "text-emerald-600",
+        tagBg: "bg-emerald-50",
+    },
+    {
+        label: "Section D — Repeat Sentences",
+        detail: "8 questions · Listen and repeat sentences accurately",
+        icon: Repeat2,
+        tag: "Speaking",
+        tagColor: "text-violet-600",
+        tagBg: "bg-violet-50",
+    },
+    {
+        label: "Section E — Fill in the Blank",
+        detail: "5 questions · Complete sentences with the correct word",
+        icon: PencilLine,
+        tag: "Vocabulary",
+        tagColor: "text-amber-600",
+        tagBg: "bg-amber-50",
+    },
+    {
+        label: "Section F — Error Correction",
+        detail: "5 questions · Identify and correct grammatical errors",
+        icon: AlertCircle,
+        tag: "Grammar",
+        tagColor: "text-rose-600",
+        tagBg: "bg-rose-50",
+    },
+    {
+        label: "Section G — Speaking Topic",
+        detail: "3 questions · Speak for 60 seconds on a given topic",
+        icon: Radio,
+        tag: "Speaking",
+        tagColor: "text-violet-600",
+        tagBg: "bg-violet-50",
+    },
+    {
+        label: "Written Email",
+        detail: "1 task · Compose a professional email in a given scenario",
+        icon: Mail,
+        tag: "Writing",
+        tagColor: "text-sky-600",
+        tagBg: "bg-sky-50",
+    },
+    {
+        label: "AI Score Analysis",
+        detail: "Fluency · Grammar · Vocabulary · Pronunciation breakdown",
+        icon: BarChart2,
+        tag: "Feedback",
+        tagColor: "text-stone-500",
+        tagBg: "bg-stone-100",
     },
 ];
+
+// ─── Pattern Detail Modal ──────────────────────────────────────────────────────
+
+function PatternDetailModal({
+    isOpen,
+    onClose,
+    onStart,
+    onUnlock,
+    isPremium,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onStart: () => void;
+    onUnlock: () => void;
+    isPremium: boolean;
+}) {
+    if (!isOpen) return null;
+
+    return (
+        // Backdrop
+        <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
+            {/* Sheet */}
+            <div
+                className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+                style={{
+                    maxHeight: "90dvh",
+                    boxShadow: "0 32px 80px rgba(0,0,0,0.2)",
+                    border: "1px solid rgba(124,58,237,0.12)",
+                }}
+            >
+                {/* Header */}
+                <div
+                    className="px-6 pt-6 pb-4 flex-shrink-0"
+                    style={{
+                        background: `linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(124,58,237,0.02) 100%)`,
+                        borderBottom: "1px solid rgba(124,58,237,0.1)",
+                    }}
+                >
+                    {/* Drag handle (mobile) */}
+                    <div className="w-9 h-1 bg-stone-200 rounded-full mx-auto mb-4 sm:hidden" />
+
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                                style={{ background: ACTIVE_PATTERN.bg, border: `1px solid ${ACTIVE_PATTERN.border}` }}
+                            >
+                                <Mic className="w-5 h-5" style={{ color: ACTIVE_PATTERN.color }} />
+                            </div>
+                            <div>
+                                <div
+                                    className="text-[9px] font-bold tracking-[0.35em] uppercase font-['Inter'] mb-0.5"
+                                    style={{ color: ACTIVE_PATTERN.color }}
+                                >
+                                    Communication Round · {ACTIVE_PATTERN.num}
+                                </div>
+                                <h2 className="text-[1.1rem] font-bold tracking-tight font-['Inter'] text-stone-900">
+                                    {ACTIVE_PATTERN.name}
+                                </h2>
+                            </div>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors mt-0.5 flex-shrink-0"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    <p className="text-stone-500 text-[12.5px] leading-relaxed font-['Inter'] mt-3">
+                        {ACTIVE_PATTERN.desc}
+                    </p>
+
+                    {/* Stats row */}
+                    <div className="flex items-center gap-3 mt-4 flex-wrap">
+                        {[
+                            { val: "9", label: "Sections" },
+                            { val: "42+", label: "Questions" },
+                            { val: "AI", label: "Graded" },
+                        ].map((s) => (
+                            <div key={s.label} className="flex items-center gap-1.5">
+                                <span
+                                    className="text-[11px] font-bold font-['Inter']"
+                                    style={{ color: ACTIVE_PATTERN.color }}
+                                >
+                                    {s.val}
+                                </span>
+                                <span className="text-stone-400 text-[11px] font-['Inter']">{s.label}</span>
+                                <span className="text-stone-200 text-[11px]">·</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Sections list */}
+                <div className="overflow-y-auto flex-1 px-6 py-4 space-y-2">
+                    <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-stone-400 font-['Inter'] mb-3">
+                        Exam Structure
+                    </p>
+                    {PATTERN_SECTIONS.map((sec, idx) => {
+                        const Icon = sec.icon;
+                        return (
+                            <div
+                                key={idx}
+                                className="flex items-center gap-3 px-3 py-3 rounded-xl bg-stone-50 border border-stone-100 hover:border-stone-200 transition-colors"
+                            >
+                                {/* Step number */}
+                                <div className="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center flex-shrink-0">
+                                    <span className="text-[9px] font-bold text-stone-400 font-['Inter']">
+                                        {idx + 1}
+                                    </span>
+                                </div>
+
+                                {/* Icon */}
+                                <div
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                                    style={{ background: ACTIVE_PATTERN.bg }}
+                                >
+                                    <Icon className="w-3.5 h-3.5" style={{ color: ACTIVE_PATTERN.color }} />
+                                </div>
+
+                                {/* Text */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-[12.5px] font-semibold text-stone-800 font-['Inter'] leading-tight truncate">
+                                        {sec.label}
+                                    </div>
+                                    <div className="text-[11px] text-stone-400 font-['Inter'] leading-tight mt-0.5 truncate">
+                                        {sec.detail}
+                                    </div>
+                                </div>
+
+                                {/* Tag */}
+                                <div
+                                    className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide font-['Inter'] flex-shrink-0 ${sec.tagBg} ${sec.tagColor}`}
+                                >
+                                    {sec.tag}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* CTA */}
+                <div
+                    className="px-6 py-5 flex-shrink-0"
+                    style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+                >
+                    {isPremium ? (
+                        <button
+                            onClick={onStart}
+                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-[14px] font-['Inter'] text-white transition-all active:scale-[0.98]"
+                            style={{
+                                background: `linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)`,
+                                boxShadow: "0 4px 20px rgba(124,58,237,0.35)",
+                            }}
+                        >
+                            <Play className="w-4 h-4 fill-white" />
+                            Start Practice Round
+                        </button>
+                    ) : (
+                        <div className="space-y-2">
+                            <button
+                                onClick={onUnlock}
+                                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-[14px] font-['Inter'] transition-all active:scale-[0.98]"
+                                style={{
+                                    background: "rgba(217,119,6,0.07)",
+                                    border: "1.5px solid rgba(217,119,6,0.3)",
+                                    color: "#b45309",
+                                }}
+                            >
+                                <Lock className="w-4 h-4" />
+                                Unlock with Premium
+                            </button>
+                            <p className="text-center text-[11px] text-stone-400 font-['Inter']">
+                                <Crown className="w-3 h-3 inline-block mr-1 text-amber-400" />
+                                Premium users get full access to all Communication Rounds
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
@@ -42,6 +314,7 @@ function PatternsContent() {
     const containerRef = useRef<HTMLDivElement>(null);
     const { isPremium } = usePremiumStatus();
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+    const [showPatternModal, setShowPatternModal] = useState(false);
 
     useGSAP(
         () => {
@@ -51,13 +324,13 @@ function PatternsContent() {
         { scope: containerRef }
     );
 
-    const handlePatternClick = async () => {
-        // Non-premium users → show payment popup instead of starting
-        if (!isPremium) {
-            setShowPaymentPopup(true);
-            return;
-        }
+    const handlePatternClick = () => {
+        // Always show the pattern detail modal first
+        setShowPatternModal(true);
+    };
 
+    const handleStartRound = async () => {
+        setShowPatternModal(false);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             stream.getTracks().forEach((track) => track.stop());
@@ -76,9 +349,22 @@ function PatternsContent() {
         }
     };
 
+    const handleUnlock = () => {
+        setShowPatternModal(false);
+        setShowPaymentPopup(true);
+    };
+
     return (
         <>
             <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
+
+            <PatternDetailModal
+                isOpen={showPatternModal}
+                onClose={() => setShowPatternModal(false)}
+                onStart={handleStartRound}
+                onUnlock={handleUnlock}
+                isPremium={!!isPremium}
+            />
 
             <div ref={containerRef} className="w-full max-w-5xl mx-auto px-6 py-10 opacity-0">
 
@@ -163,19 +449,30 @@ function PatternsContent() {
                                     </div>
                                 </div>
 
-                                {!isPremium && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setShowPaymentPopup(true); }}
-                                        className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter'] hover:opacity-80 transition-opacity"
+                                {!isPremium ? (
+                                    <div
+                                        className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
                                         style={{
                                             color: "#d97706",
                                             background: "rgba(217,119,6,0.07)",
                                             borderColor: "rgba(217,119,6,0.2)",
                                         }}
                                     >
+                                        <Lock className="w-2.5 h-2.5" />
+                                        Premium Only
+                                    </div>
+                                ) : (
+                                    <div
+                                        className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
+                                        style={{
+                                            color: "#16a34a",
+                                            background: "rgba(22,163,74,0.07)",
+                                            borderColor: "rgba(22,163,74,0.2)",
+                                        }}
+                                    >
                                         <Crown className="w-2.5 h-2.5" />
-                                        Unlock Full Access
-                                    </button>
+                                        Unlocked
+                                    </div>
                                 )}
                             </div>
 
@@ -202,7 +499,7 @@ function PatternsContent() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <span className="text-[12px] font-semibold font-['Inter']" style={{ color: ACTIVE_PATTERN.color }}>
-                                        Start
+                                        View Pattern
                                     </span>
                                     <ArrowUpRight
                                         className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

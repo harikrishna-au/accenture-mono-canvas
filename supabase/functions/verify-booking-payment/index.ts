@@ -64,7 +64,7 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Race-condition guard
+    // Race-condition guard: expert slot conflict
     const { data: conflict } = await supabaseAdmin
       .from('bookings')
       .select('id')
@@ -77,6 +77,27 @@ serve(async (req: Request) => {
     if (conflict) {
       return new Response(
         JSON.stringify({ error: 'This slot was just booked by someone else. Please choose another time.' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Overlap guard: prevent the same individual from booking two sessions at the same time
+    const { data: userOverlap } = await supabaseAdmin
+      .from('bookings')
+      .select('id, start_time, end_time')
+      .eq('user_email', user_email)
+      .eq('date', date)
+      .in('status', ['paid', 'confirmed']);
+
+    const proposedStart = start_time;
+    const proposedEnd   = end_time;
+    const hasOverlap = (userOverlap ?? []).some((b: any) =>
+      proposedStart < b.end_time && proposedEnd > b.start_time
+    );
+
+    if (hasOverlap) {
+      return new Response(
+        JSON.stringify({ error: 'You already have a session booked during this time. Please choose a different slot.' }),
         { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

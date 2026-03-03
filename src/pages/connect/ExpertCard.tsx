@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Tag, BadgeCheck, TrendingUp, Calendar } from 'lucide-react';
+import { Clock, Tag, BadgeCheck, TrendingUp, Calendar, MessageCircle } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
 export interface Expert {
@@ -20,6 +20,7 @@ export interface Expert {
 interface ExpertCardProps {
   expert: Expert;
   onBook: (expert: Expert) => void;
+  onMessage: (expert: Expert) => void;
 }
 
 const COMPANY_STYLES: Record<string, { pill: string; glow: string; dot: string }> = {
@@ -51,7 +52,7 @@ const DEFAULT_STYLE = {
   dot: 'bg-emerald-500',
 };
 
-const ExpertCard = ({ expert, onBook }: ExpertCardProps) => {
+const ExpertCard = ({ expert, onBook, onMessage }: ExpertCardProps) => {
   const style = expert.company
     ? (COMPANY_STYLES[expert.company] ?? DEFAULT_STYLE)
     : DEFAULT_STYLE;
@@ -151,12 +152,21 @@ const ExpertCard = ({ expert, onBook }: ExpertCardProps) => {
             <Clock className="w-3.5 h-3.5" />
             <span>20 min · ₹{expert.price_inr}</span>
           </div>
-          <button
-            onClick={() => onBook(expert)}
-            className="px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 active:scale-95 transition-all duration-200 font-['Inter']"
-          >
-            Book a Call
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onMessage(expert)}
+              className="p-2 bg-stone-100 text-stone-600 rounded-xl hover:bg-stone-200 active:scale-95 transition-all duration-200"
+              title="Send a message"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onBook(expert)}
+              className="px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 active:scale-95 transition-all duration-200 font-['Inter']"
+            >
+              Book a Call
+            </button>
+          </div>
         </div>
       </div>
     </div>

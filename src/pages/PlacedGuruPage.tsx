@@ -1,7 +1,7 @@
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X, Video, CalendarCheck } from 'lucide-react';
+import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X, Video, CalendarCheck, MessageCircle, Mail } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
@@ -346,6 +346,122 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
   );
 };
 
+/* ── Messages panel ────────────────────────────────────────────────── */
+
+interface Message {
+  id: string;
+  sender_name: string;
+  sender_email: string;
+  subject: string | null;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+  experts: { name: string } | null;
+}
+
+const MessagesPanel = ({ userId }: { userId: string }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data: myExperts } = await supabase
+        .from('experts').select('id').eq('user_id', userId);
+      if (!myExperts || myExperts.length === 0) { setLoading(false); return; }
+      const ids = myExperts.map((e) => e.id);
+      const { data } = await supabase
+        .from('messages')
+        .select('*, experts(name)')
+        .in('expert_id', ids)
+        .order('created_at', { ascending: false });
+      setMessages((data as unknown as Message[]) || []);
+      setLoading(false);
+    };
+    fetchMessages();
+  }, [userId]);
+
+  const markRead = async (id: string) => {
+    setMessages((prev) => prev.map((m) => m.id === id ? { ...m, is_read: true } : m));
+    await supabase.from('messages').update({ is_read: true }).eq('id', id);
+  };
+
+  const unreadCount = messages.filter((m) => !m.is_read).length;
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <div className="w-6 h-6 border-2 border-stone-200 border-t-stone-700 rounded-full animate-spin" />
+    </div>
+  );
+
+  if (messages.length === 0) return (
+    <div className="bg-white rounded-3xl p-12 shadow-sm border border-stone-100 flex flex-col items-center text-center">
+      <MessageCircle className="w-8 h-8 text-stone-300 mb-3" />
+      <p className="text-stone-400 text-sm font-['Inter']">No messages yet.</p>
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {unreadCount > 0 && (
+        <p className="text-xs text-stone-400 font-['Inter']">
+          {unreadCount} unread message{unreadCount > 1 ? 's' : ''}
+        </p>
+      )}
+      {messages.map((msg) => (
+        <div
+          key={msg.id}
+          className={`bg-white rounded-2xl shadow-sm border transition-all ${msg.is_read ? 'border-stone-100' : 'border-stone-300'}`}
+        >
+          <button
+            className="w-full text-left px-5 py-4 flex items-start justify-between gap-3"
+            onClick={() => {
+              setExpanded(expanded === msg.id ? null : msg.id);
+              if (!msg.is_read) markRead(msg.id);
+            }}
+          >
+            <div className="flex items-start gap-3 min-w-0">
+              {!msg.is_read && (
+                <span className="mt-1.5 w-2 h-2 bg-stone-800 rounded-full flex-shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className={`text-sm font-['Inter'] truncate ${msg.is_read ? 'text-stone-600' : 'text-stone-900 font-semibold'}`}>
+                  {msg.sender_name}
+                  {msg.experts && <span className="text-stone-400 font-normal"> → {msg.experts.name}</span>}
+                </p>
+                {msg.subject && (
+                  <p className="text-xs text-stone-500 font-['Inter'] mt-0.5 truncate">{msg.subject}</p>
+                )}
+                {!expanded && (
+                  <p className="text-xs text-stone-400 font-['Inter'] mt-0.5 line-clamp-1">{msg.body}</p>
+                )}
+              </div>
+            </div>
+            <span className="text-xs text-stone-400 font-['Inter'] flex-shrink-0 mt-0.5">
+              {format(parseISO(msg.created_at), 'MMM d')}
+            </span>
+          </button>
+
+          {expanded === msg.id && (
+            <div className="px-5 pb-4 space-y-3 border-t border-stone-50 pt-3">
+              <p className="text-sm text-stone-700 font-['Inter'] leading-relaxed whitespace-pre-wrap">
+                {msg.body}
+              </p>
+              <a
+                href={`mailto:${msg.sender_email}?subject=Re: ${msg.subject ?? 'Your message'}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-stone-900 text-white rounded-xl text-xs font-medium font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all"
+              >
+                <Mail className="w-3 h-3" />
+                Reply to {msg.sender_email}
+              </a>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 /* ── Management panel ──────────────────────────────────────────────── */
 
 type View = 'list' | 'add' | 'edit';
@@ -353,7 +469,7 @@ type View = 'list' | 'add' | 'edit';
 const ManagementPanel = ({ userId }: { userId: string }) => {
   const { signOut } = useClerk();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'profiles' | 'bookings'>('profiles');
+  const [tab, setTab] = useState<'profiles' | 'bookings' | 'messages'>('profiles');
   const [view, setView] = useState<View>('list');
   const [experts, setExperts] = useState<Expert[]>([]);
   const [editingExpert, setEditingExpert] = useState<Expert | null>(null);
@@ -401,7 +517,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
             </button>
           )}
           <h1 className="text-2xl sm:text-3xl font-['Merriweather'] text-stone-900 tracking-tight">
-            {tab === 'profiles' ? headingMap[view] : 'Bookings'}
+            {tab === 'profiles' ? headingMap[view] : tab === 'bookings' ? 'Bookings' : 'Messages'}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -425,7 +541,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
       </div>
 
       <div className="flex gap-1 p-1 bg-stone-100 rounded-2xl mb-6">
-        {([['profiles', 'My Profiles'], ['bookings', 'Bookings']] as const).map(([key, label]) => (
+        {([['profiles', 'My Profiles'], ['bookings', 'Bookings'], ['messages', 'Messages']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => { setTab(key); if (key === 'profiles') setView('list'); }}
@@ -440,6 +556,7 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
       </div>
 
       {tab === 'bookings' && <BookingsPanel userId={userId} />}
+      {tab === 'messages' && <MessagesPanel userId={userId} />}
 
       {tab === 'profiles' && view === 'list' && (
         <>

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ExpertCard, { Expert } from './connect/ExpertCard';
 import BookingScreen from './connect/BookingScreen';
 import MyBookingsModal from './connect/MyBookingsModal';
+import DMModal from './connect/DMModal';
 
 const ConnectPage = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const ConnectPage = () => {
     const [experts, setExperts] = useState<Expert[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+    const [dmExpert, setDmExpert] = useState<Expert | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCompany, setSelectedCompany] = useState('All');
     const [showMyBookings, setShowMyBookings] = useState(false);
@@ -265,11 +267,16 @@ const ConnectPage = () => {
                                 key={expert.id}
                                 expert={expert}
                                 onBook={handleBook}
+                                onMessage={(e) => setDmExpert(e)}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
+            {dmExpert && (
+                <DMModal expert={dmExpert} onClose={() => setDmExpert(null)} />
+            )}
 
             {selectedExpert && (
                 <BookingScreen
