@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass, Video, CalendarCheck } from 'lucide-react';
+import { X, Loader2, Search, Calendar, Clock, CheckCircle2, XCircle, Hourglass, Video, CalendarCheck, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
+import DMModal from './DMModal';
 
 interface Booking {
   id: string;
@@ -16,7 +17,7 @@ interface Booking {
   meet_link: string | null;
   status: string;
   created_at: string;
-  experts: { name: string; photo_url: string | null } | null;
+  experts: { id: string; name: string; title: string | null; photo_url: string | null } | null;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
@@ -55,6 +56,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [meetLoading, setMeetLoading] = useState<string | null>(null);
+  const [dmExpert, setDmExpert] = useState<Booking['experts'] | null>(null);
 
   const fetchBookings = async (emailToSearch: string) => {
     if (!emailToSearch.trim()) return;
@@ -62,7 +64,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
     try {
       const { data } = await supabase
         .from('bookings')
-        .select('*, experts(name, photo_url)')
+        .select('*, experts(id, name, title, photo_url)')
         .ilike('user_email', emailToSearch.trim())
         .order('date', { ascending: false })
         .returns<Booking[]>();
@@ -121,6 +123,13 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
   };
 
   return (
+    <>
+    {dmExpert && (
+      <DMModal
+        expert={dmExpert as any}
+        onClose={() => setDmExpert(null)}
+      />
+    )}
     <div
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -214,31 +223,47 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                       </p>
                     )}
 
-                    {/* Meet link / Request Meeting */}
-                    {booking.meet_link ? (
-                      <a
-                        href={booking.meet_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg text-xs font-medium font-['Inter'] transition-colors"
-                      >
-                        <Video className="w-3 h-3" />
-                        Join Google Meet
-                      </a>
-                    ) : (booking.status === 'paid' || booking.status === 'confirmed') ? (
-                      <button
-                        onClick={() => requestMeetLink(booking.id)}
-                        disabled={meetLoading === booking.id}
-                        className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 active:scale-95 text-white rounded-lg text-xs font-medium font-['Inter'] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {meetLoading === booking.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <CalendarCheck className="w-3 h-3" />
+                    {/* Actions — only for paid/confirmed bookings */}
+                    {(booking.status === 'paid' || booking.status === 'confirmed') && (
+                      <div className="space-y-2">
+                        {/* Message Expert */}
+                        {booking.experts && (
+                          <button
+                            onClick={() => setDmExpert(booking.experts)}
+                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-50 border border-stone-200 hover:bg-stone-100 active:scale-95 text-stone-700 rounded-lg text-xs font-medium font-['Inter'] transition-all"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            Message {booking.experts.name.split(' ')[0]}
+                          </button>
                         )}
-                        {meetLoading === booking.id ? 'Generating...' : 'Request Meeting'}
-                      </button>
-                    ) : null}
+
+                        {/* Meet link / Request Meeting */}
+                        {booking.meet_link ? (
+                          <a
+                            href={booking.meet_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg text-xs font-medium font-['Inter'] transition-colors"
+                          >
+                            <Video className="w-3 h-3" />
+                            Join Google Meet
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => requestMeetLink(booking.id)}
+                            disabled={meetLoading === booking.id}
+                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 active:scale-95 text-white rounded-lg text-xs font-medium font-['Inter'] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {meetLoading === booking.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <CalendarCheck className="w-3 h-3" />
+                            )}
+                            {meetLoading === booking.id ? 'Generating...' : 'Request Meeting'}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -247,6 +272,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
