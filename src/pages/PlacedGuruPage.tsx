@@ -1,7 +1,7 @@
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, LogOut, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X, Video, CalendarCheck, MessageCircle, Mail } from 'lucide-react';
+import { Plus, Pencil, BadgeCheck, TrendingUp, Clock, CalendarDays, CheckCircle2, XCircle, Hourglass, Loader2, Calendar, ArrowLeft, X, Video, CalendarCheck, MessageCircle, Mail } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
@@ -12,9 +12,9 @@ import { Expert } from './connect/ExpertCard';
 /* ── Profile mini-card ─────────────────────────────────────────────── */
 
 function startGoogleOAuth(expertId: string) {
-  const clientId    = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/oauth/google/callback`;
-  const scope       = 'https://www.googleapis.com/auth/meetings.space.created';
+  const scope = 'https://www.googleapis.com/auth/meetings.space.created';
   const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${expertId}`;
   window.location.href = url;
 }
@@ -417,7 +417,7 @@ interface Message {
 
 const MessagesPanel = ({ userId }: { userId: string }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -523,7 +523,6 @@ const MessagesPanel = ({ userId }: { userId: string }) => {
 type View = 'list' | 'add' | 'edit';
 
 const ManagementPanel = ({ userId }: { userId: string }) => {
-  const { signOut } = useClerk();
   const navigate = useNavigate();
   const [tab, setTab] = useState<'profiles' | 'bookings' | 'messages'>('profiles');
   const [view, setView] = useState<View>('list');
@@ -586,13 +585,6 @@ const ManagementPanel = ({ userId }: { userId: string }) => {
               Add Profile
             </button>
           )}
-          <button
-            onClick={() => signOut().then(() => navigate('/connect'))}
-            title="Sign out"
-            className="p-2.5 bg-stone-100 text-stone-500 rounded-xl hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </div>
 

@@ -90,7 +90,9 @@ const Header = ({ onStartTour }: HeaderProps) => {
           {showExit && (
             <button
               onClick={() => {
-                if (location.pathname === '/connect' || location.pathname === '/ai-interview') {
+                if (location.pathname === '/placed-guru') {
+                  window.location.href = 'https://www.harrytheblaze.site/connect';
+                } else if (location.pathname === '/connect' || location.pathname === '/ai-interview') {
                   navigate('/');
                 } else {
                   navigate('/dashboard/Accenture');
