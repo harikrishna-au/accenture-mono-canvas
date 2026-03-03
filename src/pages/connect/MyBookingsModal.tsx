@@ -170,7 +170,13 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
             </div>
           ) : (
             <div className="space-y-3">
-              {bookings.map((booking) => {
+              {bookings
+                .filter((b) => {
+                  // Hide ended meetings (date + end_time in the past)
+                  const ended = new Date(`${b.date}T${b.end_time}`) < new Date();
+                  return !ended;
+                })
+                .map((booking) => {
                 const status = STATUS_CONFIG[booking.status] ?? STATUS_CONFIG.cancelled;
                 return (
                   <div key={booking.id} className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 space-y-3">

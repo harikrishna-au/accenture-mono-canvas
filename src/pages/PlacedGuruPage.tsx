@@ -149,8 +149,11 @@ interface ExpertBooking {
   end_time: string;
   meet_link: string | null;
   status: string;
-  experts: { name: string; photo_url: string | null } | null;
+  experts: { name: string; photo_url: string | null; price_inr: number } | null;
 }
+
+const isMeetingEnded = (date: string, endTime: string) =>
+  new Date(`${date}T${endTime}`) < new Date();
 
 const BookingsPanel = ({ userId }: { userId: string }) => {
   const [bookings, setBookings] = useState<ExpertBooking[]>([]);
@@ -205,7 +208,7 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
     const ids = myExperts.map((e) => e.id);
     const { data } = await supabase
       .from('bookings')
-      .select('*, experts(name, photo_url)')
+      .select('*, experts(name, photo_url, price_inr)')
       .in('expert_id', ids)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
@@ -240,6 +243,22 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
     );
   }
 
+  // Split into active (upcoming) and ended
+  const activeBookings = bookings.filter(
+    (b) => b.status !== 'declined' && !isMeetingEnded(b.date, b.end_time)
+  );
+  const endedConfirmed = bookings.filter(
+    (b) => b.status === 'confirmed' && isMeetingEnded(b.date, b.end_time)
+  );
+
+  // Income = sum of price_inr for every completed confirmed session
+  const totalEarned = endedConfirmed.reduce(
+    (sum, b) => sum + (b.experts?.price_inr ?? 0), 0
+  );
+  const upcoming = activeBookings.filter(
+    (b) => b.status === 'confirmed' || b.status === 'paid'
+  ).length;
+
   if (bookings.length === 0) {
     return (
       <div className="bg-white rounded-3xl p-12 shadow-sm border border-stone-100 flex flex-col items-center text-center">
@@ -250,12 +269,49 @@ const BookingsPanel = ({ userId }: { userId: string }) => {
   }
 
   const order = ['paid', 'confirmed', 'declined'];
-  const sorted = [...bookings].sort(
+  const sorted = [...activeBookings].sort(
     (a, b) => order.indexOf(a.status) - order.indexOf(b.status)
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* ── Income stats banner ── */}
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-stone-50">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 font-['Inter']">
+            Earnings Overview
+          </p>
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-stone-100">
+          <div className="px-5 py-4 flex flex-col gap-0.5">
+            <span className="text-[11px] text-stone-400 font-['Inter']">Total Earned</span>
+            <span className="text-xl font-bold font-['Inter'] text-stone-900">
+              ₹{totalEarned.toLocaleString('en-IN')}
+            </span>
+            <span className="text-[10px] text-stone-400 font-['Inter']">{endedConfirmed.length} session{endedConfirmed.length !== 1 ? 's' : ''} completed</span>
+          </div>
+          <div className="px-5 py-4 flex flex-col gap-0.5">
+            <span className="text-[11px] text-stone-400 font-['Inter']">Upcoming</span>
+            <span className="text-xl font-bold font-['Inter'] text-stone-900">{upcoming}</span>
+            <span className="text-[10px] text-stone-400 font-['Inter']">session{upcoming !== 1 ? 's' : ''} scheduled</span>
+          </div>
+          <div className="px-5 py-4 flex flex-col gap-0.5">
+            <span className="text-[11px] text-stone-400 font-['Inter']">Pending</span>
+            <span className="text-xl font-bold font-['Inter'] text-amber-600">
+              {activeBookings.filter((b) => b.status === 'paid').length}
+            </span>
+            <span className="text-[10px] text-stone-400 font-['Inter']">awaiting your accept</span>
+          </div>
+        </div>
+      </div>
+
+      {sorted.length === 0 ? (
+        <div className="bg-white rounded-3xl p-10 shadow-sm border border-stone-100 flex flex-col items-center text-center">
+          <CalendarDays className="w-7 h-7 text-stone-300 mb-3" />
+          <p className="text-stone-400 text-sm font-['Inter']">No upcoming sessions.</p>
+        </div>
+      ) : null}
+
       {sorted.map((booking) => {
         const st = BOOKING_STATUS[booking.status] ?? BOOKING_STATUS.declined;
         const isPending = booking.status === 'paid';
