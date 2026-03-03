@@ -124,12 +124,6 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
 
   return (
     <>
-    {dmExpert && (
-      <DMModal
-        expert={dmExpert as any}
-        onClose={() => setDmExpert(null)}
-      />
-    )}
     <div
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -275,6 +269,12 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
         </div>
       </div>
     </div>
+    {dmExpert && (
+      <DMModal
+        expert={dmExpert as any}
+        onClose={() => setDmExpert(null)}
+      />
+    )}
     </>
   );
 };
