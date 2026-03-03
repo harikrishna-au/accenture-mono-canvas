@@ -180,6 +180,23 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                 const status = STATUS_CONFIG[booking.status] ?? STATUS_CONFIG.cancelled;
                 return (
                   <div key={booking.id} className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 space-y-3">
+
+                    {/* Message banner — top of card, only for paid/confirmed */}
+                    {(booking.status === 'paid' || booking.status === 'confirmed') && booking.experts && (
+                      <button
+                        onClick={() => setDmExpert(booking.experts)}
+                        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 hover:bg-stone-100 active:scale-[0.99] transition-all group"
+                      >
+                        <div className="w-6 h-6 rounded-lg bg-stone-200 group-hover:bg-stone-300 flex items-center justify-center flex-shrink-0 transition-colors">
+                          <MessageCircle className="w-3.5 h-3.5 text-stone-600" />
+                        </div>
+                        <span className="text-xs font-medium text-stone-600 font-['Inter']">
+                          Message {booking.experts.name.split(' ')[0]}
+                        </span>
+                        <span className="ml-auto text-[10px] text-stone-400 font-['Inter']">Send a message →</span>
+                      </button>
+                    )}
+
                     {/* Expert + status */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
@@ -216,53 +233,39 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
                       </span>
                     </div>
 
-                    {/* Message */}
+                    {/* Booking note */}
                     {booking.message && (
                       <p className="text-xs text-stone-500 font-['Inter'] line-clamp-2 bg-stone-50 rounded-lg px-3 py-2">
                         {booking.message}
                       </p>
                     )}
 
-                    {/* Actions — only for paid/confirmed bookings */}
+                    {/* Meet link / Request Meeting */}
                     {(booking.status === 'paid' || booking.status === 'confirmed') && (
-                      <div className="space-y-2">
-                        {/* Message Expert */}
-                        {booking.experts && (
-                          <button
-                            onClick={() => setDmExpert(booking.experts)}
-                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-50 border border-stone-200 hover:bg-stone-100 active:scale-95 text-stone-700 rounded-lg text-xs font-medium font-['Inter'] transition-all"
-                          >
-                            <MessageCircle className="w-3 h-3" />
-                            Message {booking.experts.name.split(' ')[0]}
-                          </button>
-                        )}
-
-                        {/* Meet link / Request Meeting */}
-                        {booking.meet_link ? (
-                          <a
-                            href={booking.meet_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg text-xs font-medium font-['Inter'] transition-colors"
-                          >
-                            <Video className="w-3 h-3" />
-                            Join Google Meet
-                          </a>
-                        ) : (
-                          <button
-                            onClick={() => requestMeetLink(booking.id)}
-                            disabled={meetLoading === booking.id}
-                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 active:scale-95 text-white rounded-lg text-xs font-medium font-['Inter'] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {meetLoading === booking.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <CalendarCheck className="w-3 h-3" />
-                            )}
-                            {meetLoading === booking.id ? 'Generating...' : 'Request Meeting'}
-                          </button>
-                        )}
-                      </div>
+                      booking.meet_link ? (
+                        <a
+                          href={booking.meet_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg text-xs font-medium font-['Inter'] transition-colors"
+                        >
+                          <Video className="w-3 h-3" />
+                          Join Google Meet
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => requestMeetLink(booking.id)}
+                          disabled={meetLoading === booking.id}
+                          className="flex items-center justify-center gap-1.5 w-full py-2 bg-stone-900 hover:bg-stone-700 active:scale-95 text-white rounded-lg text-xs font-medium font-['Inter'] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {meetLoading === booking.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <CalendarCheck className="w-3 h-3" />
+                          )}
+                          {meetLoading === booking.id ? 'Generating...' : 'Request Meeting'}
+                        </button>
+                      )
                     )}
                   </div>
                 );
