@@ -187,11 +187,11 @@ export default function Landing() {
           style={{ background: "radial-gradient(ellipse, rgba(168,162,158,0.14) 0%, transparent 70%)" }}
         />
 
-        {/* 3-D floating glass cubes */}
+        {/* 3-D floating glass cubes — desktop only */}
         {shapes.map((s, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-2xl"
+            className="absolute rounded-2xl hidden lg:block"
             style={{
               width: s.w,
               height: s.h,
@@ -218,7 +218,6 @@ export default function Landing() {
               ease: "easeInOut",
             }}
           >
-            {/* inner shimmer line */}
             <div
               className="absolute inset-x-3 top-2 h-px rounded-full"
               style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)" }}
@@ -226,7 +225,7 @@ export default function Landing() {
           </motion.div>
         ))}
 
-        {/* floating stat badges */}
+        {/* floating stat badge — desktop only */}
         <motion.div
           className="absolute top-[18%] right-[10%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl"
           style={{
@@ -247,14 +246,191 @@ export default function Landing() {
           <span className="text-[12px] font-['Inter'] font-semibold text-stone-700">500+ Students Placed</span>
         </motion.div>
 
-
       </div>
 
-      {/* ══ MAIN LAYOUT ═══════════════════════════════════════════════ */}
-      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
+      {/* ══════════════════════════════════════════════════════════════ */}
+      {/* ══ MOBILE LAYOUT  (hidden on lg+) ═══════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════ */}
+      <div className="lg:hidden relative z-10 min-h-screen flex flex-col">
 
-        {/* ── LEFT: brand ─────────────────────────────────────────── */}
-        <div className="flex flex-col justify-between px-5 sm:px-10 lg:px-14 py-8 lg:py-14 lg:w-[54%] lg:min-h-screen">
+        {/* ── Top bar ── */}
+        <div className="flex items-center justify-between px-5 pt-7 pb-2">
+          <div className="flex items-center gap-2">
+            <img
+              src="/favicon.svg"
+              alt="Harry The Blaze"
+              className="w-7 h-7 flex-shrink-0"
+              style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.22))" }}
+            />
+            <span className="font-['Merriweather'] font-black text-[0.82rem] tracking-tight text-stone-800">
+              HARRY THE BLAZE
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-['Inter'] font-semibold bg-stone-100 text-stone-500 border border-stone-200">
+            <Sparkles className="w-2.5 h-2.5" />
+            Free to join
+          </span>
+        </div>
+
+        {/* ── Compact hero ── */}
+        <div className="px-5 pt-5 pb-4">
+          <h1 className="font-['Merriweather'] font-black text-stone-900 leading-[1.1] tracking-tight text-[1.65rem] mb-2">
+            Crack campus<br />
+            placements.{" "}
+            <span className="text-stone-400">Faster.</span>
+          </h1>
+          <p className="font-['Inter'] text-[13px] text-stone-500 leading-relaxed">
+            AI mock interviews · Gamified aptitude · 1:1 with placed seniors
+          </p>
+        </div>
+
+        {/* ── Divider ── */}
+        <div className="mx-5 h-px bg-stone-100 mb-5" />
+
+        {/* ── Auth area — flat, full-width, no card chrome ── */}
+        <div className="flex-1 px-5 pb-4">
+          <SignedOut>
+            {!isLoaded ? (
+              <AuthSkeleton />
+            ) : (
+              <>
+                {/* Tab switcher */}
+                <div
+                  className={`flex p-1 rounded-2xl mb-5 ${isClerkVerificationStep ? "hidden" : ""}`}
+                  style={{
+                    background: "rgba(0,0,0,0.04)",
+                    border: "1px solid rgba(0,0,0,0.07)",
+                  }}
+                >
+                  {(["sign-in", "sign-up"] as AuthView[]).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setView(v)}
+                      className="flex-1 py-2.5 rounded-xl text-[13.5px] font-['Inter'] font-semibold transition-all duration-200 active:scale-[0.97]"
+                      style={
+                        view === v
+                          ? {
+                              background: "#ffffff",
+                              color: "#1c1c1e",
+                              boxShadow: "0 1px 6px rgba(0,0,0,0.1)",
+                            }
+                          : { color: "#a8a29e" }
+                      }
+                    >
+                      {v === "sign-in" ? "Sign In" : "Sign Up"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Clerk embed — full width, no wrapper card */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={view + "-mob"}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18 }}
+                    className="w-full"
+                  >
+                    {view === "sign-in" ? (
+                      <SignIn
+                        routing="hash"
+                        forceRedirectUrl="/dashboard"
+                        appearance={clerkAppearance}
+                      />
+                    ) : (
+                      <SignUp
+                        routing="hash"
+                        forceRedirectUrl="/dashboard"
+                        appearance={clerkAppearance}
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </>
+            )}
+          </SignedOut>
+
+          {/* Signed-in state — mobile */}
+          <SignedIn>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="text-center pt-6"
+            >
+              <div className="flex justify-center mb-4">
+                <UserButton />
+              </div>
+              <h2 className="font-['Merriweather'] font-bold text-xl text-stone-900 mb-1.5">
+                Welcome back!
+              </h2>
+              <p className="font-['Inter'] text-[13px] text-stone-500 mb-6">
+                Continue where you left off.
+              </p>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-['Inter'] font-semibold text-[14px] bg-stone-900 text-white active:scale-[0.98] transition-transform mb-3"
+              >
+                Go to Dashboard
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <Link
+                to="/connect"
+                className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-['Inter'] font-medium text-[13px] text-stone-600 border border-stone-200 bg-white active:scale-[0.98] transition-transform"
+              >
+                Browse Placed Gurus
+              </Link>
+            </motion.div>
+          </SignedIn>
+        </div>
+
+        {/* ── Feature chips — horizontal scroll ── */}
+        <div
+          className="border-t border-stone-100 pt-3 pb-2"
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}
+        >
+          <div className="flex gap-2 px-5 min-w-max">
+            {features.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-full shadow-sm flex-shrink-0"
+              >
+                <Icon className="w-3 h-3 text-stone-500 flex-shrink-0" />
+                <span className="text-[11px] font-['Inter'] font-medium text-stone-600 whitespace-nowrap">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Footer links ── */}
+        <div className="flex items-center gap-4 px-5 py-4 flex-wrap">
+          {[
+            { label: "About", to: "/about" },
+            { label: "Terms", to: "/terms" },
+            { label: "Connect", to: "/connect" },
+            { label: "Be a Guru", to: "/placed-guru" },
+          ].map(({ label, to }) => (
+            <Link
+              key={label}
+              to={to}
+              className="text-[11px] font-['Inter'] text-stone-400 hover:text-stone-600 transition-colors"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════ */}
+      {/* ══ DESKTOP LAYOUT  (hidden below lg) ════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════ */}
+      <div className="hidden lg:flex relative z-10 min-h-screen flex-row">
+
+        {/* ── LEFT: brand ── */}
+        <div className="flex flex-col justify-between px-14 py-14 w-[54%] min-h-screen">
 
           {/* logo */}
           <motion.div
@@ -277,8 +453,7 @@ export default function Landing() {
           </motion.div>
 
           {/* hero copy */}
-          <div className="py-8 lg:py-0">
-
+          <div>
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -296,7 +471,7 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
               className="font-['Merriweather'] font-black text-stone-900 leading-[1.08] tracking-tight mb-5"
-              style={{ fontSize: "clamp(1.85rem, 7vw, 4rem)" }}
+              style={{ fontSize: "clamp(2.4rem, 4vw, 4rem)" }}
             >
               Crack campus
               <br />
@@ -367,8 +542,8 @@ export default function Landing() {
           </motion.div>
         </div>
 
-        {/* ── RIGHT: auth card ─────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 sm:py-12 lg:py-0">
+        {/* ── RIGHT: auth card ── */}
+        <div className="flex-1 flex items-center justify-center px-8">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
@@ -381,23 +556,21 @@ export default function Landing() {
             }}
             onMouseMove={onMove}
             onMouseLeave={onLeave}
-            className="w-full max-w-[380px]"
+            className="w-full max-w-[390px]"
           >
-            {/* card — overflow:hidden clips Clerk's inner chrome */}
+            {/* card */}
             <div
-              className="bg-white rounded-3xl p-5 sm:p-8 border border-stone-100 overflow-hidden"
+              className="bg-white rounded-3xl p-8 border border-stone-100 overflow-hidden"
               style={{
                 boxShadow:
                   "0 24px 64px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)",
               }}
             >
               <SignedOut>
-                {/* show skeleton while Clerk JS bootstraps */}
                 {!isLoaded ? (
                   <AuthSkeleton />
                 ) : (
                   <>
-                    {/* tabs — hidden during multi-step flows like email verification */}
                     <div className={`flex p-1 rounded-xl bg-stone-100 border border-stone-200 mb-7 ${isClerkVerificationStep ? "hidden" : ""}`}>
                       {(["sign-in", "sign-up"] as AuthView[]).map((v) => (
                         <button
@@ -407,10 +580,10 @@ export default function Landing() {
                           style={
                             view === v
                               ? {
-                                background: "#ffffff",
-                                color: "#1c1c1e",
-                                boxShadow: "0 1px 5px rgba(0,0,0,0.09)",
-                              }
+                                  background: "#ffffff",
+                                  color: "#1c1c1e",
+                                  boxShadow: "0 1px 5px rgba(0,0,0,0.09)",
+                                }
                               : { color: "#a8a29e" }
                           }
                         >
@@ -419,7 +592,6 @@ export default function Landing() {
                       ))}
                     </div>
 
-                    {/* heading — hide when Clerk shows verification step (it has its own header) */}
                     {!isClerkVerificationStep && (
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -453,7 +625,6 @@ export default function Landing() {
                       </AnimatePresence>
                     )}
 
-                    {/* Clerk embed — fade in/out on view switch */}
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={view + "-clerk"}
@@ -482,7 +653,6 @@ export default function Landing() {
                 )}
               </SignedOut>
 
-              {/* signed-in state */}
               <SignedIn>
                 <div className="text-center py-4">
                   <div className="flex justify-center mb-5">
@@ -513,7 +683,7 @@ export default function Landing() {
               </SignedIn>
             </div>
 
-            {/* card glow shadow */}
+            {/* card glow */}
             <div
               className="absolute -inset-4 -z-10 blur-[40px] opacity-30 rounded-3xl"
               style={{ background: "radial-gradient(ellipse, rgba(201,164,110,0.3) 0%, transparent 70%)" }}
