@@ -216,7 +216,7 @@ const Dashboard = () => {
         mode={companyId ? 'journey' : 'landing'}
       />
 
-      <div className={`relative z-10 flex-1 flex flex-col items-center w-full transition-all duration-500 ${companyId ? 'justify-start pt-20 p-4' : 'p-4 pt-20 md:p-8'} ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
+      <div className={`relative z-10 flex-1 flex flex-col items-center w-full transition-all duration-500 ${companyId ? 'justify-start pt-16 p-3 sm:p-4' : 'p-3 sm:p-4 pt-16 md:p-8'} ${isFooterHovered ? 'blur-sm scale-[0.98] opacity-80' : ''}`}>
         <SignedIn>
           <div className={`flex flex-col items-center w-full max-w-6xl flex-1 ${companyId ? 'justify-start' : 'min-h-[60vh] justify-start'}`}>
 

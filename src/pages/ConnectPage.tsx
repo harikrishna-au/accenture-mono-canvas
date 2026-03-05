@@ -127,17 +127,17 @@ const ConnectPage = () => {
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 {/* Hero Header — preserving original design */}
-                <div className="relative flex flex-col items-center justify-center text-center mb-8 md:mb-16 space-y-6 sm:space-y-8 pt-16 w-full">
+                <div className="relative flex flex-col items-center justify-center text-center mb-8 md:mb-16 space-y-4 sm:space-y-8 pt-10 sm:pt-16 w-full">
                     <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-50 pointer-events-none">
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-emerald-200 rounded-full mix-blend-multiply blur-3xl -translate-x-20 -translate-y-4" />
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-sky-200 rounded-full mix-blend-multiply blur-3xl translate-x-10 translate-y-10" />
                         <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-indigo-200 rounded-full mix-blend-multiply blur-3xl translate-x-32 -translate-y-8" />
                     </div>
 
-                    <div className="relative inline-flex items-center group mt-8">
+                    <div className="relative inline-flex items-center group mt-4 sm:mt-8">
                         <div className="absolute -inset-8 bg-yellow-400 rounded-full blur-[60px] opacity-40 -z-10 group-hover:opacity-70 transition-opacity duration-700" />
                         <div className="absolute -inset-4 bg-amber-500 rounded-full blur-[40px] opacity-30 -z-10 group-hover:opacity-60 transition-opacity duration-700" />
-                        <h1 className="text-5xl sm:text-7xl md:text-9xl font-serif tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-stone-800 to-stone-600 z-10 pb-4">
+                        <h1 className="text-4xl sm:text-6xl md:text-9xl font-serif tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-stone-800 to-stone-600 z-10 pb-4">
                             Connect.
                         </h1>
                         <Sparkles className="absolute -top-3 -right-8 sm:-top-4 sm:-right-12 w-7 h-7 sm:w-10 sm:h-10 text-emerald-400 animate-pulse opacity-100 transition-opacity duration-700 z-20" />
@@ -150,7 +150,7 @@ const ConnectPage = () => {
 
                     {/* Company Filter Scroll */}
                     <div
-                        className="w-full max-w-4xl mt-12 overflow-hidden relative pb-4"
+                        className="w-full max-w-4xl mt-6 sm:mt-12 overflow-hidden relative pb-4"
                         onMouseEnter={handleTickerEnter}
                         onMouseLeave={handleTickerLeave}
                     >

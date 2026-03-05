@@ -274,9 +274,9 @@ export const TestimonialScroller = () => {
       {/* Top divider */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-stone-200 to-transparent" />
 
-      <div className="py-20">
+      <div className="py-10 sm:py-20">
         {/* Section header */}
-        <div className="text-center mb-14 px-6">
+        <div className="text-center mb-8 sm:mb-14 px-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 text-stone-500 text-[10.5px] font-semibold tracking-[0.2em] uppercase font-['Inter'] mb-5">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />

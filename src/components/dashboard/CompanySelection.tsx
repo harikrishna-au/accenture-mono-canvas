@@ -247,7 +247,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
   }, { scope: containerRef });
 
   return (
-    <div ref={containerRef} className="w-full max-w-7xl mx-auto px-6 py-14 opacity-0">
+    <div ref={containerRef} className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-14 opacity-0">
       <style>{STYLES}</style>
 
       <WaitlistPopup
@@ -260,7 +260,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div
         ref={heroRef}
-        className="flex flex-col items-center text-center mb-12 space-y-4"
+        className="flex flex-col items-center text-center mb-8 sm:mb-12 space-y-3 sm:space-y-4"
       >
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 text-stone-500 text-[10.5px] font-semibold tracking-[0.2em] uppercase font-['Inter']">
           <span className="relative flex h-1.5 w-1.5">
@@ -270,7 +270,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           Interview Prep Platform
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-[3.3rem] font-serif text-stone-800 tracking-tight leading-[1.12] max-w-2xl">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.3rem] font-serif text-stone-800 tracking-tight leading-[1.12] max-w-2xl">
           Practice what top MNCs
           <br />
           <span className="text-stone-400 font-light italic">actually test.</span>
@@ -305,7 +305,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
                 }}
               />
 
-              <div className="relative z-10 p-8 flex flex-col h-full min-h-[360px]">
+              <div className="relative z-10 p-5 sm:p-8 flex flex-col h-full min-h-[260px] sm:min-h-[360px]">
                 {/* Header row */}
                 <div className="flex items-start justify-between mb-8">
                   <div>
@@ -571,7 +571,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             }}
           />
 
-          <div className="relative z-10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="relative z-10 p-5 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
             {/* Left: icon + text */}
             <div className="flex items-center gap-5">
               <div

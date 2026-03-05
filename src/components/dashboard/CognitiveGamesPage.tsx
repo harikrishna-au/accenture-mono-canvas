@@ -92,7 +92,7 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
   );
 
   return (
-    <div ref={containerRef} className="w-full max-w-5xl mx-auto px-6 py-10 opacity-0">
+    <div ref={containerRef} className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 opacity-0">
 
       {/* Back */}
       <button

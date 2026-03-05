@@ -254,7 +254,7 @@ export default function Landing() {
       <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
 
         {/* ── LEFT: brand ─────────────────────────────────────────── */}
-        <div className="flex flex-col justify-between px-10 lg:px-14 py-10 lg:py-14 lg:w-[54%] lg:min-h-screen">
+        <div className="flex flex-col justify-between px-5 sm:px-10 lg:px-14 py-8 lg:py-14 lg:w-[54%] lg:min-h-screen">
 
           {/* logo */}
           <motion.div
@@ -277,7 +277,7 @@ export default function Landing() {
           </motion.div>
 
           {/* hero copy */}
-          <div className="py-12 lg:py-0">
+          <div className="py-8 lg:py-0">
 
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -296,7 +296,7 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
               className="font-['Merriweather'] font-black text-stone-900 leading-[1.08] tracking-tight mb-5"
-              style={{ fontSize: "clamp(2.5rem, 5.5vw, 4rem)" }}
+              style={{ fontSize: "clamp(1.85rem, 7vw, 4rem)" }}
             >
               Crack campus
               <br />
@@ -368,7 +368,7 @@ export default function Landing() {
         </div>
 
         {/* ── RIGHT: auth card ─────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center px-8 py-12 lg:py-0">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 sm:py-12 lg:py-0">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
@@ -385,7 +385,7 @@ export default function Landing() {
           >
             {/* card — overflow:hidden clips Clerk's inner chrome */}
             <div
-              className="bg-white rounded-3xl p-8 border border-stone-100 overflow-hidden"
+              className="bg-white rounded-3xl p-5 sm:p-8 border border-stone-100 overflow-hidden"
               style={{
                 boxShadow:
                   "0 24px 64px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9)",
