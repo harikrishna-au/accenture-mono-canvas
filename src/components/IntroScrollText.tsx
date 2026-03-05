@@ -257,6 +257,19 @@ const IntroScrollText = () => {
           />
         </div>
 
+        {/* Logo mark */}
+        <img
+          src="/favicon.svg"
+          alt="Harry The Blaze"
+          style={{
+            width: 52,
+            height: 52,
+            animation: "titleIn 3s cubic-bezier(0.22,1,0.36,1) 0.08s forwards",
+            opacity: 0,
+            filter: "drop-shadow(0 4px 18px rgba(0,0,0,0.18))",
+          }}
+        />
+
         {/* Title row + flanking lines */}
         <div
           style={{

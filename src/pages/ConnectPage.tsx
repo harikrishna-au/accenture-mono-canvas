@@ -62,15 +62,19 @@ const ConnectPage = () => {
     useEffect(() => {
         const fetchExperts = async () => {
             setLoading(true);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 10_000);
             try {
                 const { data } = await supabase
                     .from('experts')
-                    .select('*, availability(id)')
-                    .order('created_at', { ascending: false });
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .abortSignal(controller.signal);
                 if (data) setExperts(data as unknown as Expert[]);
             } catch {
-                // Network error — experts list stays empty, page still renders
+                // Network error or timeout — experts list stays empty
             } finally {
+                clearTimeout(timer);
                 setLoading(false);
             }
         };

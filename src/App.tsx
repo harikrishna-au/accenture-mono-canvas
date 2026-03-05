@@ -45,6 +45,8 @@ const App = () => {
   return (
     <ClerkProvider
       publishableKey={clerkPubKey}
+      signInUrl="/"
+      signUpUrl="/"
       appearance={{
         baseTheme: undefined,
         variables: { colorPrimary: '#000000' }

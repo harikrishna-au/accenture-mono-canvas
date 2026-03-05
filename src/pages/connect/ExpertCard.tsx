@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, Tag, BadgeCheck, TrendingUp, Calendar, CalendarOff } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 
