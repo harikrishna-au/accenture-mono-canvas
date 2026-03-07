@@ -61,11 +61,7 @@ export default function FindMin() {
   const [showModeSelect, setShowModeSelect] = useState(false);
   const [showLevelSelect, setShowLevelSelect] = useState(false);
 
-  useEffect(() => {
-    if (isPremium) {
-      setShowModeSelect(true);
-    }
-  }, [isPremium]);
+  // Premium users go straight into arcade mode — no blocking popup
 
   const handleModeSelect = (mode: 'arcade' | 'practice') => {
     setGameMode(mode);

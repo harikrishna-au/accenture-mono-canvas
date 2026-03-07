@@ -5,6 +5,7 @@ import PageWrapper from '@/components/PageWrapper';
 import Header from "@/components/Header";
 import { LogOut, Flag } from "lucide-react";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import PaymentPopup from "@/components/PaymentPopup";
 
 interface Balloon {
     id: number;
@@ -27,8 +28,9 @@ const BalloonMathGame: React.FC = () => {
     const [started, setStarted] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
     const [roundPerfect, setRoundPerfect] = useState(true);
+    const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-    const FREE_ROUNDS = 25;
+    const FREE_ROUNDS = 3;
     const TIME_PER_ROUND = 15; // Increased time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
     const BUBBLE_COUNT = 3;
 
@@ -177,16 +179,15 @@ const BalloonMathGame: React.FC = () => {
     };
 
     const nextRound = (success: boolean) => {
-        const maxRounds = isPremium ? Infinity : FREE_ROUNDS;
-
-        if (round >= maxRounds) {
-            finishGame();
-        } else {
-            setRound(prev => prev + 1);
-            setTimeLeft(TIME_PER_ROUND);
-            setRoundPerfect(true);
-            generateBalloons();
+        if (!isPremium && round >= FREE_ROUNDS) {
+            // Non-premium: show paywall after 3 free rounds
+            setShowPaymentPopup(true);
+            return;
         }
+        setRound(prev => prev + 1);
+        setTimeLeft(TIME_PER_ROUND);
+        setRoundPerfect(true);
+        generateBalloons();
     };
 
     const finishGame = () => {
@@ -274,7 +275,7 @@ const BalloonMathGame: React.FC = () => {
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-neutral-500 pt-4 border-t border-neutral-200">
-                                <span>• {isPremium ? "Unlimited Rounds" : `${FREE_ROUNDS} Rounds`}</span>
+                                <span>• {isPremium ? "Unlimited Rounds" : `${FREE_ROUNDS} Free Rounds (Upgrade for more)`}</span>
                                 <span>• {TIME_PER_ROUND} Seconds per round</span>
                             </div>
                         </div>
@@ -328,11 +329,12 @@ const BalloonMathGame: React.FC = () => {
     return (
         <div className="min-h-screen w-full bg-white relative overflow-hidden flex flex-col pt-16">
             <Header />
+            <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} />
 
             <div className="flex-1 relative w-full max-w-4xl mx-auto">
                 {/* Round Indicator */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-neutral-100 px-4 py-1 rounded-full text-sm font-medium text-neutral-500 z-10">
-                    Section {round} {isPremium ? "(Infinite)" : `of ${FREE_ROUNDS}`}
+                    Round {round}{!isPremium ? ` of ${FREE_ROUNDS} free` : ""}
                 </div>
 
                 {/* Instruction Hint */}

@@ -9,7 +9,13 @@ export type SectionType =
     | 'F' // Error Correction
     | 'G' // Speaking on a Topic (Monologue)
     | 'WRITTEN' // Email Writing (Optional/Extra)
-    | 'SUMMARY'; // Final Analysis
+    | 'SUMMARY' // Final Analysis
+    // Pattern 2 sections
+    | 'P2_READ_SENTENCE'    // Read displayed sentence aloud
+    | 'P2_REPEAT_SENTENCE'  // Listen then repeat
+    | 'P2_QA_SPOKEN'        // Spoken Q&A
+    | 'P2_REARRANGEMENT'    // Rearrange scrambled words
+    | 'P2_STORY_RETELLING'; // Listen to story, retell it
 
 export interface Question {
     id: string;

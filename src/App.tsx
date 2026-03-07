@@ -13,6 +13,7 @@ import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { CommunicationRounds } from "./pages/communication-rounds";
+import { CommunicationRoundsP2 } from "./pages/communication-rounds-p2";
 import { CommunicationPatternsPage } from "@/components/dashboard/CommunicationPatternsPage";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -24,6 +25,13 @@ import PremiumRoute from "@/components/PremiumRoute";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
+
+import GeoSudo from "./pages/GeoSudo";
+import GridChallenge from "./pages/GridChallenge";
+import MotionChallenge from "./pages/MotionChallenge";
+import SwitchChallenge from "./pages/SwitchChallenge";
+import DigitChallenge from "./pages/DigitChallenge";
+import BARTGame from "./pages/BARTGame";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
@@ -90,18 +98,36 @@ const App = () => {
               {/* Hidden Maze Game */}
               <Route path="/game/hidden-maze" element={<HiddenMaze />} />
 
+              {/* Assessment Games */}
+              <Route path="/game/geo-sudo" element={<GeoSudo />} />
+              <Route path="/game/grid-challenge" element={<GridChallenge />} />
+              <Route path="/game/motion" element={<MotionChallenge />} />
+              <Route path="/game/switch" element={<SwitchChallenge />} />
+              <Route path="/game/digit" element={<DigitChallenge />} />
+              <Route path="/game/bart" element={<BARTGame />} />
+
               {/* Communication Pattern Selector */}
               <Route
                 path="/game/communication-patterns"
                 element={<CommunicationPatternsPage />}
               />
 
-              {/* Communication Game - Refactored */}
+              {/* Communication Game - Pattern 1 */}
               <Route
                 path="/game/communication"
                 element={
                   <PremiumRoute>
                     <CommunicationRounds />
+                  </PremiumRoute>
+                }
+              />
+
+              {/* Communication Game - Pattern 2 */}
+              <Route
+                path="/game/communication-p2"
+                element={
+                  <PremiumRoute>
+                    <CommunicationRoundsP2 />
                   </PremiumRoute>
                 }
               />

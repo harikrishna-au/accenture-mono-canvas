@@ -430,6 +430,120 @@ def seed_questions():
         }
     ])
     
+    # ==========================================
+    # PATTERN 2 — P2_READ_SENTENCE (Pool of 15, picks 5 randomly per session)
+    # promptText is shown on screen; user reads it aloud
+    # ==========================================
+    questions.extend([
+        {'id': 'p2_rs_1',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'The committee has decided to postpone the annual shareholders meeting until further notice.', 'voice_type': 'male_1'},
+        {'id': 'p2_rs_2',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'Effective communication skills are essential for career advancement in any professional field.', 'voice_type': 'female_1'},
+        {'id': 'p2_rs_3',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'Please ensure all required documents are submitted before the end of the business day.', 'voice_type': 'male_2'},
+        {'id': 'p2_rs_4',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'The revised policy will take effect from the first of next month across all departments.', 'voice_type': 'female_2'},
+        {'id': 'p2_rs_5',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'We appreciate your continued support and look forward to a productive collaboration ahead.', 'voice_type': 'male_1'},
+        {'id': 'p2_rs_6',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'The new software system will streamline our operations and reduce processing time significantly.', 'voice_type': 'female_1'},
+        {'id': 'p2_rs_7',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'All team members are expected to attend the mandatory safety briefing on Monday morning.', 'voice_type': 'male_2'},
+        {'id': 'p2_rs_8',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'The client has expressed satisfaction with the project progress and approved the next milestone.', 'voice_type': 'female_2'},
+        {'id': 'p2_rs_9',  'section': 'P2_READ_SENTENCE', 'prompt_text': 'Our organisation is committed to providing equal opportunities for all employees at every level.', 'voice_type': 'male_1'},
+        {'id': 'p2_rs_10', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'The annual conference will be held at the Grand Hyatt Hotel in the city centre next week.', 'voice_type': 'female_1'},
+        {'id': 'p2_rs_11', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'Please review the attached documents and provide your feedback by the end of this week.', 'voice_type': 'male_2'},
+        {'id': 'p2_rs_12', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'The financial audit confirmed that all accounts are in compliance with regulatory standards.', 'voice_type': 'female_2'},
+        {'id': 'p2_rs_13', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'We have successfully launched the new product line ahead of the scheduled release date.', 'voice_type': 'male_1'},
+        {'id': 'p2_rs_14', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'The human resources department will be conducting interviews throughout the month of April.', 'voice_type': 'female_1'},
+        {'id': 'p2_rs_15', 'section': 'P2_READ_SENTENCE', 'prompt_text': 'Collaboration between departments is essential to achieving our organisational goals this year.', 'voice_type': 'male_2'},
+    ])
+
+    # ==========================================
+    # PATTERN 2 — P2_REPEAT_SENTENCE (Pool of 15, picks 5 randomly per session)
+    # audio_src is the sentence spoken via TTS; user listens then repeats
+    # ==========================================
+    questions.extend([
+        {'id': 'p2_rep_1',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The project deadline has been extended by two weeks due to unforeseen delays.', 'voice_type': 'male_1'},
+        {'id': 'p2_rep_2',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'Please review the attached report and share your detailed feedback by Friday.', 'voice_type': 'female_1'},
+        {'id': 'p2_rep_3',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The meeting will be held in the main conference room at twelve noon tomorrow.', 'voice_type': 'male_1'},
+        {'id': 'p2_rep_4',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'All employees are requested to update their emergency contact information immediately.', 'voice_type': 'female_1'},
+        {'id': 'p2_rep_5',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The quarterly results exceeded our initial expectations by a significant margin.', 'voice_type': 'male_1'},
+        {'id': 'p2_rep_6',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The management team has approved the proposed budget for the upcoming quarter.', 'voice_type': 'female_1'},
+        {'id': 'p2_rep_7',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'Please ensure your identification badge is visible at all times while on the premises.', 'voice_type': 'male_2'},
+        {'id': 'p2_rep_8',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The training session will be conducted online via the company learning portal next Monday.', 'voice_type': 'female_2'},
+        {'id': 'p2_rep_9',  'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'We are pleased to inform you that your application has been shortlisted for review.', 'voice_type': 'male_1'},
+        {'id': 'p2_rep_10', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The customer satisfaction survey results were presented at this morning\'s board meeting.', 'voice_type': 'female_1'},
+        {'id': 'p2_rep_11', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'All invoices must be processed within five business days of receipt.', 'voice_type': 'male_2'},
+        {'id': 'p2_rep_12', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The new employee orientation programme will begin next Tuesday at nine in the morning.', 'voice_type': 'female_2'},
+        {'id': 'p2_rep_13', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'Our technical team resolved the server outage issue within three hours of detection.', 'voice_type': 'male_1'},
+        {'id': 'p2_rep_14', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'The management has decided to implement a flexible work-from-home policy from next month.', 'voice_type': 'female_1'},
+        {'id': 'p2_rep_15', 'section': 'P2_REPEAT_SENTENCE', 'audio_src': 'Please be advised that the office will be closed on account of the national holiday.', 'voice_type': 'male_1'},
+    ])
+
+    # ==========================================
+    # PATTERN 2 — P2_QA_SPOKEN (Pool of 12, picks 4 randomly per session)
+    # audio_src is the question spoken via TTS; user records a verbal answer
+    # ==========================================
+    questions.extend([
+        {'id': 'p2_qa_1',  'section': 'P2_QA_SPOKEN', 'audio_src': 'Tell me about a time you handled a difficult situation at work or college.', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_2',  'section': 'P2_QA_SPOKEN', 'audio_src': 'How do you prioritize your tasks when you have multiple deadlines at the same time?', 'voice_type': 'male_1'},
+        {'id': 'p2_qa_3',  'section': 'P2_QA_SPOKEN', 'audio_src': 'Describe your ideal work environment and the kind of team you work best in.', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_4',  'section': 'P2_QA_SPOKEN', 'audio_src': 'What motivates you to perform at your best even during challenging times?', 'voice_type': 'male_1'},
+        {'id': 'p2_qa_5',  'section': 'P2_QA_SPOKEN', 'audio_src': 'How do you handle constructive criticism from a manager or senior colleague?', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_6',  'section': 'P2_QA_SPOKEN', 'audio_src': 'Describe a situation where you had to learn something new quickly to complete a task.', 'voice_type': 'male_1'},
+        {'id': 'p2_qa_7',  'section': 'P2_QA_SPOKEN', 'audio_src': 'What do you consider your greatest professional strength and how does it help you at work?', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_8',  'section': 'P2_QA_SPOKEN', 'audio_src': 'Tell me about a time you worked as part of a team to achieve a shared goal.', 'voice_type': 'male_1'},
+        {'id': 'p2_qa_9',  'section': 'P2_QA_SPOKEN', 'audio_src': 'How do you manage your time when you have both urgent and important tasks competing for attention?', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_10', 'section': 'P2_QA_SPOKEN', 'audio_src': 'Describe a challenge you faced during an academic project and how you overcame it.', 'voice_type': 'male_1'},
+        {'id': 'p2_qa_11', 'section': 'P2_QA_SPOKEN', 'audio_src': 'What steps do you take to ensure accuracy and quality in your work?', 'voice_type': 'female_1'},
+        {'id': 'p2_qa_12', 'section': 'P2_QA_SPOKEN', 'audio_src': 'Tell me about an experience that made you a better communicator.', 'voice_type': 'male_1'},
+    ])
+
+    # ==========================================
+    # PATTERN 2 — P2_REARRANGEMENT (Pool of 12, picks 4 randomly per session)
+    # correct_answer is the full sentence; frontend splits into words and shuffles
+    # ==========================================
+    questions.extend([
+        {'id': 'p2_rear_1',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'Reports must be submitted before the deadline', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_2',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'The team completed the project by collaborating effectively', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_3',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'All employees are required to attend the training program', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_4',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'The announcement will appear on the official website', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_5',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'She presented her ideas clearly during the meeting', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_6',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'The manager approved the budget for the new project', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_7',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'He completed the task ahead of schedule', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_8',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'The client was satisfied with the final report', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_9',  'section': 'P2_REARRANGEMENT', 'correct_answer': 'All applications must be received by the closing date', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_10', 'section': 'P2_REARRANGEMENT', 'correct_answer': 'The team leader praised the effort of every member', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_11', 'section': 'P2_REARRANGEMENT', 'correct_answer': 'Effective teamwork leads to better results for everyone', 'prompt_text': 'Rearrange the words.'},
+        {'id': 'p2_rear_12', 'section': 'P2_REARRANGEMENT', 'correct_answer': 'The company launched a new product last quarter', 'prompt_text': 'Rearrange the words.'},
+    ])
+
+    # ==========================================
+    # PATTERN 2 — P2_STORY_RETELLING (Pool of 5, picks 1 randomly per session)
+    # audio_src is the full story text spoken via TTS; prompt_text is the story title
+    # ==========================================
+    questions.extend([
+        {
+            'id': 'p2_story_1', 'section': 'P2_STORY_RETELLING', 'voice_type': 'female_1',
+            'prompt_text': "Priya's Initiative",
+            'audio_src': "Priya joined a new company as a junior analyst. On her first day, she noticed that her team was struggling with a disorganized workflow. Instead of staying quiet, she scheduled a short meeting, presented a simple tracking system, and got approval to implement it. Within a month, the team's productivity increased by thirty percent. Her manager recognized her initiative and praised her contribution in the quarterly review. Within six months, Priya was promoted to team lead, setting an example of how proactive communication and problem-solving can drive career growth.",
+        },
+        {
+            'id': 'p2_story_2', 'section': 'P2_STORY_RETELLING', 'voice_type': 'male_1',
+            'prompt_text': "Rahul's Presentation",
+            'audio_src': "Rahul was the quietest member of his software team. When the lead developer fell ill two days before a product demo, the manager had no choice but to ask Rahul to present. That night, Rahul studied every feature of the product, prepared clear notes, and rehearsed his delivery multiple times. The demo was a success. The client was impressed and signed a major contract. From that day, Rahul was known as the team's most reliable presenter and was given leadership responsibilities on the next project.",
+        },
+        {
+            'id': 'p2_story_3', 'section': 'P2_STORY_RETELLING', 'voice_type': 'female_1',
+            'prompt_text': "Ananya's Business",
+            'audio_src': "Ananya started her own small business selling handmade jewellery online while she was still in college. She had no money for advertising, so she used social media to reach customers. Within six months, she had over two thousand followers and her first international order came from Singapore. By the time she graduated, she had saved enough to rent a small studio. Today, Ananya's brand is sold in fifteen stores across India and she employs four people from her hometown.",
+        },
+        {
+            'id': 'p2_story_4', 'section': 'P2_STORY_RETELLING', 'voice_type': 'male_1',
+            'prompt_text': "Dev's Complaint Log",
+            'audio_src': "During his internship, Dev noticed that the company's customer complaints were never tracked properly. He created a simple spreadsheet to log and categorize each complaint, then shared it with his manager. Within a month, the company was responding to ninety percent of complaints within two days, compared to just forty percent before. The customer satisfaction score improved significantly. Dev was offered a full-time position before his internship even ended and was put in charge of the customer experience team.",
+        },
+        {
+            'id': 'p2_story_5', 'section': 'P2_STORY_RETELLING', 'voice_type': 'female_1',
+            'prompt_text': "Nina Overcomes Stage Fright",
+            'audio_src': "Nina had always been afraid of public speaking. When her professor assigned her a group presentation, she was terrified. Instead of hiding, she rehearsed every day for two weeks, recorded herself on her phone, and asked her friends for honest feedback. On presentation day, she spoke clearly and confidently, making eye contact with the audience throughout. Her professor later told her she had the best delivery in the entire class. Inspired by this success, Nina went on to represent her college at a national debate competition the following semester.",
+        },
+    ])
+
     print(f"📝 Seeding {len(questions)} questions...")
 
     # --- Generate Audio Assets ---
@@ -444,10 +558,11 @@ def seed_questions():
                 url = ensure_audio(q['context_audio_src'], q['id'], suffix="_context", voice_type=voice)
                 if url: q['context_audio_url'] = url
             
-            # 2. Main Question Audio (Sections C, D, E, F)
-            # Section C uses prompt_text. D, E, F use audio_src.
+            # 2. Main Question Audio (Sections C, D, E, F + P2 sections)
+            # Section C and P2_READ_SENTENCE use prompt_text (shown on screen, no TTS needed).
+            # D, E, F, P2_REPEAT_SENTENCE, P2_QA_SPOKEN, P2_STORY_RETELLING use audio_src.
             audio_text = q.get('audio_src')
-            if not audio_text and q.get('section') == 'C':
+            if not audio_text and q.get('section') in ('C',):
                 audio_text = q.get('prompt_text')
             
             # Special handling for Section E (Fill Blank) -> Replace '_' with 'blank'
@@ -473,8 +588,9 @@ def seed_questions():
         for question in questions:
             batch.put_item(Item=question)
     
-    print(f"✅ Successfully seeded {len(questions)} questions (Pool of 3 Sets)!")
+    print(f"✅ Successfully seeded {len(questions)} questions!")
     print("\n📊 Question Pool Breakdown:")
+    print("  [Pattern 1]")
     print("  Section A (Conversation): 9 items")
     print("  Section B (Listening Comp): 6 items")
     print("  Section C (Reading): 24 items")
@@ -483,8 +599,12 @@ def seed_questions():
     print("  Section F (Error Correction): 15 items")
     print("  Section G (Speaking Topic): 9 items")
     print("  Written Round: 3 items")
-    print(f"\n  Total Verbal Pool: 102 questions")
-    print(f"  Total Written Pool: 3 emails")
+    print("  [Pattern 2]")
+    print("  P2_READ_SENTENCE: 15 items  → picks 5 per session")
+    print("  P2_REPEAT_SENTENCE: 15 items → picks 5 per session")
+    print("  P2_QA_SPOKEN: 12 items      → picks 4 per session")
+    print("  P2_REARRANGEMENT: 12 items  → picks 4 per session")
+    print("  P2_STORY_RETELLING: 5 items → picks 1 per session")
 
 if __name__ == '__main__':
     print("🚀 Starting DynamoDB reseed with Expanded Pool (Set 1 + User's Set 2 + Generated Set 3)...")
