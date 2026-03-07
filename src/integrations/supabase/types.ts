@@ -350,7 +350,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_bookings_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          id: string
+          expert_id: string
+          user_name: string
+          user_email: string
+          message: string | null
+          date: string
+          start_time: string
+          end_time: string
+          meet_link: string | null
+          status: string
+          created_at: string
+          updated_at: string | null
+          experts: { id: string; name: string; title: string | null; photo_url: string | null } | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -34,9 +34,15 @@ serve(async (req: Request) => {
 
     const salt = Deno.env.get('PAYU_MERCHANT_SALT') || 'YOUR_MERCHANT_SALT';
 
+    // Strip pipe characters from user-supplied fields to prevent hash field injection.
+    // PayU's pipe-delimited hash format is vulnerable to pipe chars in user data shifting
+    // field positions, which could allow an attacker to craft a matching hash for a
+    // fraudulent transaction.
+    const sanitize = (s: string) => (s ?? '').replace(/\|/g, '');
+
     // Verification Hash: salt|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
     // Note the REVERSE ORDER compared to request hash
-    const hashString = `${salt}|${status}|||||||||${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    const hashString = `${salt}|${status}|||||||||${sanitize(udf1)}|${sanitize(email)}|${sanitize(firstname)}|${sanitize(productinfo)}|${amount}|${txnid}|${key}`;
 
     const encoder = new TextEncoder();
     const calculatedHashBuffer = await crypto.subtle.digest("SHA-512", encoder.encode(hashString));

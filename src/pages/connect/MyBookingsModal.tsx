@@ -65,10 +65,7 @@ const MyBookingsModal = ({ onClose }: MyBookingsModalProps) => {
     const timer = setTimeout(() => controller.abort(), 10_000);
     try {
       const { data } = await supabase
-        .from('bookings')
-        .select('*, experts(id, name, title, photo_url)')
-        .ilike('user_email', emailToSearch.trim())
-        .order('date', { ascending: false })
+        .rpc('get_bookings_by_email', { p_email: emailToSearch.trim() })
         .abortSignal(controller.signal);
       setBookings((data as Booking[]) || []);
     } catch {

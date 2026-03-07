@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { toast } from "sonner";
 
 export function useRazorpay() {
     const { user } = useUser();
+    const { getToken } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
     const loadRazorpayScript = () => {
@@ -68,17 +69,17 @@ export function useRazorpay() {
                 // "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/", // We use handler instead for SPA
                 "handler": async function (response: any) {
                     try {
+                        const clerkToken = await getToken();
                         const verifyRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-razorpay-payment`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                                'Authorization': `Bearer ${clerkToken}`,
                             },
                             body: JSON.stringify({
                                 order_id: response.razorpay_order_id,
                                 payment_id: response.razorpay_payment_id,
                                 signature: response.razorpay_signature,
-                                clerk_user_id: user.id,
                                 coupon_code: couponCode // Pass the coupon code for tracking (hashed)
                             })
                         });
