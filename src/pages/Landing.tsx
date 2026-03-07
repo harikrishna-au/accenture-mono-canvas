@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import {
   SignIn,
   SignUp,
@@ -123,6 +124,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const [view, setView] = useState<AuthView>("sign-in");
   const [clerkStep, setClerkStep] = useState<string>("");
+  const { isPremium } = usePremiumStatus();
 
   /* track Clerk's hash-based step changes */
   useEffect(() => {
@@ -268,6 +270,16 @@ export default function Landing() {
               <h2 className="font-['Merriweather'] font-bold text-2xl text-stone-900 mb-2">
                 Welcome back!
               </h2>
+              {isPremium ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 mb-3">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-[12px] font-semibold font-['Inter'] text-amber-700">Premium Member</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 mb-3">
+                  <span className="text-[12px] font-medium font-['Inter'] text-stone-500">Free Plan</span>
+                </div>
+              )}
               <p className="font-['Inter'] text-[14px] text-stone-500 mb-8">
                 Continue where you left off.
               </p>
@@ -774,6 +786,16 @@ export default function Landing() {
                   <h2 className="font-['Merriweather'] font-bold text-[1.3rem] text-stone-900 mb-2">
                     Welcome back!
                   </h2>
+                  {isPremium ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 mb-3">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="text-[12px] font-semibold font-['Inter'] text-amber-700">Premium Member</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 mb-3">
+                      <span className="text-[12px] font-medium font-['Inter'] text-stone-500">Free Plan</span>
+                    </div>
+                  )}
                   <p className="font-['Inter'] text-[13.5px] text-stone-500 mb-7">
                     Continue where you left off.
                   </p>

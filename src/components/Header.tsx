@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { Maximize, Minimize, LogOut, HelpCircle } from "lucide-react";
+import { Maximize, Minimize, LogOut, HelpCircle, Sparkles } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import PaymentPopup from "@/components/PaymentPopup";
 
 interface HeaderProps {
   onStartTour?: () => void;
@@ -13,6 +15,8 @@ const Header = ({ onStartTour }: HeaderProps) => {
   const location = useLocation();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isPremium, loading: premiumLoading } = usePremiumStatus();
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -39,6 +43,7 @@ const Header = ({ onStartTour }: HeaderProps) => {
   const showExit = location.pathname !== "/" && location.pathname !== "/dashboard";
 
   return (
+    <>
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
@@ -125,14 +130,58 @@ const Header = ({ onStartTour }: HeaderProps) => {
           </SignedOut>
 
           <SignedIn>
-            <div className="ml-1">
-              <UserButton afterSignOutUrl="/" />
+            {!premiumLoading && (
+              isPremium ? (
+                /* ── Premium badge ── */
+                <div
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl"
+                  style={{
+                    background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                    border: "1px solid #f59e0b",
+                    boxShadow: "0 2px 10px rgba(245,158,11,0.25), inset 0 1px 0 rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <span className="text-[13px] font-bold font-['Inter'] text-amber-800 hidden sm:inline tracking-wide">
+                    PREMIUM
+                  </span>
+                </div>
+              ) : (
+                /* ── Get Premium CTA ── */
+                <button
+                  onClick={() => setShowPayment(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-[13px] font-['Inter'] text-white transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{
+                    background: "linear-gradient(135deg, #1c1c1e 0%, #44403c 60%, #a16207 100%)",
+                    boxShadow: "0 3px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                  <span className="hidden sm:inline">Get Premium</span>
+                  <span className="sm:hidden">Pro</span>
+                </button>
+              )
+            )}
+            {/* ── Avatar with golden ring for premium users ── */}
+            <div
+              className="ml-1.5 rounded-full p-[2px] transition-all duration-300"
+              style={isPremium && !premiumLoading ? {
+                background: "linear-gradient(135deg, #f59e0b, #fcd34d, #f59e0b)",
+                boxShadow: "0 0 10px rgba(245,158,11,0.5)",
+              } : {}}
+            >
+              <div className={isPremium && !premiumLoading ? "rounded-full overflow-hidden" : ""}>
+                <UserButton afterSignOutUrl="/" />
+              </div>
             </div>
           </SignedIn>
 
         </div>
       </div>
     </header>
+
+    <PaymentPopup isOpen={showPayment} onClose={() => setShowPayment(false)} />
+    </>
   );
 };
 
