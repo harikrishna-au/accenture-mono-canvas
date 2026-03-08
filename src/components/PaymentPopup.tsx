@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRazorpay } from "@/hooks/useRazorpay";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentPopupProps {
     isOpen: boolean;
@@ -14,20 +15,11 @@ const BASE_PRICE = 120;
 
 async function validateCouponServer(code: string): Promise<number | null> {
     try {
-        const res = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-coupon`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-                },
-                body: JSON.stringify({ coupon_code: code }),
-            }
-        );
-        if (!res.ok) return null;
-        const data = await res.json();
-        return data.valid ? data.amount : null;
+        const { data, error } = await supabase.functions.invoke('validate-coupon', {
+            body: { coupon_code: code },
+        });
+        if (error) return null;
+        return data?.valid ? data.amount : null;
     } catch {
         return null;
     }
