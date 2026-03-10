@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Check, X, Trash2, ChevronDown, ChevronUp, Clock, Eye, ArrowLeft, Calendar, Share2, AlertTriangle } from 'lucide-react';
 import type { Blog } from '@/lib/blog-utils';
 import { formatDate, displayAuthor } from '@/lib/blog-utils';
@@ -16,6 +16,35 @@ interface ConfirmDialogProps {
 
 function ConfirmDialog({ title, message, confirmLabel, confirmStyle = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
   const isDanger = confirmStyle === 'danger';
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const titleId = `confirm-dialog-title-${confirmStyle}`;
+  const msgId = `confirm-dialog-msg-${confirmStyle}`;
+
+  // Focus cancel button on mount; restore previous focus on unmount
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    cancelRef.current?.focus();
+    return () => { prev?.focus(); };
+  }, []);
+
+  // Close on Escape; trap Tab within dialog
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { e.preventDefault(); onCancel(); return; }
+    if (e.key === 'Tab') {
+      const focusable = Array.from(
+        (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('button:not([disabled])')
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -26,6 +55,11 @@ function ConfirmDialog({ title, message, confirmLabel, confirmStyle = 'danger', 
       {/* Panel */}
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
         <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={msgId}
+          onKeyDown={handleKeyDown}
           className="pointer-events-auto w-full max-w-sm rounded-2xl border border-stone-200/60 shadow-2xl overflow-hidden"
           style={{ background: '#fff' }}
         >
@@ -49,16 +83,17 @@ function ConfirmDialog({ title, message, confirmLabel, confirmStyle = 'danger', 
                   : <Check className="w-5 h-5" style={{ color: '#4a7060' }} />}
               </div>
               <div>
-                <h3 className="font-['Merriweather'] font-bold text-stone-900 text-[0.95rem] leading-snug mb-1">
+                <h3 id={titleId} className="font-['Merriweather'] font-bold text-stone-900 text-[0.95rem] leading-snug mb-1">
                   {title}
                 </h3>
-                <p className="font-['Inter'] text-[13px] text-stone-500 font-light leading-relaxed">
+                <p id={msgId} className="font-['Inter'] text-[13px] text-stone-500 font-light leading-relaxed">
                   {message}
                 </p>
               </div>
             </div>
             <div className="flex gap-2 justify-end">
               <button
+                ref={cancelRef}
                 type="button"
                 onClick={onCancel}
                 className="px-4 py-2 text-[13px] font-semibold font-['Inter'] text-stone-500 border border-stone-200 bg-white hover:bg-stone-50 rounded-xl transition-all active:scale-95"

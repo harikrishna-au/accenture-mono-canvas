@@ -170,17 +170,22 @@ function useAdminCounts() {
   const [counts, setCounts] = useState<Record<string, number>>({ pending: 0, published: 0, rejected: 0 });
 
   const load = async () => {
-    const statuses: BlogStatus[] = ['pending', 'published', 'rejected'];
-    const results = await Promise.all(
-      statuses.map(s =>
-        (supabase as any).from('blogs').select('id', { count: 'exact', head: true }).eq('status', s)
-      )
-    );
-    setCounts({
-      pending:   results[0].count ?? 0,
-      published: results[1].count ?? 0,
-      rejected:  results[2].count ?? 0,
-    });
+    try {
+      const statuses: BlogStatus[] = ['pending', 'published', 'rejected'];
+      const results = await Promise.all(
+        statuses.map(s =>
+          (supabase as any).from('blogs').select('id', { count: 'exact', head: true }).eq('status', s)
+        )
+      );
+      if (results.some(r => r.error)) return;
+      setCounts({
+        pending:   results[0].count ?? 0,
+        published: results[1].count ?? 0,
+        rejected:  results[2].count ?? 0,
+      });
+    } catch {
+      // counts stay at previous values on network failure
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -195,21 +200,33 @@ function AdminDashboard() {
   const { counts, reload: reloadCounts } = useAdminCounts();
 
   const handleApprove = async (id: string) => {
-    await approve(id);
-    reloadCounts();
-    toast.success('Blog approved and published!');
+    try {
+      await approve(id);
+      reloadCounts();
+      toast.success('Blog approved and published!');
+    } catch {
+      toast.error('Failed to approve blog.');
+    }
   };
 
   const handleReject = async (id: string, reason: string) => {
-    await reject(id, reason);
-    reloadCounts();
-    toast.success('Blog rejected.');
+    try {
+      await reject(id, reason);
+      reloadCounts();
+      toast.success('Blog rejected.');
+    } catch {
+      toast.error('Failed to reject blog.');
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteBlog(id);
-    reloadCounts();
-    toast.success('Blog deleted.');
+    try {
+      await deleteBlog(id);
+      reloadCounts();
+      toast.success('Blog deleted.');
+    } catch {
+      toast.error('Failed to delete blog.');
+    }
   };
 
   const handleRefresh = () => {
