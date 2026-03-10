@@ -1,8 +1,90 @@
 import { useState } from 'react';
-import { Check, X, Trash2, ChevronDown, ChevronUp, Clock, Eye, ArrowLeft, Calendar, Share2 } from 'lucide-react';
+import { Check, X, Trash2, ChevronDown, ChevronUp, Clock, Eye, ArrowLeft, Calendar, Share2, AlertTriangle } from 'lucide-react';
 import type { Blog } from '@/lib/blog-utils';
 import { formatDate, displayAuthor } from '@/lib/blog-utils';
 import { BlogTypeTag } from './BlogTypeTag';
+
+// ── Confirm Dialog ─────────────────────────────────────────────────────────────
+interface ConfirmDialogProps {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  confirmStyle?: 'danger' | 'success';
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmDialog({ title, message, confirmLabel, confirmStyle = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
+  const isDanger = confirmStyle === 'danger';
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px]"
+        onClick={onCancel}
+      />
+      {/* Panel */}
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
+        <div
+          className="pointer-events-auto w-full max-w-sm rounded-2xl border border-stone-200/60 shadow-2xl overflow-hidden"
+          style={{ background: '#fff' }}
+        >
+          {/* Accent top stripe */}
+          <div
+            className="h-1 w-full"
+            style={{
+              background: isDanger
+                ? 'linear-gradient(90deg, #b45309, #d97706)'
+                : 'linear-gradient(90deg, #4a7060, #6fa88c)',
+            }}
+          />
+          <div className="p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: isDanger ? '#fef3c7' : '#f4f8f5' }}
+              >
+                {isDanger
+                  ? <AlertTriangle className="w-5 h-5" style={{ color: '#b45309' }} />
+                  : <Check className="w-5 h-5" style={{ color: '#4a7060' }} />}
+              </div>
+              <div>
+                <h3 className="font-['Merriweather'] font-bold text-stone-900 text-[0.95rem] leading-snug mb-1">
+                  {title}
+                </h3>
+                <p className="font-['Inter'] text-[13px] text-stone-500 font-light leading-relaxed">
+                  {message}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 text-[13px] font-semibold font-['Inter'] text-stone-500 border border-stone-200 bg-white hover:bg-stone-50 rounded-xl transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onConfirm}
+                className="px-4 py-2 text-[13px] font-semibold font-['Inter'] text-white rounded-xl transition-all active:scale-95 hover:opacity-90"
+                style={{
+                  background: isDanger
+                    ? 'linear-gradient(135deg, #b45309 0%, #d97706 100%)'
+                    : 'linear-gradient(135deg, #4a7060 0%, #6fa88c 100%)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 interface AdminBlogRowProps {
   blog: Blog;
@@ -29,7 +111,11 @@ function renderMarkdown(md: string): string {
     .replace(/^>\s(.+)/gm, '<blockquote style="padding:0.75rem 1rem;border-left:3px solid #c4bdb4;color:#78716c;font-style:italic;margin:1.25rem 0;background:#faf9f7;border-radius:0 8px 8px 0">$1</blockquote>')
     .replace(/^[-*]\s(.+)/gm, '<li style="margin-left:1.5rem;list-style-type:disc;color:#57534e;margin-top:5px;line-height:1.75">$1</li>')
     .replace(/^\d+\.\s(.+)/gm, '<li style="margin-left:1.5rem;list-style-type:decimal;color:#57534e;margin-top:5px;line-height:1.75">$1</li>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#557d6b;text-decoration:underline;text-underline-offset:3px;font-weight:500" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+      const safe = /^https?:\/\//i.test(url) || /^mailto:/i.test(url) || url.startsWith('/') || url.startsWith('#');
+      if (!safe) return text;
+      return `<a href="${url.replace(/"/g, '%22')}" style="color:#557d6b;text-decoration:underline;text-underline-offset:3px;font-weight:500" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    })
     .replace(/\n\n/g, '</p><p style="margin-top:1.25rem;color:#57534e;line-height:1.85;font-family:Inter,sans-serif;font-size:15.5px">')
     .replace(/\n/g, '<br/>');
 }
@@ -187,12 +273,37 @@ function BlogPreviewDrawer({ blog, onClose }: { blog: Blog; onClose: () => void 
   );
 }
 
+type DialogState = {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  confirmStyle: 'danger' | 'success';
+  onConfirm: () => void;
+} | null;
+
 // ── Admin row ──────────────────────────────────────────────────────────────────
 export function AdminBlogRow({ blog, onApprove, onReject, onDelete }: AdminBlogRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [rejectMode, setRejectMode] = useState(false);
   const [reason, setReason] = useState('');
   const [previewing, setPreviewing] = useState(false);
+  const [dialog, setDialog] = useState<DialogState>(null);
+
+  const openApproveDialog = () => setDialog({
+    title: 'Approve this blog?',
+    message: 'It will be immediately published and visible to all visitors.',
+    confirmLabel: 'Approve & Publish',
+    confirmStyle: 'success',
+    onConfirm: () => { setDialog(null); onApprove(blog.id); },
+  });
+
+  const openDeleteDialog = () => setDialog({
+    title: 'Delete this blog?',
+    message: 'This action is permanent and cannot be undone.',
+    confirmLabel: 'Delete',
+    confirmStyle: 'danger',
+    onConfirm: () => { setDialog(null); onDelete(blog.id); },
+  });
 
   const handleReject = () => {
     if (!reason.trim()) return;
@@ -203,6 +314,16 @@ export function AdminBlogRow({ blog, onApprove, onReject, onDelete }: AdminBlogR
 
   return (
     <>
+      {dialog && (
+        <ConfirmDialog
+          title={dialog.title}
+          message={dialog.message}
+          confirmLabel={dialog.confirmLabel}
+          confirmStyle={dialog.confirmStyle}
+          onConfirm={dialog.onConfirm}
+          onCancel={() => setDialog(null)}
+        />
+      )}
       {previewing && (
         <BlogPreviewDrawer blog={blog} onClose={() => setPreviewing(false)} />
       )}
@@ -244,7 +365,8 @@ export function AdminBlogRow({ blog, onApprove, onReject, onDelete }: AdminBlogR
             {blog.status === 'pending' && (
               <>
                 <button
-                  onClick={() => onApprove(blog.id)}
+                  type="button"
+                  onClick={openApproveDialog}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[12px] font-semibold font-['Inter'] transition-all duration-200 active:scale-95 border"
                   style={{ background: '#f4f8f5', color: '#4a7060', borderColor: '#bfd4c8' }}
                 >
@@ -272,8 +394,9 @@ export function AdminBlogRow({ blog, onApprove, onReject, onDelete }: AdminBlogR
             </button>
 
             <button
-              onClick={() => onDelete(blog.id)}
-              className="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-all"
+              type="button"
+              onClick={openDeleteDialog}
+              className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
               title="Delete"
             >
               <Trash2 className="w-4 h-4" />

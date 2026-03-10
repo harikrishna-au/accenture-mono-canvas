@@ -207,7 +207,6 @@ function AdminDashboard() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Permanently delete this blog?')) return;
     await deleteBlog(id);
     reloadCounts();
     toast.success('Blog deleted.');
