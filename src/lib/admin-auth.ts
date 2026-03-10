@@ -1,8 +1,7 @@
-// ─── Admin Auth (hardcoded, session-based) ────────────────────────────────────
-// No backend role setup needed. Password stored in env var.
+// ─── Admin Auth (session-based) ───────────────────────────────────────────────
+// Password must be set via VITE_ADMIN_PASSWORD environment variable.
 
-const ADMIN_PASSWORD =
-  (import.meta as any).env?.VITE_ADMIN_PASSWORD ?? 'htb-admin-2026';
+const ADMIN_PASSWORD = (import.meta as any).env?.VITE_ADMIN_PASSWORD as string | undefined;
 
 const SESSION_KEY = 'blog_admin_auth';
 
@@ -11,6 +10,7 @@ export function isAdminAuthenticated(): boolean {
 }
 
 export function loginAdmin(password: string): boolean {
+  if (!ADMIN_PASSWORD) return false;
   if (password === ADMIN_PASSWORD) {
     sessionStorage.setItem(SESSION_KEY, 'true');
     return true;

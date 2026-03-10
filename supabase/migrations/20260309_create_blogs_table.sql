@@ -33,6 +33,10 @@ ALTER TABLE blogs
   ADD CONSTRAINT blogs_status_check
     CHECK (status IN ('pending','published','rejected'));
 
+ALTER TABLE blogs
+  ADD CONSTRAINT blogs_content_min_length
+    CHECK (char_length(content) >= 500);
+
 -- ── Indexes ───────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS blogs_status_idx      ON blogs (status);
 CREATE INDEX IF NOT EXISTS blogs_author_id_idx   ON blogs (author_id);
@@ -79,3 +83,9 @@ $$;
 CREATE TRIGGER blogs_updated_at
   BEFORE UPDATE ON blogs
   FOR EACH ROW EXECUTE FUNCTION set_blogs_updated_at();
+
+-- ── Atomic view counter ────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION increment_blog_views(blog_id uuid)
+RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
+  UPDATE blogs SET views = views + 1 WHERE id = blog_id;
+$$;

@@ -24,6 +24,8 @@ export function BlogFilters({ active, onChange }: BlogFiltersProps) {
         return (
           <button
             key={key}
+            type="button"
+            aria-pressed={isActive}
             onClick={() => onChange(key)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-semibold font-['Inter'] whitespace-nowrap transition-all duration-200 border active:scale-95 flex-shrink-0 ${
               isActive

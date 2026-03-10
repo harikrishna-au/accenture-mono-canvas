@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useUser, SignedOut, SignInButton } from '@clerk/clerk-react';
 import { PenLine, Clock, Eye, AlertCircle, CheckCircle2, Hourglass, FileText } from 'lucide-react';
 import Header from '@/components/Header';
@@ -134,16 +134,18 @@ export default function BlogMyPosts() {
                   <span className="text-2xl flex-shrink-0 mt-0.5 select-none">{blog.cover_emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                      <h3
-                        className={`font-['Merriweather'] font-bold text-stone-800 text-[0.93rem] leading-snug ${
-                          blog.status === 'published'
-                            ? 'cursor-pointer hover:text-stone-600 transition-colors'
-                            : ''
-                        }`}
-                        onClick={() => blog.status === 'published' && navigate(`/blog/${blog.slug}`)}
-                      >
-                        {blog.title}
-                      </h3>
+                      {blog.status === 'published' ? (
+                        <Link
+                          to={`/blog/${blog.slug}`}
+                          className="font-['Merriweather'] font-bold text-stone-800 text-[0.93rem] leading-snug hover:text-stone-600 transition-colors"
+                        >
+                          {blog.title}
+                        </Link>
+                      ) : (
+                        <h3 className="font-['Merriweather'] font-bold text-stone-800 text-[0.93rem] leading-snug">
+                          {blog.title}
+                        </h3>
+                      )}
                       <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[10px] font-bold font-['Inter'] uppercase tracking-widest ${sm.classes}`}>
                         {sm.icon}
                         {sm.label}
