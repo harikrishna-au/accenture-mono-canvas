@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.refactor-description]
 verify_jwt = false
+
+[functions.radar-jobs]
+verify_jwt = false
