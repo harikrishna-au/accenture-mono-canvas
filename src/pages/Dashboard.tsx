@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList, Users, Linkedin, Bot, ArrowLeft, MessageCircle } from "lucide-react";
+import { Lock, Crown, ClipboardList, Users, Linkedin, Bot, ArrowLeft, MessageCircle, Hammer } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -118,6 +118,13 @@ const Dashboard = () => {
       typingText: "BOOK 1:1 SESSION"
     },
     {
+      id: 13,
+      name: "Forge",
+      subtitle: "Resume Builder",
+      path: "/forge",
+      icon: <Hammer className="w-8 h-8 text-orange-500" />
+    },
+    {
       id: 10,
       name: "AI Interview",
       path: "/ai-interview",
@@ -161,6 +168,13 @@ const Dashboard = () => {
 
   const cognizantGames = [
     // You can add different games/endpoints here for Cognizant
+    {
+      id: 13,
+      name: "Forge",
+      subtitle: "Resume Builder",
+      path: "/forge",
+      icon: <Hammer className="w-8 h-8 text-orange-500" />
+    },
     {
       id: 5,
       name: "Connect with me",

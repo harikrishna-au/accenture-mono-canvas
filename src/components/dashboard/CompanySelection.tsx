@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useCallback } from "react";
-import { Layers, Mic2, Bot, Users, ArrowUpRight } from "lucide-react";
+import { Layers, Mic2, Bot, Users, ArrowUpRight, Hammer } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { WaitlistPopup } from "./WaitlistPopup";
@@ -636,6 +636,138 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             style={{ background: "linear-gradient(90deg, #d97706, transparent 70%)" }}
           />
         </TiltCard>
+
+        {/* ── Card 05: Forge — Resume Builder (dark dramatic) ── */}
+        <div
+          onClick={() => navigate("/forge")}
+          className="relative w-full rounded-2xl overflow-hidden cursor-pointer group transition-all duration-500 hover:-translate-y-1 hover:scale-[1.005]"
+          style={{
+            background: "linear-gradient(135deg, #0f0e0d 0%, #1c1814 50%, #0f0e0d 100%)",
+            boxShadow: "0 0 0 1px rgba(251,146,60,0.2), 0 8px 40px rgba(0,0,0,0.4), 0 24px 60px rgba(234,88,12,0.08)",
+          }}
+        >
+          {/* Fire glow at bottom */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse 70% 100% at 50% 100%, rgba(234,88,12,0.22) 0%, rgba(251,146,60,0.08) 50%, transparent 70%)",
+            }}
+          />
+          {/* Top right ember glow */}
+          <div
+            className="absolute -top-8 -right-8 w-48 h-48 pointer-events-none opacity-30 group-hover:opacity-50 transition-opacity duration-700"
+            style={{ background: "radial-gradient(circle, rgba(251,146,60,0.5), transparent 65%)" }}
+          />
+
+          {/* Shimmer sweep */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1100ms] ease-in-out pointer-events-none" />
+
+          <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10">
+
+            {/* Left — branding + description */}
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(251,146,60,0.12)", border: "1px solid rgba(251,146,60,0.25)" }}
+                >
+                  <Hammer className="w-4.5 h-4.5" style={{ color: "#fb923c" }} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold tracking-[0.38em] uppercase font-['Inter'] text-orange-400">05</span>
+                  <span
+                    className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide font-['Inter'] border"
+                    style={{ color: "#fb923c", background: "rgba(251,146,60,0.1)", borderColor: "rgba(251,146,60,0.25)" }}
+                  >
+                    FREE
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <h3
+                  className="text-3xl sm:text-4xl font-bold tracking-tight font-['Inter'] mb-2"
+                  style={{ color: "#fafaf9", letterSpacing: "-0.025em" }}
+                >
+                  Forge
+                </h3>
+                <p className="text-stone-400 text-[13px] leading-relaxed font-['Inter'] max-w-sm">
+                  Upload your resume — AI reads it, extracts everything, and fills
+                  your profile. Edit and export a polished LaTeX file for Overleaf.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {["PDF · DOCX", "AI Extraction", "LaTeX Export"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2.5 py-1 rounded-full text-[10px] font-semibold font-['Inter']"
+                    style={{ color: "#a8a29e", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1.5 group/cta">
+                <span className="text-[13px] font-semibold font-['Inter'] text-orange-400 group-hover/cta:text-orange-300 transition-colors">
+                  Build your resume
+                </span>
+                <ArrowUpRight className="w-4 h-4 text-orange-400 group-hover/cta:text-orange-300 transition-all duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
+              </div>
+            </div>
+
+            {/* Right — animated resume lines viz */}
+            <div className="flex-shrink-0 hidden sm:flex flex-col gap-2 w-52 opacity-70 group-hover:opacity-100 transition-opacity duration-500">
+              {/* Simulated resume preview lines */}
+              {[
+                { w: "70%", label: "Name", bright: true },
+                { w: "50%", label: "Email", bright: false },
+                { w: "85%", label: "Skills", bright: false },
+                { w: "60%", label: "Section", bright: true },
+                { w: "90%", label: "Project", bright: false },
+                { w: "75%", label: "Desc", bright: false },
+                { w: "45%", label: "Date", bright: false },
+                { w: "80%", label: "Exp", bright: true },
+                { w: "65%", label: "Role", bright: false },
+              ].map((line, i) => (
+                <div
+                  key={i}
+                  className="h-1.5 rounded-full"
+                  style={{
+                    width: line.w,
+                    background: line.bright
+                      ? "linear-gradient(90deg, #fb923c, #f97316)"
+                      : "rgba(255,255,255,0.1)",
+                    animationName: "waveBar",
+                    animationDuration: `${1.2 + i * 0.15}s`,
+                    animationTimingFunction: "ease-in-out",
+                    animationIterationCount: "infinite",
+                    animationDirection: "alternate",
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                />
+              ))}
+              <div
+                className="mt-2 px-3 py-1.5 rounded-lg text-[10px] font-bold font-['Inter'] text-center"
+                style={{
+                  background: "rgba(251,146,60,0.12)",
+                  border: "1px solid rgba(251,146,60,0.2)",
+                  color: "#fb923c",
+                }}
+              >
+                .tex ready ✦
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom ember line */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[1.5px]"
+            style={{ background: "linear-gradient(90deg, transparent, #f97316, #fb923c, transparent)" }}
+          />
+        </div>
       </div>
     </div>
   );
