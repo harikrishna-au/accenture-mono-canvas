@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { Maximize, Minimize, LogOut, HelpCircle, Sparkles } from "lucide-react";
+import { Maximize, Minimize, LogOut, HelpCircle, Sparkles, FileText } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import PaymentPopup from "@/components/PaymentPopup";
@@ -130,6 +130,14 @@ const Header = ({ onStartTour }: HeaderProps) => {
           </SignedOut>
 
           <SignedIn>
+            <button
+              onClick={() => navigate("/forge/profile")}
+              className="flex items-center gap-1.5 px-3.5 py-2 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-xl font-medium transition-all duration-200 text-[13px] font-['Inter']"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Profile</span>
+            </button>
+
             {!premiumLoading && (
               isPremium ? (
                 /* ── Premium badge ── */
