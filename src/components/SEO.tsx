@@ -7,6 +7,10 @@ interface SEOProps {
     type?: string;
     keywords?: string;
     canonical?: string;
+    image?: string;
+    publishedTime?: string;
+    authorName?: string;
+    jsonLd?: object | object[];
 }
 
 const SEO = ({
@@ -15,8 +19,12 @@ const SEO = ({
     name = "Harry The Blaze",
     type = "website",
     keywords = "Harry the Blaze, cognitive assessment, MNC practice, aptitude training, game-based assessment, communication round, placement preparation",
-    canonical
-}: SEOProps) => { // Use proper React functional component syntax if preferred
+    canonical,
+    image = "https://www.harrytheblaze.site/og-image.png",
+    publishedTime,
+    authorName,
+    jsonLd,
+}: SEOProps) => {
     return (
         <Helmet>
             {/* Standard metadata tags */}
@@ -25,20 +33,31 @@ const SEO = ({
             <meta name='keywords' content={keywords} />
             {canonical && <link rel="canonical" href={canonical} />}
 
-            {/* End standard metadata tags */}
-
-            {/* Facebook tags */}
+            {/* Open Graph */}
             <meta property="og:type" content={type} />
             <meta property="og:title" content={title} />
             <meta property="og:description" content={description} />
-            {/* End Facebook tags */}
+            <meta property="og:image" content={image} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            {canonical && <meta property="og:url" content={canonical} />}
+            <meta property="og:site_name" content="Harry The Blaze" />
+            {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+            {authorName && <meta property="article:author" content={authorName} />}
 
-            {/* Twitter tags */}
-            <meta name="twitter:creator" content={name} />
+            {/* Twitter Card */}
+            <meta name="twitter:creator" content={authorName ?? name} />
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={title} />
             <meta name="twitter:description" content={description} />
-            {/* End Twitter tags */}
+            <meta name="twitter:image" content={image} />
+
+            {/* JSON-LD Structured Data */}
+            {jsonLd && (
+                <script type="application/ld+json">
+                    {JSON.stringify(Array.isArray(jsonLd) ? jsonLd : jsonLd)}
+                </script>
+            )}
         </Helmet>
     );
 };

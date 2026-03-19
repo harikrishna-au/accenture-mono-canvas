@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Guidelines from "./pages/Guidelines";
 import Dashboard from "./pages/Dashboard";
 import FindMin from "./pages/findmin";
+
 import BalloonMathGame from "./pages/BalloonMath";
 import HiddenMaze from "./pages/HiddenMaze";
 import Auth from "./pages/Auth";
@@ -25,6 +26,11 @@ import PremiumRoute from "@/components/PremiumRoute";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import BlogWrite from "./pages/BlogWrite";
+import BlogMyPosts from "./pages/BlogMyPosts";
+import BlogAdmin from "./pages/BlogAdmin";
 
 import ForgePage from "./pages/ForgePage";
 import ForgeProfilePage from "./pages/ForgeProfilePage";
@@ -135,6 +141,15 @@ const App = () => {
                   </PremiumRoute>
                 }
               />
+
+              {/* Blog */}
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/write" element={<BlogWrite />} />
+              <Route path="/blog/my" element={<BlogMyPosts />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+
+              {/* Admin */}
+              <Route path="/admin/blog" element={<BlogAdmin />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
