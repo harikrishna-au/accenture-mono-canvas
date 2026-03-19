@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Shield, LogOut, RefreshCw, Eye, EyeOff, Hourglass, BookOpen,
-  XCircle, LayoutList, Users, Check, Trash2, ExternalLink, UserCheck, UserX
+  XCircle, LayoutList, Users, Check, Trash2, ExternalLink, UserCheck, UserX,
+  Briefcase, Plus, X, MapPin, Package, Link, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,14 @@ import { isAdminAuthenticated, loginAdmin, logoutAdmin } from '@/lib/admin-auth'
 import type { BlogStatus } from '@/lib/blog-utils';
 
 type BlogTabFilter = BlogStatus | 'all';
-type MainTab = 'blog' | 'experts';
+type MainTab = 'blog' | 'experts' | 'jobs';
+
+/* ── Job type ── */
+type Job = {
+  id: string; title: string; company: string | null; type: string;
+  location: string | null; skills_required: string[]; description: string | null;
+  apply_url: string | null; package_lpa: number | null; active: boolean; created_at: string;
+};
 
 const BLOG_TABS: { key: BlogTabFilter; label: string }[] = [
   { key: 'pending',   label: 'Pending' },
@@ -373,6 +381,237 @@ function BlogSection() {
   );
 }
 
+/* ─────────────────── Jobs section ─────────────────── */
+const EMPTY_SKILLS_INPUT = '';
+
+function JobsSection() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [skillInput, setSkillInput] = useState(EMPTY_SKILLS_INPUT);
+
+  const [form, setForm] = useState({
+    title: '', company: '', type: 'Full-time', location: '',
+    description: '', apply_url: '', package_lpa: '', skills_required: [] as string[],
+  });
+
+  const loadJobs = async () => {
+    setLoading(true);
+    const { data } = await (supabase as any)
+      .from('jobs').select('*').order('created_at', { ascending: false });
+    setJobs(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadJobs(); }, []);
+
+  const addSkill = () => {
+    const v = skillInput.trim();
+    if (v && !form.skills_required.includes(v)) {
+      setForm(f => ({ ...f, skills_required: [...f.skills_required, v] }));
+    }
+    setSkillInput('');
+  };
+
+  const resetForm = () => {
+    setForm({ title: '', company: '', type: 'Full-time', location: '', description: '', apply_url: '', package_lpa: '', skills_required: [] });
+    setSkillInput('');
+    setShowForm(false);
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { toast.error('Title is required.'); return; }
+    setSaving(true);
+    const payload = {
+      title: form.title.trim(),
+      company: form.company.trim() || null,
+      type: form.type,
+      location: form.location.trim() || null,
+      description: form.description.trim() || null,
+      apply_url: form.apply_url.trim() || null,
+      package_lpa: form.package_lpa ? parseFloat(form.package_lpa) : null,
+      skills_required: form.skills_required,
+      active: true,
+    };
+    const { error } = await (supabase as any).from('jobs').insert(payload);
+    setSaving(false);
+    if (error) { toast.error('Failed to save job.'); return; }
+    toast.success('Job posted!');
+    resetForm();
+    loadJobs();
+  };
+
+  const toggleActive = async (job: Job) => {
+    await (supabase as any).from('jobs').update({ active: !job.active }).eq('id', job.id);
+    setJobs(prev => prev.map(j => j.id === job.id ? { ...j, active: !j.active } : j));
+  };
+
+  const deleteJob = async (id: string) => {
+    await (supabase as any).from('jobs').delete().eq('id', id);
+    toast.success('Job removed.');
+    setJobs(prev => prev.filter(j => j.id !== id));
+  };
+
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[11px] font-semibold font-['Inter'] text-stone-400 uppercase tracking-widest">{label}</label>
+      {children}
+    </div>
+  );
+
+  const inputCls = "px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm font-['Inter'] placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-300 transition-all";
+
+  return (
+    <div>
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="font-['Merriweather'] font-bold text-stone-800">Job Listings</p>
+          <p className="text-xs font-['Inter'] text-stone-400 mt-0.5">{jobs.filter(j => j.active).length} active · {jobs.length} total</p>
+        </div>
+        <button onClick={() => setShowForm(v => !v)}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
+          <Plus className="w-4 h-4" /> Add Job
+        </button>
+      </div>
+
+      {/* Add Job form */}
+      {showForm && (
+        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 mb-6 space-y-4">
+          <div className="flex items-center justify-between mb-1">
+            <p className="font-semibold font-['Inter'] text-stone-800 text-sm">New Job / Internship</p>
+            <button onClick={resetForm} className="text-stone-400 hover:text-stone-600 transition-colors"><X className="w-4 h-4" /></button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Title *">
+              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="Software Engineer Intern" className={inputCls} />
+            </Field>
+            <Field label="Company">
+              <input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
+                placeholder="Google, Zepto, Startup…" className={inputCls} />
+            </Field>
+            <Field label="Type">
+              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                className={inputCls}>
+                <option>Internship</option>
+                <option>Full-time</option>
+                <option>Part-time</option>
+              </select>
+            </Field>
+            <Field label="Location">
+              <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                placeholder="Bangalore / Remote" className={inputCls} />
+            </Field>
+            <Field label="Package (LPA)">
+              <input type="number" value={form.package_lpa} onChange={e => setForm(f => ({ ...f, package_lpa: e.target.value }))}
+                placeholder="6" className={inputCls} />
+            </Field>
+            <Field label="Apply URL">
+              <input value={form.apply_url} onChange={e => setForm(f => ({ ...f, apply_url: e.target.value }))}
+                placeholder="https://…" className={inputCls} />
+            </Field>
+          </div>
+
+          <Field label="Description">
+            <textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="What the role involves…" className={`${inputCls} resize-none`} />
+          </Field>
+
+          <Field label="Skills Required">
+            <div className="flex flex-wrap gap-1.5 p-2.5 bg-stone-50 border border-stone-200 rounded-xl min-h-[44px]">
+              {form.skills_required.map((s, i) => (
+                <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-800 text-white rounded-lg text-xs font-['Inter']">
+                  {s}
+                  <button onClick={() => setForm(f => ({ ...f, skills_required: f.skills_required.filter((_, j) => j !== i) }))}
+                    className="hover:text-stone-300 leading-none">×</button>
+                </span>
+              ))}
+              <input value={skillInput} onChange={e => setSkillInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkill(); } }}
+                placeholder="Type skill + Enter"
+                className="flex-1 min-w-[120px] bg-transparent text-stone-900 text-sm placeholder:text-stone-300 focus:outline-none font-['Inter']" />
+            </div>
+          </Field>
+
+          <div className="flex justify-end gap-2 pt-1">
+            <button onClick={resetForm} className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-['Inter'] font-medium hover:bg-stone-50 transition-all">
+              Cancel
+            </button>
+            <button onClick={handleSave} disabled={saving}
+              className="px-5 py-2 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all disabled:opacity-50">
+              {saving ? 'Saving…' : 'Post Job'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Jobs list */}
+      {loading ? (
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="animate-pulse h-24 bg-stone-100/80 rounded-xl" />)}</div>
+      ) : jobs.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-white border border-stone-200 flex items-center justify-center mb-4 shadow-sm">
+            <Briefcase className="w-7 h-7 text-stone-400" />
+          </div>
+          <p className="font-['Merriweather'] font-bold text-stone-700 text-xl mb-1">No jobs posted yet</p>
+          <p className="font-['Inter'] text-stone-400 text-sm">Add your first job listing above.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {jobs.map(job => (
+            <div key={job.id} className={`bg-white rounded-2xl border shadow-sm p-5 transition-opacity ${job.active ? 'border-stone-100' : 'border-stone-100 opacity-50'}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold font-['Inter'] text-stone-900 text-sm">{job.title}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold font-['Inter'] border ${
+                      job.type === 'Internship' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                    }`}>{job.type}</span>
+                    {!job.active && <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold font-['Inter'] bg-stone-100 text-stone-500">Inactive</span>}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    {job.company   && <span className="text-xs font-['Inter'] text-stone-500">{job.company}</span>}
+                    {job.location  && <span className="flex items-center gap-1 text-xs font-['Inter'] text-stone-400"><MapPin className="w-3 h-3" />{job.location}</span>}
+                    {job.package_lpa && <span className="flex items-center gap-1 text-xs font-['Inter'] text-stone-400"><Package className="w-3 h-3" />{job.package_lpa} LPA</span>}
+                  </div>
+                  {job.skills_required.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {job.skills_required.map((s, i) => (
+                        <span key={i} className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[11px] font-['Inter']">{s}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {job.apply_url && (
+                    <a href={job.apply_url} target="_blank" rel="noreferrer"
+                      className="p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-all" title="Open apply URL">
+                      <Link className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  <button onClick={() => toggleActive(job)} title={job.active ? 'Deactivate' : 'Activate'}
+                    className="p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-all">
+                    {job.active ? <ToggleRight className="w-4 h-4 text-emerald-500" /> : <ToggleLeft className="w-4 h-4" />}
+                  </button>
+                  <button onClick={() => deleteJob(job.id)} title="Delete"
+                    className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─────────────────── Main admin dashboard ─────────────────── */
 function AdminDashboard() {
   const [authed, setAuthed] = useState(true);
@@ -415,6 +654,10 @@ function AdminDashboard() {
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-semibold font-['Inter'] transition-all ${mainTab === 'experts' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
               <Users className="w-3.5 h-3.5" /> Experts
             </button>
+            <button onClick={() => setMainTab('jobs')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-semibold font-['Inter'] transition-all ${mainTab === 'jobs' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
+              <Briefcase className="w-3.5 h-3.5" /> Jobs
+            </button>
           </div>
 
           <button onClick={() => { logoutAdmin(); setAuthed(false); }}
@@ -427,6 +670,7 @@ function AdminDashboard() {
       <main className="relative z-10 container mx-auto px-6 pt-24 pb-20 max-w-5xl">
         {mainTab === 'blog'    && <BlogSection />}
         {mainTab === 'experts' && <ExpertsSection />}
+        {mainTab === 'jobs'    && <JobsSection />}
       </main>
     </div>
   );

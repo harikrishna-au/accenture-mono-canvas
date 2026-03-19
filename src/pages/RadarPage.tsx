@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Radar, Loader2, ExternalLink, Zap, TrendingUp, AlertCircle,
-  Briefcase, Clock, Building2, ChevronRight, RefreshCw, Hammer
+  Radar, Loader2, ExternalLink, TrendingUp, AlertCircle,
+  Briefcase, Clock, MapPin, Package, RefreshCw, Hammer, Zap
 } from "lucide-react";
 import Header from "@/components/Header";
 import { useResume } from "@/hooks/useResume";
@@ -11,23 +11,42 @@ import { useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
 
 /* ── Types ── */
-type Job = {
-  title: string;
-  type: "Internship" | "Full-time" | "Part-time";
-  company_type: string;
+type DBJob = {
+  id: string; title: string; company: string | null; type: string;
+  location: string | null; skills_required: string[]; description: string | null;
+  apply_url: string | null; package_lpa: number | null; active: boolean;
+};
+
+type MatchedJob = DBJob & {
   match_score: number;
-  why: string;
   skills_match: string[];
   skills_gap: string[];
-  search_url: string;
-  internshala_url: string;
 };
+
+/* ── Match score calculator ── */
+function calculateMatch(job: DBJob, userSkills: string[]): MatchedJob {
+  const norm = (s: string) => s.toLowerCase().trim();
+  const userSet = new Set(userSkills.map(norm));
+  const required = job.skills_required.map(norm);
+
+  const skills_match = job.skills_required.filter(s => userSet.has(norm(s)));
+  const skills_gap   = job.skills_required.filter(s => !userSet.has(norm(s)));
+
+  let score = 50; // base
+  if (required.length > 0) {
+    score = Math.round(50 + (skills_match.length / required.length) * 49);
+  }
+  // boost if user has lots of skills overall
+  if (userSkills.length > 8) score = Math.min(99, score + 5);
+
+  return { ...job, match_score: score, skills_match, skills_gap };
+}
 
 /* ── Score ring color ── */
 function scoreColor(s: number) {
-  if (s >= 85) return { ring: "#16a34a", bg: "#f0fdf4", text: "#15803d" };
-  if (s >= 70) return { ring: "#d97706", bg: "#fffbeb", text: "#b45309" };
-  return { ring: "#6b7280", bg: "#f9fafb", text: "#4b5563" };
+  if (s >= 85) return { ring: "#16a34a", text: "#15803d" };
+  if (s >= 70) return { ring: "#d97706", text: "#b45309" };
+  return { ring: "#6b7280", text: "#4b5563" };
 }
 
 /* ── Score arc ── */
@@ -36,7 +55,6 @@ function ScoreArc({ score }: { score: number }) {
   const r = 22, cx = 28, cy = 28;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
-
   return (
     <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
       <svg width="56" height="56" className="-rotate-90">
@@ -50,43 +68,41 @@ function ScoreArc({ score }: { score: number }) {
 }
 
 /* ── Job card ── */
-function JobCard({ job, index }: { job: Job; index: number }) {
-  const c = scoreColor(job.match_score);
-  const typeIcon = job.type === "Internship" ? <Clock className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />;
+function JobCard({ job, index }: { job: MatchedJob; index: number }) {
   const typeColor = job.type === "Internship"
     ? "bg-blue-50 text-blue-600 border-blue-100"
     : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.05 }}
-      className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 flex gap-4 group"
+      transition={{ duration: 0.22, delay: index * 0.04 }}
+      className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 flex gap-4"
     >
-      {/* Score */}
       <ScoreArc score={job.match_score} />
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="font-semibold font-['Inter'] text-stone-900 text-sm leading-snug">{job.title}</p>
+            <p className="font-semibold font-['Inter'] text-stone-900 text-sm">{job.title}</p>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold font-['Inter'] border ${typeColor}`}>
-                {typeIcon}{job.type}
+                {job.type === "Internship" ? <Clock className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
+                {job.type}
               </span>
-              <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']">
-                <Building2 className="w-3 h-3" />{job.company_type}
-              </span>
+              {job.company  && <span className="text-[11px] text-stone-500 font-['Inter']">{job.company}</span>}
+              {job.location && <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']"><MapPin className="w-3 h-3" />{job.location}</span>}
+              {job.package_lpa && <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']"><Package className="w-3 h-3" />{job.package_lpa} LPA</span>}
             </div>
           </div>
         </div>
 
-        {/* Why match */}
-        <p className="text-xs font-['Inter'] text-stone-500 mt-2 leading-relaxed">{job.why}</p>
+        {job.description && (
+          <p className="text-xs font-['Inter'] text-stone-500 mt-2 leading-relaxed line-clamp-2">{job.description}</p>
+        )}
 
-        {/* Skills match */}
+        {/* Matched skills */}
         {job.skills_match.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2.5">
             {job.skills_match.map((s, i) => (
@@ -100,55 +116,48 @@ function JobCard({ job, index }: { job: Job; index: number }) {
           <div className="flex items-center gap-1.5 mt-2">
             <TrendingUp className="w-3 h-3 text-amber-500 shrink-0" />
             <p className="text-[11px] font-['Inter'] text-amber-600">
-              Learn: <span className="font-semibold">{job.skills_gap.join(", ")}</span>
+              Learn: <span className="font-semibold">{job.skills_gap.slice(0, 3).join(", ")}</span>
             </p>
           </div>
         )}
 
-        {/* CTAs */}
-        <div className="flex items-center gap-2 mt-3">
-          <a href={job.search_url} target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-[11px] font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
-            <ExternalLink className="w-3 h-3" /> LinkedIn Jobs
-          </a>
-          {job.type === "Internship" && job.internshala_url && (
-            <a href={job.internshala_url} target="_blank" rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-stone-600 text-[11px] font-semibold font-['Inter'] hover:bg-stone-50 active:scale-95 transition-all">
-              <ExternalLink className="w-3 h-3" /> Internshala
+        {/* Apply */}
+        {job.apply_url && (
+          <div className="mt-3">
+            <a href={job.apply_url} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 text-white text-[11px] font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
+              <ExternalLink className="w-3 h-3" /> Apply Now
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-/* ── Scanning animation ── */
+/* ── Scan animation ── */
 function ScanAnimation() {
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-6">
       <div className="relative w-32 h-32">
-        {/* Rings */}
         {[1, 2, 3].map(i => (
           <motion.div key={i} className="absolute inset-0 rounded-full border border-stone-300"
             style={{ margin: `${(i - 1) * 16}px` }}
             animate={{ opacity: [0.2, 0.6, 0.2] }}
             transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }} />
         ))}
-        {/* Sweep */}
         <motion.div className="absolute inset-0 rounded-full overflow-hidden"
           animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
           <div className="absolute top-1/2 left-1/2 w-1/2 h-0.5 origin-left"
             style={{ background: "linear-gradient(90deg, transparent, #1c1917)" }} />
         </motion.div>
-        {/* Center dot */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-2 h-2 rounded-full bg-stone-800" />
         </div>
       </div>
       <div className="text-center">
-        <p className="font-['Merriweather'] font-bold text-stone-800 text-base">Scanning your profile…</p>
-        <p className="font-['Inter'] text-stone-400 text-sm mt-1">Finding roles that match your skills</p>
+        <p className="font-['Merriweather'] font-bold text-stone-800 text-base">Scanning opportunities…</p>
+        <p className="font-['Inter'] text-stone-400 text-sm mt-1">Matching your profile to available roles</p>
       </div>
     </div>
   );
@@ -158,25 +167,40 @@ function ScanAnimation() {
 export default function RadarPage() {
   const navigate = useNavigate();
   const { savedData, loading: profileLoading } = useResume();
-  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [results, setResults] = useState<MatchedJob[] | null>(null);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState("");
+
+  const userSkills = savedData ? [
+    ...savedData.skills.languages,
+    ...savedData.skills.technical,
+    ...savedData.skills.tools,
+  ] : [];
 
   const runScan = async () => {
     if (!savedData) return;
     setScanning(true);
     setError("");
-    setJobs(null);
+    setResults(null);
 
-    const { data, error: fnErr } = await supabase.functions.invoke("radar-jobs", {
-      body: { profile: savedData },
-    });
+    const { data, error: dbErr } = await (supabase as any)
+      .from("jobs")
+      .select("*")
+      .eq("active", true)
+      .order("created_at", { ascending: false });
 
-    if (fnErr || data?.error) {
-      setError(data?.error || fnErr?.message || "Scan failed. Try again.");
-    } else {
-      setJobs(data.jobs ?? []);
+    if (dbErr) {
+      setError("Failed to load jobs. Try again.");
+      setScanning(false);
+      return;
     }
+
+    const jobs: DBJob[] = data ?? [];
+    const matched = jobs
+      .map(j => calculateMatch(j, userSkills))
+      .sort((a, b) => b.match_score - a.match_score);
+
+    setResults(matched);
     setScanning(false);
   };
 
@@ -211,14 +235,13 @@ export default function RadarPage() {
           {profileLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-stone-400 animate-spin" /></div>
           ) : !hasProfile ? (
-            /* No profile */
             <div className="text-center py-16 space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center mx-auto">
                 <Radar className="w-7 h-7 text-stone-400" />
               </div>
               <p className="font-['Merriweather'] font-bold text-stone-800 text-xl">No profile to scan</p>
               <p className="font-['Inter'] text-stone-400 text-sm max-w-xs mx-auto">
-                Build your resume in Forge first — Radar uses your skills and education to find matching roles.
+                Build your resume in Forge first — Radar uses your skills to match you with real openings.
               </p>
               <button onClick={() => navigate("/forge")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
@@ -228,29 +251,25 @@ export default function RadarPage() {
           ) : (
             <AnimatePresence mode="wait">
 
-              {/* Idle — show scan button */}
-              {!scanning && !jobs && (
+              {/* Idle */}
+              {!scanning && !results && (
                 <motion.div key="idle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                   className="text-center space-y-6 py-8">
                   <div>
                     <h1 className="font-['Merriweather'] font-bold text-stone-900 text-2xl mb-2">Find your best-fit roles</h1>
                     <p className="font-['Inter'] text-stone-400 text-sm max-w-sm mx-auto leading-relaxed">
-                      Radar analyses your skills, education and projects, then surfaces the most relevant internships and jobs for you right now.
+                      Radar matches your skills and education against real openings and ranks them by how well you fit.
                     </p>
                   </div>
 
-                  {/* Profile summary pill */}
+                  {/* Skills preview */}
                   <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 text-left">
                     <p className="text-[11px] font-semibold font-['Inter'] text-stone-400 uppercase tracking-widest mb-2">Scanning from your profile</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {[
-                        ...savedData.skills.languages,
-                        ...savedData.skills.technical,
-                        ...savedData.skills.tools,
-                      ].slice(0, 10).map((s, i) => (
+                      {userSkills.slice(0, 12).map((s, i) => (
                         <span key={i} className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600 text-xs font-['Inter']">{s}</span>
                       ))}
-                      {savedData.education[0]?.degree && (
+                      {savedData?.education[0]?.degree && (
                         <span className="px-2.5 py-0.5 rounded-full bg-stone-900 text-white text-xs font-['Inter']">
                           {savedData.education[0].degree}
                         </span>
@@ -274,15 +293,14 @@ export default function RadarPage() {
               )}
 
               {/* Results */}
-              {jobs && !scanning && (
+              {results && !scanning && (
                 <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  {/* Results header */}
                   <div className="flex items-center justify-between mb-5">
                     <div>
                       <h2 className="font-['Merriweather'] font-bold text-stone-900 text-lg">
-                        {jobs.length} opportunities found
+                        {results.length} {results.length === 1 ? "opening" : "openings"} found
                       </h2>
-                      <p className="text-xs font-['Inter'] text-stone-400 mt-0.5">Sorted by match score · Based on your profile</p>
+                      <p className="text-xs font-['Inter'] text-stone-400 mt-0.5">Sorted by match score · Based on your skills</p>
                     </div>
                     <button onClick={runScan}
                       className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-200 text-stone-600 text-xs font-semibold font-['Inter'] hover:bg-stone-50 transition-all active:scale-95">
@@ -290,20 +308,22 @@ export default function RadarPage() {
                     </button>
                   </div>
 
-                  {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-xl mb-4 text-sm font-['Inter'] text-red-600">
-                      <AlertCircle className="w-4 h-4 shrink-0" />{error}
+                  {results.length === 0 ? (
+                    <div className="text-center py-16 space-y-3">
+                      <Zap className="w-10 h-10 text-stone-300 mx-auto" />
+                      <p className="font-['Merriweather'] font-bold text-stone-700 text-lg">No openings yet</p>
+                      <p className="font-['Inter'] text-stone-400 text-sm">Check back soon — new roles are added regularly.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {results.map((job, i) => <JobCard key={job.id} job={job} index={i} />)}
                     </div>
                   )}
-
-                  <div className="space-y-3">
-                    {jobs.map((job, i) => <JobCard key={i} job={job} index={i} />)}
-                  </div>
                 </motion.div>
               )}
 
-              {/* Error on first scan */}
-              {error && !jobs && !scanning && (
+              {/* Error */}
+              {error && !scanning && !results && (
                 <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 space-y-4">
                   <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
                   <p className="font-['Inter'] text-stone-600 text-sm">{error}</p>
