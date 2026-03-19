@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
-import { Maximize, Minimize, LogOut, HelpCircle, Sparkles, FileText } from "lucide-react";
+import { Maximize, Minimize, LogOut, HelpCircle, Sparkles, FileText, BookOpen } from "lucide-react";
 
 import { useLocation } from "react-router-dom";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
