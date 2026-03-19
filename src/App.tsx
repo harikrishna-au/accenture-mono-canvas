@@ -32,6 +32,8 @@ import BlogWrite from "./pages/BlogWrite";
 import BlogMyPosts from "./pages/BlogMyPosts";
 import BlogAdmin from "./pages/BlogAdmin";
 
+import ForgePage from "./pages/ForgePage";
+import ForgeProfilePage from "./pages/ForgeProfilePage";
 import GeoSudo from "./pages/GeoSudo";
 import GridChallenge from "./pages/GridChallenge";
 import MotionChallenge from "./pages/MotionChallenge";
@@ -89,6 +91,8 @@ const App = () => {
               <Route path="/coupon-stats" element={<CouponDashboard />} />
               <Route path="/ai-interview" element={<AIInterviewSelection />} />
               <Route path="/ai-interview/:type" element={<AIInterview />} />
+              <Route path="/forge" element={<ForgePage />} />
+              <Route path="/forge/profile" element={<ForgeProfilePage />} />
               <Route path="/connect" element={<ConnectPage />} />
               <Route path="/connect/:expertId" element={<ConnectPage />} />
               <Route path="/placed-guru" element={<PlacedGuruPage />} />

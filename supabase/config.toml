@@ -24,3 +24,9 @@ verify_jwt = false
 
 [functions.sync-premium-to-clerk]
 verify_jwt = false
+
+[functions.parse-resume]
+verify_jwt = false
+
+[functions.refactor-description]
+verify_jwt = false
