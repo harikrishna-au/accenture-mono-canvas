@@ -127,6 +127,9 @@ export function useRazorpay() {
                 currency: options.currency,
             });
             const rzp1 = new (window as any).Razorpay(options);
+            rzp1.on('payment.failed', function(response: any) {
+                console.error("[Razorpay] Payment failed:", JSON.stringify(response.error));
+            });
             rzp1.open();
             return true;
 
