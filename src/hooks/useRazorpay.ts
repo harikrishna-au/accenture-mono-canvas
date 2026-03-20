@@ -120,15 +120,10 @@ export function useRazorpay() {
                 }
             };
 
-            console.log("[Razorpay] Opening checkout with:", {
-                key: options.key,
-                order_id: options.order_id,
-                amount: options.amount,
-                currency: options.currency,
-            });
+            toast.info(`Order: ${order.id} | Amount: ${order.amount} | Key: ${import.meta.env.VITE_RAZORPAY_KEY_ID?.slice(0,20)}`);
             const rzp1 = new (window as any).Razorpay(options);
-            rzp1.on('payment.failed', function(response: any) {
-                console.error("[Razorpay] Payment failed:", JSON.stringify(response.error));
+            rzp1.on('payment.failed', function(resp: any) {
+                toast.error(`Razorpay Error: ${resp.error?.code} — ${resp.error?.description}`);
             });
             rzp1.open();
             return true;
