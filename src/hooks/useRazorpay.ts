@@ -120,6 +120,12 @@ export function useRazorpay() {
                 }
             };
 
+            console.log("[Razorpay] Opening checkout with:", {
+                key: options.key,
+                order_id: options.order_id,
+                amount: options.amount,
+                currency: options.currency,
+            });
             const rzp1 = new (window as any).Razorpay(options);
             rzp1.open();
             return true;
