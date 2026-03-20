@@ -44,6 +44,7 @@ import BARTGame from "./pages/BARTGame";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
+import CustomerSupport from "@/components/CustomerSupport";
 
 const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -74,6 +75,7 @@ const App = () => {
           {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
           <Toaster />
           <Sonner />
+          <CustomerSupport />
           <BrowserRouter
             future={{
               v7_startTransition: true,
