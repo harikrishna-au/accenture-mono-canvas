@@ -26,6 +26,7 @@ import {
   TrendingUp,
   CheckCircle,
   Sparkles,
+  Radar,
 } from "lucide-react";
 
 type AuthView = "sign-in" | "sign-up";
@@ -105,7 +106,8 @@ const features = [
   { icon: Brain, label: "AI Mock Interviews", sub: "Real-time adaptive feedback" },
   { icon: Trophy, label: "Gamified Aptitude", sub: "Learn through engaging games" },
   { icon: Mic, label: "Communication Rounds", sub: "Speaking, writing & fluency" },
-  { icon: Users, label: "Placed Guru Sessions", sub: "1:1 with recently placed seniors" },
+  { icon: Users, label: "Placed Guru Sessions", sub: "1:1 with recently placed seniors", to: undefined },
+  { icon: Radar, label: "Radar — Job Match", sub: "Find roles that fit your skill profile", to: "/radar" },
 ];
 
 /* ── 3-D floating shapes config ── */
@@ -416,13 +418,14 @@ export default function Landing() {
 
             {/* Features list */}
             <div className="space-y-3">
-              {features.map(({ icon: Icon, label, sub }, i) => (
+              {features.map(({ icon: Icon, label, sub, to }, i) => (
                 <motion.div
                   key={label}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.35, delay: 0.35 + i * 0.06 }}
-                  className="flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-stone-100 shadow-sm"
+                  className={`flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-stone-100 shadow-sm${to ? " cursor-pointer hover:border-stone-200 hover:shadow-md transition-all active:scale-[0.98]" : ""}`}
+                  onClick={to ? () => navigate(to) : undefined}
                 >
                   <div className="w-9 h-9 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center flex-shrink-0">
                     <Icon className="w-4 h-4 text-stone-600" />
@@ -618,13 +621,14 @@ export default function Landing() {
 
             {/* feature rows */}
             <div className="space-y-2.5">
-              {features.map(({ icon: Icon, label, sub }, i) => (
+              {features.map(({ icon: Icon, label, sub, to }, i) => (
                 <motion.div
                   key={label}
                   initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.32 + i * 0.07, ease: "easeOut" }}
-                  className="flex items-center gap-3 group"
+                  className={`flex items-center gap-3 group${to ? " cursor-pointer" : ""}`}
+                  onClick={to ? () => navigate(to) : undefined}
                 >
                   <div className="w-8 h-8 rounded-lg bg-white border border-stone-200 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:border-stone-300 transition-colors">
                     <Icon className="w-3.5 h-3.5 text-stone-600" />
