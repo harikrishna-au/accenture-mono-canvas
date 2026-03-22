@@ -1,38 +1,80 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <!-- Dark stone background gradient -->
+
+    <!-- Background: deep stone, subtle warm tint -->
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1c1c1e"/>
-      <stop offset="100%" stop-color="#3a3a3c"/>
+      <stop offset="0%"   stop-color="#18181a"/>
+      <stop offset="100%" stop-color="#2c2b2e"/>
     </linearGradient>
-    <!-- Warm ember gradient for the blazing crossbar -->
-    <linearGradient id="blaze" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0%" stop-color="#b87333"/>
-      <stop offset="60%" stop-color="#d4a85a"/>
-      <stop offset="100%" stop-color="#e8c87a"/>
+
+    <!-- Inner rim highlight -->
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.10)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.02)"/>
     </linearGradient>
-    <!-- Soft glow behind the crossbar -->
-    <filter id="glow" x="-30%" y="-60%" width="160%" height="220%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
+
+    <!-- Flame crossbar: copper → warm gold → pale cream -->
+    <linearGradient id="flame" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#b8743a"/>
+      <stop offset="45%"  stop-color="#dba84c"/>
+      <stop offset="100%" stop-color="#f2d878"/>
+    </linearGradient>
+
+    <!-- Soft amber bloom behind the crossbar -->
+    <filter id="bloom" x="-40%" y="-120%" width="180%" height="340%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+
+    <!-- Crisp inner shadow on the H bars -->
+    <filter id="barShadow" x="-10%" y="-5%" width="120%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.35)"/>
+    </filter>
+
   </defs>
 
-  <!-- Background rounded square -->
-  <rect width="100" height="100" rx="22" fill="url(#bg)"/>
-  <!-- Subtle inner highlight ring -->
-  <rect x="1" y="1" width="98" height="98" rx="21" fill="none"
-        stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+  <!-- Background tile -->
+  <rect width="100" height="100" rx="23" fill="url(#bg)"/>
 
-  <!-- H — left vertical bar -->
-  <rect x="16" y="14" width="15" height="72" rx="3" fill="#ffffff" opacity="0.93"/>
-  <!-- H — right vertical bar -->
-  <rect x="69" y="14" width="15" height="72" rx="3" fill="#ffffff" opacity="0.93"/>
+  <!-- Top-edge highlight (glass feel) -->
+  <rect x="2" y="2" width="96" height="48" rx="21" fill="url(#rim)"/>
 
-  <!-- H — crossbar: angled forward like a bolt (the Blaze) -->
-  <polygon points="31,45 69,37 69,57 31,65"
-           fill="url(#blaze)" filter="url(#glow)"/>
+  <!-- Subtle border -->
+  <rect x="1" y="1" width="98" height="98" rx="22.5"
+        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+
+  <!-- ── H: left vertical bar ── -->
+  <rect x="14" y="12" width="14" height="76" rx="4.5"
+        fill="white" opacity="0.94" filter="url(#barShadow)"/>
+
+  <!-- ── H: right vertical bar ── -->
+  <rect x="72" y="12" width="14" height="76" rx="4.5"
+        fill="white" opacity="0.94" filter="url(#barShadow)"/>
+
+  <!-- ── Flame crossbar ──
+       Bezier curves give it a dynamic, tapered-flame silhouette.
+       Left edge is flat (aligns with H bars), right tip is a sharp point. -->
+  <path
+    d="M 28,40
+       Q 52,34  71,42
+       L 84,50
+       L 71,58
+       Q 52,66  28,60
+       Z"
+    fill="url(#flame)"
+    filter="url(#bloom)"
+  />
+
+  <!-- Bright specular streak on the flame (top edge) -->
+  <path
+    d="M 30,41 Q 52,36 70,43 L 78,49"
+    fill="none"
+    stroke="rgba(255,255,255,0.30)"
+    stroke-width="1.8"
+    stroke-linecap="round"
+  />
+
 </svg>
