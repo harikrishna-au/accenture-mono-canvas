@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Check, Loader2, Zap, RefreshCw } from "lucide-react";
+import { X, Check, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,8 +11,7 @@ interface PaymentPopupProps {
     onClose: () => void;
 }
 
-const LIFETIME_PRICE = 999;
-const MONTHLY_PRICE  = 149;
+const BASE_PRICE = 149;
 
 async function validateCouponServer(code: string): Promise<number | null> {
     try {
@@ -26,17 +25,14 @@ async function validateCouponServer(code: string): Promise<number | null> {
     }
 }
 
-type Plan = 'monthly' | 'lifetime';
-
 const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
-    const [plan, setPlan]                   = useState<Plan>('monthly');
     const [coupon, setCoupon]               = useState("");
     const [appliedAmount, setAppliedAmount] = useState<number | null>(null);
     const [validating, setValidating]       = useState(false);
     const [couponError, setCouponError]     = useState("");
-    const { initiatePayment, initiateSubscription, isLoading } = useRazorpay();
+    const { initiatePayment, isLoading } = useRazorpay();
 
-    // Auto-apply referral coupon from localStorage (only for lifetime plan)
+    // Auto-apply referral coupon from localStorage
     useEffect(() => {
         if (!isOpen || appliedAmount) return;
         const stored = localStorage.getItem("referral_coupon");
@@ -45,7 +41,6 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
         validateCouponServer(stored).then((amount) => {
             if (amount !== null) {
                 setAppliedAmount(amount);
-                setPlan('lifetime');
                 toast.success("Referral coupon applied!");
             }
         });
@@ -53,7 +48,7 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
 
     if (!isOpen) return null;
 
-    const finalAmount = plan === 'lifetime' ? (appliedAmount ?? LIFETIME_PRICE) : MONTHLY_PRICE;
+    const finalAmount = appliedAmount ?? BASE_PRICE;
 
     const handleApplyCoupon = async () => {
         const code = coupon.trim();
@@ -73,12 +68,7 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
     };
 
     const handlePayment = async () => {
-        let success: boolean | undefined;
-        if (plan === 'monthly') {
-            success = await initiateSubscription();
-        } else {
-            success = await initiatePayment(finalAmount, coupon.trim() || undefined);
-        }
+        const success = await initiatePayment(finalAmount, coupon.trim() || undefined);
         if (success) onClose();
     };
 
@@ -94,59 +84,26 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                 </button>
 
                 <div className="text-center space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full text-amber-700 text-xs font-semibold mb-2">
+                        <Zap className="w-3 h-3" />
+                        One-time · Full access forever
+                    </div>
                     <h2 className="text-2xl font-bold text-neutral-900">Unlock Premium</h2>
-                    <p className="text-neutral-500 text-sm">Choose the plan that works for you.</p>
+                    <p className="text-neutral-500 text-sm">Pay once. No subscription. No renewal.</p>
                 </div>
 
-                {/* Plan selector */}
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        onClick={() => { setPlan('monthly'); setAppliedAmount(null); }}
-                        className={`relative flex flex-col items-start gap-1 rounded-xl border-2 p-4 text-left transition-all ${
-                            plan === 'monthly'
-                                ? 'border-amber-500 bg-amber-50'
-                                : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
-                        }`}
-                    >
-                        <div className="flex items-center gap-1.5 font-semibold text-neutral-900">
-                            <RefreshCw className="w-4 h-4" />
-                            Monthly
+                {/* Price display */}
+                <div className="rounded-xl border-2 border-amber-500 bg-amber-50 p-5 text-center space-y-1">
+                    {appliedAmount && appliedAmount < BASE_PRICE ? (
+                        <div className="space-y-0.5">
+                            <p className="text-neutral-400 text-sm line-through">₹{BASE_PRICE}</p>
+                            <p className="text-4xl font-bold text-neutral-900">₹{finalAmount}</p>
+                            <p className="text-green-600 text-xs font-semibold">You save ₹{BASE_PRICE - finalAmount}!</p>
                         </div>
-                        <p className="text-2xl font-bold text-neutral-900">
-                            ₹{MONTHLY_PRICE}
-                            <span className="text-sm font-normal text-neutral-400">/mo</span>
-                        </p>
-                        <p className="text-xs text-neutral-500">Cancel anytime</p>
-                        {plan === 'monthly' && (
-                            <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
-                                <Check className="w-3 h-3 text-white" />
-                            </span>
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => setPlan('lifetime')}
-                        className={`relative flex flex-col items-start gap-1 rounded-xl border-2 p-4 text-left transition-all ${
-                            plan === 'lifetime'
-                                ? 'border-amber-500 bg-amber-50'
-                                : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
-                        }`}
-                    >
-                        <div className="flex items-center gap-1.5 font-semibold text-neutral-900">
-                            <Zap className="w-4 h-4" />
-                            One-time
-                        </div>
-                        <p className="text-2xl font-bold text-neutral-900">₹{LIFETIME_PRICE}</p>
-                        <p className="text-xs text-neutral-500">Lifetime access</p>
-                        <span className="absolute -top-2 right-3 rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                            BEST VALUE
-                        </span>
-                        {plan === 'lifetime' && (
-                            <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
-                                <Check className="w-3 h-3 text-white" />
-                            </span>
-                        )}
-                    </button>
+                    ) : (
+                        <p className="text-4xl font-bold text-neutral-900">₹{BASE_PRICE}</p>
+                    )}
+                    <p className="text-neutral-500 text-xs">One-time payment</p>
                 </div>
 
                 {/* What's included */}
@@ -163,47 +120,35 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                     ))}
                 </ul>
 
-                {/* Coupon — only for lifetime plan */}
-                {plan === 'lifetime' && (
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-neutral-700">Have a coupon?</label>
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Enter Code"
-                                value={coupon}
-                                onChange={(e) => { setCoupon(e.target.value); setCouponError(""); }}
-                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
-                                className="uppercase"
-                            />
-                            <Button
-                                onClick={handleApplyCoupon}
-                                disabled={validating || !coupon.trim()}
-                                variant="outline"
-                                className="shrink-0 min-w-[72px]"
-                            >
-                                {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
-                            </Button>
-                        </div>
-                        {couponError && <p className="text-red-500 text-xs font-medium">{couponError}</p>}
-                        {appliedAmount && (
-                            <p className="text-green-600 text-xs font-medium flex items-center gap-1">
-                                <Check className="w-3 h-3" /> Coupon applied — you save ₹{LIFETIME_PRICE - appliedAmount}!
-                            </p>
-                        )}
+                {/* Coupon */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700">Have a coupon?</label>
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="Enter code"
+                            value={coupon}
+                            onChange={(e) => { setCoupon(e.target.value); setCouponError(""); }}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
+                            className="uppercase"
+                        />
+                        <Button
+                            onClick={handleApplyCoupon}
+                            disabled={validating || !coupon.trim()}
+                            variant="outline"
+                            className="shrink-0 min-w-[72px]"
+                        >
+                            {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                        </Button>
                     </div>
-                )}
+                    {couponError && <p className="text-red-500 text-xs font-medium">{couponError}</p>}
+                </div>
 
                 <Button
                     onClick={handlePayment}
                     disabled={isLoading}
                     className="w-full h-12 text-base font-semibold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                 >
-                    {isLoading
-                        ? "Processing..."
-                        : plan === 'monthly'
-                            ? `Subscribe for ₹${MONTHLY_PRICE}/month`
-                            : `Pay ₹${finalAmount} — Lifetime Access`
-                    }
+                    {isLoading ? "Processing..." : `Pay ₹${finalAmount} — Get Full Access`}
                 </Button>
 
                 <p className="text-xs text-center text-neutral-400">

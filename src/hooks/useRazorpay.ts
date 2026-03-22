@@ -22,8 +22,8 @@ export function useRazorpay() {
         });
     };
 
-    /** One-time payment (₹999 lifetime plan). */
-    const initiatePayment = async (amount: number = 999, couponCode?: string) => {
+    /** One-time payment (₹149 full access). */
+    const initiatePayment = async (amount: number = 149, couponCode?: string) => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return false;
@@ -79,7 +79,7 @@ export function useRazorpay() {
                         });
 
                         if (verifyRes.ok) {
-                            toast.success("Payment verified! Lifetime premium unlocked.");
+                            toast.success("Payment verified! Full access unlocked.");
                             localStorage.removeItem("referral_coupon");
                             try { await user.reload(); } catch { window.location.reload(); }
                         } else {
@@ -114,94 +114,5 @@ export function useRazorpay() {
         }
     };
 
-    /** Monthly recurring subscription (₹149/month). */
-    const initiateSubscription = async () => {
-        if (!user) {
-            toast.error("Please sign in to proceed");
-            return false;
-        }
-
-        const res = await loadRazorpayScript();
-        if (!res) {
-            toast.error("Razorpay SDK failed to load. Are you online?");
-            return false;
-        }
-
-        try {
-            setIsLoading(true);
-            const clerkToken = await getToken();
-
-            // Create subscription via edge function
-            const subRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-razorpay-subscription`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${clerkToken}`,
-                },
-                body: JSON.stringify({}),
-            });
-
-            if (!subRes.ok) {
-                const err = await subRes.json();
-                throw new Error(err.error || 'Failed to create subscription');
-            }
-
-            const { subscription_id } = await subRes.json();
-
-            const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                subscription_id,
-                name: "Harry The Blaze",
-                description: "Monthly Premium — ₹149/month",
-                handler: async function (response: any) {
-                    try {
-                        const verifyRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-subscription-payment`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${clerkToken}`,
-                            },
-                            body: JSON.stringify({
-                                payment_id: response.razorpay_payment_id,
-                                subscription_id: response.razorpay_subscription_id,
-                                signature: response.razorpay_signature,
-                            }),
-                        });
-
-                        if (verifyRes.ok) {
-                            toast.success("Subscribed! Monthly premium is now active.");
-                            try { await user.reload(); } catch { window.location.reload(); }
-                        } else {
-                            toast.error("Payment successful but verification failed. Contact support.");
-                            try { await user.reload(); } catch { window.location.reload(); }
-                        }
-                    } catch (e) {
-                        console.error("Subscription verification error", e);
-                        try { await user.reload(); } catch { window.location.reload(); }
-                    }
-                },
-                prefill: {
-                    name: user.fullName || "",
-                    email: user.primaryEmailAddress?.emailAddress || "",
-                },
-                theme: { color: "#3399cc" }
-            };
-
-            const rzp = new (window as any).Razorpay(options);
-            rzp.on('payment.failed', (resp: any) => {
-                toast.error(`Payment failed: ${resp.error?.description}`);
-            });
-            rzp.open();
-            return true;
-
-        } catch (error: any) {
-            console.error('Subscription Error:', error);
-            toast.error(error.message || "Failed to initiate subscription");
-            return false;
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return { initiatePayment, initiateSubscription, isLoading };
+    return { initiatePayment, isLoading };
 }
