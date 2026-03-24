@@ -632,11 +632,52 @@ export default function ForgePage() {
                 </pre>
               </div>
 
-              {/* Footer hint */}
-              <div className="px-6 py-3 border-t border-stone-100 bg-stone-50/60 shrink-0">
-                <p className="text-[11px] font-['Inter'] text-stone-400 text-center">
-                  Paste this into <span className="font-semibold text-stone-500">Overleaf</span> → New Project → Blank → replace all content → Compile
+              {/* Footer — step-by-step Overleaf guide */}
+              <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/60 shrink-0">
+                <p className="text-[11px] font-bold font-['Inter'] text-stone-500 uppercase tracking-wider mb-3">
+                  How to turn this into a PDF resume
                 </p>
+                <ol className="space-y-1.5">
+                  {[
+                    <>
+                      <span className="font-semibold text-stone-700">Copy the code</span> using the button above.
+                    </>,
+                    <>
+                      Open{' '}
+                      <a
+                        href="https://www.overleaf.com/project"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-green-700 underline underline-offset-2 hover:text-green-900 transition-colors"
+                      >
+                        overleaf.com/project
+                      </a>
+                      {' '}and sign in (free account).
+                    </>,
+                    <>
+                      Click <span className="font-semibold text-stone-700">New Project</span> → <span className="font-semibold text-stone-700">Blank Project</span> → give it any name.
+                    </>,
+                    <>
+                      In the editor, <span className="font-semibold text-stone-700">select all</span> the existing code (Ctrl+A / ⌘+A) and <span className="font-semibold text-stone-700">paste</span> your copied code.
+                    </>,
+                    <>
+                      Click the green <span className="font-semibold text-stone-700">Recompile</span> button — your resume PDF appears on the right.
+                    </>,
+                    <>
+                      Hit <span className="font-semibold text-stone-700">Download PDF</span> (the download icon) — done! 🎉
+                    </>,
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-[11px] font-['Inter'] text-stone-500">
+                      <span
+                        className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5"
+                        style={{ background: '#292524' }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </motion.div>
           </motion.div>

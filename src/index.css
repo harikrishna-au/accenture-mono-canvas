@@ -102,6 +102,22 @@ All colors MUST be HSL.
   }
 }
 
+/* ── Brand keyframes ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes splashFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splashLine {
+  from { width: 0; }
+  to   { width: 200px; }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -188,10 +204,7 @@ All colors MUST be HSL.
   height: 0;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.88); }
-  to   { opacity: 1; transform: scale(1); }
-}
+/* fadeIn defined above in brand keyframes */
 
 @keyframes typing {
   from {

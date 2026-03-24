@@ -65,17 +65,21 @@ const Header = ({ onStartTour }: HeaderProps) => {
         {/* ── Logo ── */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2.5 group"
+          className="flex items-center group"
         >
+          {/* Mobile: just the icon mark */}
           <img
             src="/favicon.svg"
             alt="Harry The Blaze"
-            className="w-7 h-7 flex-shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
-            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.25))" }}
+            className="sm:hidden w-8 h-8 flex-shrink-0 transition-all duration-300 group-hover:scale-105"
+            style={{ filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.22))" }}
           />
-          <span className="hidden sm:inline text-stone-800 text-[1.05rem] font-bold tracking-tight font-['Merriweather'] transition-colors duration-300 group-hover:text-stone-600">
-            HARRY THE BLAZE
-          </span>
+          {/* Desktop: full wordmark (icon + HARRY THE + BLAZE + tagline) */}
+          <img
+            src="/logo.svg"
+            alt="Harry The Blaze"
+            className="hidden sm:block h-10 w-auto flex-shrink-0 transition-all duration-300 group-hover:opacity-85"
+          />
         </button>
 
         {/* ── Actions ── */}

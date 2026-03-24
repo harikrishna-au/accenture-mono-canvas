@@ -41,6 +41,9 @@ import MotionChallenge from "./pages/MotionChallenge";
 import SwitchChallenge from "./pages/SwitchChallenge";
 import DigitChallenge from "./pages/DigitChallenge";
 import BARTGame from "./pages/BARTGame";
+import SwithChallenge from "./pages/SwithChallenge";
+import InductiveChallenge from "./pages/InductiveChallenge";
+import DualTaskChallenge from "./pages/DualTaskChallenge";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
@@ -119,6 +122,9 @@ const App = () => {
               <Route path="/game/switch" element={<SwitchChallenge />} />
               <Route path="/game/digit" element={<DigitChallenge />} />
               <Route path="/game/bart" element={<BARTGame />} />
+              <Route path="/game/swith" element={<SwithChallenge />} />
+              <Route path="/game/inductive" element={<InductiveChallenge />} />
+              <Route path="/game/dual-task" element={<DualTaskChallenge />} />
 
               {/* Communication Pattern Selector */}
               <Route
