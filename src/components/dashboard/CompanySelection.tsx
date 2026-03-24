@@ -399,7 +399,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             {/* Middle: description */}
             <div className="flex-1 min-w-0">
               <h4 style={{ fontFamily: "'Merriweather', Georgia, serif", fontSize: "1.15rem", fontWeight: 700, color: "rgba(28,24,20,0.78)", letterSpacing: "-0.01em", marginBottom: 5 }}>
-                Book a session with a placed expert.
+                Book a session with a placed candidate.
               </h4>
               <p style={{ fontSize: 13, color: "rgba(28,24,20,0.42)", fontFamily: "'Inter',sans-serif", lineHeight: 1.55 }}>
                 Students who cracked the same process — last month. Real guidance, real results.
