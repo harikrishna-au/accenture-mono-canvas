@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Radar, Loader2, ExternalLink, TrendingUp, AlertCircle,
-  Briefcase, Clock, MapPin, Package, RefreshCw, Hammer, Zap
+  Briefcase, Clock, MapPin, Package, RefreshCw, Hammer, Zap,
+  CheckCircle2, XCircle
 } from "lucide-react";
 import Header from "@/components/Header";
 import { useResume } from "@/hooks/useResume";
@@ -42,28 +43,35 @@ function calculateMatch(job: DBJob, userSkills: string[]): MatchedJob {
   return { ...job, match_score: score, skills_match, skills_gap };
 }
 
-
 /* ── Score ring color ── */
 function scoreColor(s: number) {
-  if (s >= 85) return { ring: "#16a34a", text: "#15803d" };
-  if (s >= 70) return { ring: "#d97706", text: "#b45309" };
-  return { ring: "#6b7280", text: "#4b5563" };
+  if (s >= 85) return { ring: "#16a34a", text: "#15803d", bg: "bg-green-50", label: "Strong Match" };
+  if (s >= 70) return { ring: "#d97706", text: "#b45309", bg: "bg-amber-50", label: "Good Match" };
+  if (s > 0)   return { ring: "#6b7280", text: "#4b5563", bg: "bg-stone-100", label: "Partial Match" };
+  return { ring: "#d4d4d4", text: "#a8a29e", bg: "bg-stone-50", label: "No Score" };
 }
 
 /* ── Score arc ── */
 function ScoreArc({ score }: { score: number }) {
   const c = scoreColor(score);
-  const r = 22, cx = 28, cy = 28;
+  const r = 26, cx = 32, cy = 32;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
   return (
-    <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-      <svg width="56" height="56" className="-rotate-90">
+    <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+      <svg width="64" height="64" className="-rotate-90">
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth="4" />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={c.ring} strokeWidth="4"
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
+        {score > 0 && (
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={c.ring} strokeWidth="4"
+            strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
+        )}
       </svg>
-      <span className="absolute text-[13px] font-black font-['Inter']" style={{ color: c.text }}>{score}</span>
+      <div className="absolute flex flex-col items-center leading-none">
+        {score > 0
+          ? <span className="text-[15px] font-black font-['Inter']" style={{ color: c.text }}>{score}</span>
+          : <span className="text-[11px] font-bold font-['Inter'] text-stone-300">N/A</span>
+        }
+      </div>
     </div>
   );
 }
@@ -72,66 +80,97 @@ function ScoreArc({ score }: { score: number }) {
 function JobCard({ job, index }: { job: MatchedJob; index: number }) {
   const typeColor = job.type === "Internship"
     ? "bg-blue-50 text-blue-600 border-blue-100"
+    : job.type === "Part-time"
+    ? "bg-purple-50 text-purple-600 border-purple-100"
     : "bg-emerald-50 text-emerald-600 border-emerald-100";
+
+  const c = scoreColor(job.match_score);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: index * 0.04 }}
-      className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 flex gap-4"
+      className="bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-stone-200 transition-all flex flex-col h-full"
     >
-      <ScoreArc score={job.match_score} />
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="font-semibold font-['Inter'] text-stone-900 text-sm">{job.title}</p>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold font-['Inter'] border ${typeColor}`}>
-                {job.type === "Internship" ? <Clock className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
-                {job.type}
+      {/* Card top */}
+      <div className="p-5 flex-1">
+        {/* Score + title row */}
+        <div className="flex items-start gap-4">
+          <ScoreArc score={job.match_score} />
+          <div className="flex-1 min-w-0 pt-0.5">
+            <p className="font-semibold font-['Inter'] text-stone-900 text-sm leading-snug">{job.title}</p>
+            {job.company && (
+              <p className="text-xs font-['Inter'] text-stone-500 mt-0.5">{job.company}</p>
+            )}
+            {job.match_score > 0 && (
+              <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold font-['Inter'] ${c.bg}`} style={{ color: c.text }}>
+                {c.label}
               </span>
-              {job.company  && <span className="text-[11px] text-stone-500 font-['Inter']">{job.company}</span>}
-              {job.location && <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']"><MapPin className="w-3 h-3" />{job.location}</span>}
-              {job.package_lpa && <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']"><Package className="w-3 h-3" />{job.package_lpa} LPA</span>}
-            </div>
+            )}
           </div>
         </div>
 
+        {/* Meta row */}
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold font-['Inter'] border ${typeColor}`}>
+            {job.type === "Internship" ? <Clock className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
+            {job.type}
+          </span>
+          {job.location && (
+            <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']">
+              <MapPin className="w-3 h-3" />{job.location}
+            </span>
+          )}
+          {job.package_lpa && (
+            <span className="flex items-center gap-1 text-[11px] text-stone-400 font-['Inter']">
+              <Package className="w-3 h-3" />{job.package_lpa} LPA
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
         {job.description && (
-          <p className="text-xs font-['Inter'] text-stone-500 mt-2 leading-relaxed line-clamp-2">{job.description}</p>
+          <p className="text-xs font-['Inter'] text-stone-500 mt-3 leading-relaxed line-clamp-3">{job.description}</p>
         )}
 
-        {/* Matched skills */}
+        {/* Skills sections */}
         {job.skills_match.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2.5">
-            {job.skills_match.map((s, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-full bg-stone-900 text-white text-[11px] font-['Inter']">{s}</span>
-            ))}
-          </div>
-        )}
-
-        {/* Skills gap */}
-        {job.skills_gap.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2">
-            <TrendingUp className="w-3 h-3 text-amber-500 shrink-0" />
-            <p className="text-[11px] font-['Inter'] text-amber-600">
-              Learn: <span className="font-semibold">{job.skills_gap.slice(0, 3).join(", ")}</span>
-            </p>
-          </div>
-        )}
-
-        {/* Apply */}
-        {job.apply_url && (
           <div className="mt-3">
-            <a href={job.apply_url} target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 text-white text-[11px] font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
-              <ExternalLink className="w-3 h-3" /> Apply Now
-            </a>
+            <p className="text-[10px] font-semibold font-['Inter'] text-stone-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" /> You have
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {job.skills_match.map((s, i) => (
+                <span key={i} className="px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-['Inter'] border border-green-100">{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {job.skills_gap.length > 0 && (
+          <div className="mt-2.5">
+            <p className="text-[10px] font-semibold font-['Inter'] text-stone-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+              <TrendingUp className="w-3 h-3 text-amber-500" /> Learn
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {job.skills_gap.slice(0, 4).map((s, i) => (
+                <span key={i} className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-['Inter'] border border-amber-100">{s}</span>
+              ))}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Apply button pinned to bottom */}
+      {job.apply_url && (
+        <div className="px-5 pb-4 pt-2 border-t border-stone-50">
+          <a href={job.apply_url} target="_blank" rel="noreferrer"
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-stone-900 text-white text-xs font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all">
+            <ExternalLink className="w-3.5 h-3.5" /> Apply Now
+          </a>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -215,9 +254,9 @@ export default function RadarPage() {
     <div className="min-h-screen" style={{ background: "#fcfcf9" }}>
       <Header />
 
-      <div className="pt-20 pb-16 px-4 max-w-2xl mx-auto">
+      <div className="pt-20 pb-16 px-4">
 
-        {/* Brand pill */}
+        {/* Brand pill — always centred, narrow */}
         <div className="flex justify-center mt-6 mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 border border-stone-200">
             <Radar className="w-3.5 h-3.5 text-stone-500" />
@@ -226,7 +265,7 @@ export default function RadarPage() {
         </div>
 
         <SignedOut>
-          <div className="text-center py-16 space-y-3">
+          <div className="max-w-2xl mx-auto text-center py-16 space-y-3">
             <p className="font-['Merriweather'] font-bold text-stone-800 text-xl">Sign in to use Radar</p>
             <p className="font-['Inter'] text-stone-400 text-sm">We need your profile to find matching roles.</p>
           </div>
@@ -236,7 +275,7 @@ export default function RadarPage() {
           {profileLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-stone-400 animate-spin" /></div>
           ) : !hasProfile ? (
-            <div className="text-center py-16 space-y-4">
+            <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center mx-auto">
                 <Radar className="w-7 h-7 text-stone-400" />
               </div>
@@ -255,7 +294,7 @@ export default function RadarPage() {
               {/* Idle */}
               {!scanning && !results && (
                 <motion.div key="idle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  className="text-center space-y-6 py-8">
+                  className="max-w-2xl mx-auto text-center space-y-6 py-8">
                   <div>
                     <h1 className="font-['Merriweather'] font-bold text-stone-900 text-2xl mb-2">Find your best-fit roles</h1>
                     <p className="font-['Inter'] text-stone-400 text-sm max-w-sm mx-auto leading-relaxed">
@@ -263,7 +302,6 @@ export default function RadarPage() {
                     </p>
                   </div>
 
-                  {/* Skills preview */}
                   <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 text-left">
                     <p className="text-[11px] font-semibold font-['Inter'] text-stone-400 uppercase tracking-widest mb-2">Scanning from your profile</p>
                     <div className="flex flex-wrap gap-1.5">
@@ -293,12 +331,14 @@ export default function RadarPage() {
                 </motion.div>
               )}
 
-              {/* Results */}
+              {/* Results — full width */}
               {results && !scanning && (
-                <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <div className="flex items-center justify-between mb-5">
+                <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto">
+
+                  {/* Results header */}
+                  <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="font-['Merriweather'] font-bold text-stone-900 text-lg">
+                      <h2 className="font-['Merriweather'] font-bold text-stone-900 text-xl">
                         {results.length} {results.length === 1 ? "opening" : "openings"} found
                       </h2>
                       <p className="text-xs font-['Inter'] text-stone-400 mt-0.5">Sorted by match score · Based on your skills</p>
@@ -310,13 +350,13 @@ export default function RadarPage() {
                   </div>
 
                   {results.length === 0 ? (
-                    <div className="text-center py-16 space-y-3">
+                    <div className="text-center py-24 space-y-3">
                       <Zap className="w-10 h-10 text-stone-300 mx-auto" />
                       <p className="font-['Merriweather'] font-bold text-stone-700 text-lg">No openings yet</p>
                       <p className="font-['Inter'] text-stone-400 text-sm">Check back soon — new roles are added regularly.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {results.map((job, i) => <JobCard key={job.id} job={job} index={i} />)}
                     </div>
                   )}
@@ -325,10 +365,12 @@ export default function RadarPage() {
 
               {/* Error */}
               {error && !scanning && !results && (
-                <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 space-y-4">
+                <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="max-w-2xl mx-auto text-center py-16 space-y-4">
                   <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
                   <p className="font-['Inter'] text-stone-600 text-sm">{error}</p>
-                  <button onClick={runScan} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 transition-all">
+                  <button onClick={runScan}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 transition-all">
                     <RefreshCw className="w-4 h-4" /> Try Again
                   </button>
                 </motion.div>
