@@ -52,9 +52,7 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewTy
     };
 
     const handleStartInterview = () => {
-        if (resumeText.trim()) {
-            onSubmit(resumeText);
-        }
+        onSubmit(resumeText);
     };
 
     return (
@@ -151,6 +149,13 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewTy
                                 </>
                             )}
                         </button>
+
+                        <button
+                            onClick={() => setStep(2)}
+                            className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            Skip upload → paste text manually or start without a resume
+                        </button>
                     </div>
                 )}
 
@@ -166,7 +171,7 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewTy
                                     }
                                 }}
                                 maxLength={5000}
-                                placeholder="Paste your resume content here..."
+                                placeholder="Paste your resume content here… or leave blank for general interview questions."
                                 className="w-full h-64 p-4 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none transition-all text-sm font-mono leading-relaxed bg-gray-50/50"
                             />
                             <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-medium bg-white px-2 py-1 rounded-md border border-gray-100 shadow-sm">
@@ -183,10 +188,10 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewTy
                             </button>
                             <button
                                 onClick={handleStartInterview}
-                                disabled={!resumeText.trim() || isSubmitting}
+                                disabled={isSubmitting}
                                 className={cn(
                                     "flex-1 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg transform active:scale-[0.98]",
-                                    !resumeText.trim() || isSubmitting
+                                    isSubmitting
                                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                                         : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 hover:shadow-indigo-500/25"
                                 )}
