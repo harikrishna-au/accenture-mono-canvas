@@ -63,7 +63,7 @@ def start_interview(
         final_resume_text = resume_text
     
     if not final_resume_text.strip():
-        raise HTTPException(status_code=400, detail="Resume content is required")
+        final_resume_text = "No resume provided. Ask general interview questions suitable for a fresher or entry-level candidate."
 
     session_id = str(uuid.uuid4())
     
