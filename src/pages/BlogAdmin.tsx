@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   Shield, LogOut, RefreshCw, Eye, EyeOff, Hourglass, BookOpen,
   XCircle, LayoutList, Users, Check, Trash2, ExternalLink, UserCheck, UserX,
-  Briefcase, Plus, X, MapPin, Package, Link, ToggleLeft, ToggleRight
+  Briefcase, Plus, X, MapPin, Package, Link, ToggleLeft, ToggleRight,
+  Sparkles, ClipboardPaste, PenLine, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -381,6 +382,17 @@ function BlogSection() {
   );
 }
 
+/* ─────────────────── AI job parser ─────────────────── */
+async function parseJobWithAI(raw: string): Promise<{
+  title: string; company: string; type: string; location: string;
+  description: string; apply_url: string; package_lpa: string; skills_required: string[];
+}> {
+  const { data, error } = await (supabase as any).functions.invoke('parse-job', { body: { raw } });
+  if (error) throw new Error(error.message ?? 'Edge function error');
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 /* ─────────────────── Jobs section ─────────────────── */
 const EMPTY_SKILLS_INPUT = '';
 
@@ -390,6 +402,9 @@ function JobsSection() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [skillInput, setSkillInput] = useState(EMPTY_SKILLS_INPUT);
+  const [entryMode, setEntryMode] = useState<'ai' | 'manual'>('ai');
+  const [rawText, setRawText] = useState('');
+  const [parsing, setParsing] = useState(false);
 
   const [form, setForm] = useState({
     title: '', company: '', type: 'Full-time', location: '',
@@ -414,9 +429,35 @@ function JobsSection() {
     setSkillInput('');
   };
 
+  const handleParse = async () => {
+    if (!rawText.trim()) { toast.error('Paste some job details first.'); return; }
+    setParsing(true);
+    try {
+      const parsed = await parseJobWithAI(rawText);
+      setForm({
+        title: parsed.title ?? '',
+        company: parsed.company ?? '',
+        type: ['Internship', 'Full-time', 'Part-time'].includes(parsed.type) ? parsed.type : 'Full-time',
+        location: parsed.location ?? '',
+        description: parsed.description ?? '',
+        apply_url: parsed.apply_url ?? '',
+        package_lpa: parsed.package_lpa ?? '',
+        skills_required: parsed.skills_required ?? [],
+      });
+      setEntryMode('manual');
+      toast.success('Fields filled! Review and post.');
+    } catch (e: any) {
+      toast.error(e.message ?? 'Parsing failed.');
+    } finally {
+      setParsing(false);
+    }
+  };
+
   const resetForm = () => {
     setForm({ title: '', company: '', type: 'Full-time', location: '', description: '', apply_url: '', package_lpa: '', skills_required: [] });
     setSkillInput('');
+    setRawText('');
+    setEntryMode('ai');
     setShowForm(false);
   };
 
@@ -479,72 +520,129 @@ function JobsSection() {
       {/* Add Job form */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 mb-6 space-y-4">
+          {/* Header + close */}
           <div className="flex items-center justify-between mb-1">
             <p className="font-semibold font-['Inter'] text-stone-800 text-sm">New Job / Internship</p>
             <button onClick={resetForm} className="text-stone-400 hover:text-stone-600 transition-colors"><X className="w-4 h-4" /></button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Title *">
-              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="Software Engineer Intern" className={inputCls} />
-            </Field>
-            <Field label="Company">
-              <input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
-                placeholder="Google, Zepto, Startup…" className={inputCls} />
-            </Field>
-            <Field label="Type">
-              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                className={inputCls}>
-                <option>Internship</option>
-                <option>Full-time</option>
-                <option>Part-time</option>
-              </select>
-            </Field>
-            <Field label="Location">
-              <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                placeholder="Bangalore / Remote" className={inputCls} />
-            </Field>
-            <Field label="Package (LPA)">
-              <input type="number" value={form.package_lpa} onChange={e => setForm(f => ({ ...f, package_lpa: e.target.value }))}
-                placeholder="6" className={inputCls} />
-            </Field>
-            <Field label="Apply URL">
-              <input value={form.apply_url} onChange={e => setForm(f => ({ ...f, apply_url: e.target.value }))}
-                placeholder="https://…" className={inputCls} />
-            </Field>
+          {/* Mode toggle */}
+          <div className="flex items-center gap-2 p-1 bg-stone-100 rounded-xl w-fit">
+            <button
+              onClick={() => setEntryMode('ai')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-['Inter'] transition-all ${
+                entryMode === 'ai' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'
+              }`}>
+              <Sparkles className="w-3.5 h-3.5" /> Paste & Parse
+            </button>
+            <button
+              onClick={() => setEntryMode('manual')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-['Inter'] transition-all ${
+                entryMode === 'manual' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'
+              }`}>
+              <PenLine className="w-3.5 h-3.5" /> Manual Entry
+            </button>
           </div>
 
-          <Field label="Description">
-            <textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              placeholder="What the role involves…" className={`${inputCls} resize-none`} />
-          </Field>
-
-          <Field label="Skills Required">
-            <div className="flex flex-wrap gap-1.5 p-2.5 bg-stone-50 border border-stone-200 rounded-xl min-h-[44px]">
-              {form.skills_required.map((s, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-800 text-white rounded-lg text-xs font-['Inter']">
-                  {s}
-                  <button onClick={() => setForm(f => ({ ...f, skills_required: f.skills_required.filter((_, j) => j !== i) }))}
-                    className="hover:text-stone-300 leading-none">×</button>
-                </span>
-              ))}
-              <input value={skillInput} onChange={e => setSkillInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkill(); } }}
-                placeholder="Type skill + Enter"
-                className="flex-1 min-w-[120px] bg-transparent text-stone-900 text-sm placeholder:text-stone-300 focus:outline-none font-['Inter']" />
+          {/* AI paste panel */}
+          {entryMode === 'ai' && (
+            <div className="space-y-3">
+              <p className="text-xs font-['Inter'] text-stone-400">Paste the full job description, LinkedIn post, or any raw text — AI will extract the fields.</p>
+              <textarea
+                rows={7}
+                value={rawText}
+                onChange={e => setRawText(e.target.value)}
+                placeholder="Paste job details here…&#10;&#10;e.g. Software Engineer Intern at Google&#10;Location: Bangalore | Package: 18 LPA&#10;Skills: React, TypeScript, Node.js&#10;Apply: https://careers.google.com/…"
+                className={`${inputCls} resize-none w-full`}
+              />
+              <div className="flex justify-end gap-2">
+                <button onClick={resetForm} className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-['Inter'] font-medium hover:bg-stone-50 transition-all">
+                  Cancel
+                </button>
+                <button
+                  onClick={handleParse}
+                  disabled={parsing || !rawText.trim()}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all disabled:opacity-50">
+                  {parsing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {parsing ? 'Parsing…' : 'Parse with AI'}
+                </button>
+              </div>
             </div>
-          </Field>
+          )}
 
-          <div className="flex justify-end gap-2 pt-1">
-            <button onClick={resetForm} className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-['Inter'] font-medium hover:bg-stone-50 transition-all">
-              Cancel
-            </button>
-            <button onClick={handleSave} disabled={saving}
-              className="px-5 py-2 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all disabled:opacity-50">
-              {saving ? 'Saving…' : 'Post Job'}
-            </button>
-          </div>
+          {/* Manual fields */}
+          {entryMode === 'manual' && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Title *">
+                  <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="Software Engineer Intern" className={inputCls} />
+                </Field>
+                <Field label="Company">
+                  <input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
+                    placeholder="Google, Zepto, Startup…" className={inputCls} />
+                </Field>
+                <Field label="Type">
+                  <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                    className={inputCls}>
+                    <option>Internship</option>
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                  </select>
+                </Field>
+                <Field label="Location">
+                  <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                    placeholder="Bangalore / Remote" className={inputCls} />
+                </Field>
+                <Field label="Package (LPA)">
+                  <input type="number" value={form.package_lpa} onChange={e => setForm(f => ({ ...f, package_lpa: e.target.value }))}
+                    placeholder="6" className={inputCls} />
+                </Field>
+                <Field label="Apply URL">
+                  <input value={form.apply_url} onChange={e => setForm(f => ({ ...f, apply_url: e.target.value }))}
+                    placeholder="https://…" className={inputCls} />
+                </Field>
+              </div>
+
+              <Field label="Description">
+                <textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="What the role involves…" className={`${inputCls} resize-none`} />
+              </Field>
+
+              <Field label="Skills Required">
+                <div className="flex flex-wrap gap-1.5 p-2.5 bg-stone-50 border border-stone-200 rounded-xl min-h-[44px]">
+                  {form.skills_required.map((s, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-800 text-white rounded-lg text-xs font-['Inter']">
+                      {s}
+                      <button onClick={() => setForm(f => ({ ...f, skills_required: f.skills_required.filter((_, j) => j !== i) }))}
+                        className="hover:text-stone-300 leading-none">×</button>
+                    </span>
+                  ))}
+                  <input value={skillInput} onChange={e => setSkillInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkill(); } }}
+                    placeholder="Type skill + Enter"
+                    className="flex-1 min-w-[120px] bg-transparent text-stone-900 text-sm placeholder:text-stone-300 focus:outline-none font-['Inter']" />
+                </div>
+              </Field>
+
+              <div className="flex justify-between gap-2 pt-1">
+                <button
+                  onClick={() => setEntryMode('ai')}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-200 text-stone-500 text-sm font-['Inter'] hover:bg-stone-50 transition-all">
+                  <ClipboardPaste className="w-3.5 h-3.5" /> Re-parse
+                </button>
+                <div className="flex gap-2">
+                  <button onClick={resetForm} className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-['Inter'] font-medium hover:bg-stone-50 transition-all">
+                    Cancel
+                  </button>
+                  <button onClick={handleSave} disabled={saving}
+                    className="px-5 py-2 rounded-xl bg-stone-900 text-white text-sm font-semibold font-['Inter'] hover:bg-stone-700 active:scale-95 transition-all disabled:opacity-50">
+                    {saving ? 'Saving…' : 'Post Job'}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
