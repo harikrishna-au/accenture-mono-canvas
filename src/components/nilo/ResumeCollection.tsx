@@ -151,10 +151,11 @@ export const ResumeCollection = ({ onSubmit, onUpload, isSubmitting, interviewTy
                         </button>
 
                         <button
-                            onClick={() => setStep(2)}
-                            className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                            onClick={() => onSubmit("")}
+                            disabled={isSubmitting}
+                            className="w-full py-2 text-sm text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-50"
                         >
-                            Skip upload → paste text manually or start without a resume
+                            {isSubmitting ? "Starting…" : "Skip & start without resume →"}
                         </button>
                     </div>
                 )}
