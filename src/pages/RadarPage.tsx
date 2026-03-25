@@ -32,15 +32,16 @@ function calculateMatch(job: DBJob, userSkills: string[]): MatchedJob {
   const skills_match = job.skills_required.filter(s => userSet.has(norm(s)));
   const skills_gap   = job.skills_required.filter(s => !userSet.has(norm(s)));
 
-  let score = 50; // base
-  if (required.length > 0) {
-    score = Math.round(50 + (skills_match.length / required.length) * 49);
+  if (required.length === 0) {
+    return { ...job, match_score: 0, skills_match, skills_gap };
   }
-  // boost if user has lots of skills overall
+
+  let score = Math.round(50 + (skills_match.length / required.length) * 49);
   if (userSkills.length > 8) score = Math.min(99, score + 5);
 
   return { ...job, match_score: score, skills_match, skills_gap };
 }
+
 
 /* ── Score ring color ── */
 function scoreColor(s: number) {
