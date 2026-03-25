@@ -16,6 +16,8 @@ export const useAIInterview = () => {
 
     // Interview State
     const [isRecording, setIsRecording] = useState(false);
+    const [isMicMuted, setIsMicMuted] = useState(false);
+    const isMicMutedRef = useRef(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [textToSpeak, setTextToSpeak] = useState("");
@@ -395,6 +397,16 @@ export const useAIInterview = () => {
         }
     };
 
+    const toggleMicMute = () => {
+        const nextMuted = !isMicMutedRef.current;
+        isMicMutedRef.current = nextMuted;
+        setIsMicMuted(nextMuted);
+        if (nextMuted && isRecording) {
+            stopRecording();
+            cancelAutoSubmit();
+        }
+    };
+
     // Ref to access latest response in timer callback
     const userResponseRef = useRef(userResponse);
     useEffect(() => { userResponseRef.current = userResponse; }, [userResponse]);
@@ -413,8 +425,9 @@ export const useAIInterview = () => {
 
     const handleAudioEnd = () => {
         setStatus("idle");
-        // Auto-start recording as requested
-        startRecording();
+        if (!isMicMutedRef.current) {
+            startRecording();
+        }
     };
 
     return {
@@ -424,6 +437,8 @@ export const useAIInterview = () => {
         isResumeSubmitting,
         interviewEnded,
         isRecording,
+        isMicMuted,
+        toggleMicMute,
         isProcessing,
         textToSpeak,
         audioSrc,

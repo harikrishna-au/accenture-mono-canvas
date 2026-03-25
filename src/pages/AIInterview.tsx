@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import PageWrapper from "@/components/PageWrapper";
 import { VisemeDisplay } from "@/components/nilo/VisemeDisplay";
-import { Clock, XCircle, Loader2 } from "lucide-react";
+import { Clock, XCircle, Loader2, MicOff, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIInterview } from "@/hooks/useAIInterview";
 import { ResumeCollection } from "@/components/nilo/ResumeCollection";
@@ -21,6 +21,8 @@ const AIInterview = () => {
         isResumeSubmitting,
         interviewEnded,
         isRecording,
+        isMicMuted,
+        toggleMicMute,
         status,
         textToSpeak,
         audioSrc,
@@ -232,20 +234,36 @@ const AIInterview = () => {
                                             </div>
                                         )}
 
-                                        <div className="flex items-center gap-4 text-center">
-                                            {/* Mic Button */}
+                                        <div className="flex items-center gap-3 text-center">
+                                            {/* Mute Button */}
+                                            <button
+                                                onClick={toggleMicMute}
+                                                title={isMicMuted ? "Unmute mic" : "Mute mic"}
+                                                className={cn(
+                                                    "shrink-0 w-14 h-14 rounded-xl flex items-center justify-center border transition-all",
+                                                    isMicMuted
+                                                        ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100"
+                                                        : "bg-stone-100 border-stone-200 text-stone-500 hover:bg-stone-200"
+                                                )}
+                                            >
+                                                {isMicMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                            </button>
+
+                                            {/* Speak Button */}
                                             <button
                                                 onClick={toggleRecording}
-                                                disabled={status === "processing" || status === "speaking"}
+                                                disabled={isMicMuted || status === "processing" || status === "speaking"}
                                                 className={cn(
                                                     "flex-1 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2",
                                                     isRecording
                                                         ? "bg-rose-500 text-white animate-pulse shadow-lg shadow-rose-200"
+                                                        : isMicMuted
+                                                        ? "bg-stone-100 text-stone-300 border border-stone-200 cursor-not-allowed"
                                                         : "bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200",
                                                     (status === "processing" || status === "speaking") && "opacity-50 cursor-not-allowed"
                                                 )}
                                             >
-                                                {isRecording ? "Listening..." : "Speak Answer"}
+                                                {isRecording ? "Listening..." : isMicMuted ? "Mic muted" : "Speak Answer"}
                                             </button>
 
                                             {/* Send Button */}
