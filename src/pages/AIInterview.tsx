@@ -65,6 +65,20 @@ const AIInterview = () => {
     };
 
     const [hasStarted, setHasStarted] = useState(false);
+    const [showAudioTip, setShowAudioTip] = useState(true);
+    const [questionNum, setQuestionNum] = useState(0);
+
+    useEffect(() => {
+        if (textToSpeak) setQuestionNum(prev => prev + 1);
+    }, [textToSpeak]);
+
+    const statusConfig: Record<string, { label: string; pill: string; dot: string }> = {
+        idle:       { label: "Your turn",      pill: "bg-stone-100 text-stone-500 border-stone-200",    dot: "bg-stone-400" },
+        listening:  { label: "Listening...",   pill: "bg-emerald-50 text-emerald-600 border-emerald-200", dot: "bg-emerald-500 animate-pulse" },
+        processing: { label: "Thinking...",    pill: "bg-amber-50 text-amber-600 border-amber-200",     dot: "bg-amber-400" },
+        speaking:   { label: "AI is speaking", pill: "bg-sky-50 text-sky-600 border-sky-200",           dot: "bg-sky-500" },
+    };
+    const currentStatus = statusConfig[status] || statusConfig.idle;
 
     const handleStartSession = () => {
         // Create an empty AudioContext to unlock the browser engine immediately on click
@@ -111,52 +125,80 @@ const AIInterview = () => {
                             interviewType={interviewType}
                         />
                     ) : !hasStarted ? (
-                        /* --- GET READY SCREEN (New) --- */
-                        <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in zoom-in-95 duration-500">
-                            <div className="bg-white p-10 rounded-3xl shadow-xl border border-stone-200 max-w-md w-full text-center space-y-8 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-400 to-rose-600" />
+                        /* --- GET READY SCREEN --- */
+                        <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in fade-in zoom-in-95 duration-500 px-4">
+                            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-stone-200 max-w-md w-full text-center space-y-7 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-400 to-rose-600" />
 
-                                <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
-                                    <span className="text-3xl">🎙️</span>
+                                {/* Type badge */}
+                                <div className="flex justify-center pt-2">
+                                    <span className={cn(
+                                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest border",
+                                        interviewType === "technical"
+                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                            : "bg-rose-50 text-rose-700 border-rose-200"
+                                    )}>
+                                        <span className={cn("w-1.5 h-1.5 rounded-full", interviewType === "technical" ? "bg-emerald-500" : "bg-rose-500")} />
+                                        {interviewType === "technical" ? "Technical Interview" : "HR Interview"}
+                                    </span>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <h2 className="text-2xl font-serif text-stone-800">Interviewer Ready</h2>
-                                    <p className="text-stone-500">Your AI interviewer has reviewed your resume and prepared the first question.</p>
+                                    <h2 className="text-2xl font-serif text-stone-800">Your Interviewer is Ready</h2>
+                                    <p className="text-stone-400 text-sm font-light">Resume reviewed. First question prepared.</p>
+                                </div>
+
+                                {/* Tips */}
+                                <div className="bg-stone-50 rounded-2xl p-5 text-left space-y-3 border border-stone-100">
+                                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Quick tips</p>
+                                    {[
+                                        interviewType === "hr" ? "Use the STAR method for behavioral answers" : "Think aloud — explain your reasoning",
+                                        "Speak clearly; the mic transcribes your voice",
+                                        "Use earphones to prevent echo",
+                                    ].map((tip, i) => (
+                                        <div key={i} className="flex items-start gap-2.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-1.5 shrink-0" />
+                                            <p className="text-stone-600 text-sm leading-relaxed">{tip}</p>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <button
                                     onClick={handleStartSession}
-                                    className="w-full py-4 bg-stone-900 text-white rounded-xl font-bold text-lg hover:bg-stone-800 hover:scale-105 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-stone-900 text-white rounded-xl font-bold text-lg hover:bg-stone-800 hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
                                 >
-                                    <span>Start Interview</span>
+                                    <span>Begin Interview</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                                 </button>
-
-                                <p className="text-xs text-stone-400 uppercase tracking-widest">Tap to begin session</p>
                             </div>
                         </div>
                     ) : (
                         /* --- MAIN INTERVIEW UI --- */
                         <div className="flex flex-col items-center min-h-[calc(100vh-100px)] pt-6 pb-12 font-sans animate-in fade-in slide-in-from-bottom-4 duration-700">
                             {/* Earphone Recommendation Banner */}
-                            <div className="w-full max-w-4xl px-4 mb-8">
-                                <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm animate-fade-in">
-                                    <div className="flex items-center gap-5">
-                                        <div className="flex-shrink-0">
-                                            <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center animate-pulse">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            {showAudioTip && (
+                                <div className="w-full max-w-4xl px-4 mb-8 animate-in fade-in slide-in-from-top-2 duration-500">
+                                    <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                                 </svg>
                                             </div>
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-sm font-bold text-stone-800 mb-1 uppercase tracking-wide">Audio Optimization</h3>
-                                            <p className="text-xs text-stone-500 leading-relaxed">For the best experience, please use earphones to prevent echo and ensure clear audio capture.</p>
+                                            <p className="flex-1 text-xs text-stone-500 leading-relaxed">
+                                                <span className="font-semibold text-stone-700">Tip:</span> Use earphones to prevent echo and ensure clear audio capture.
+                                            </p>
+                                            <button
+                                                onClick={() => setShowAudioTip(false)}
+                                                className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-stone-300 hover:text-stone-500 transition-colors rounded-full hover:bg-stone-100"
+                                                title="Dismiss"
+                                            >
+                                                <XCircle className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="w-full max-w-4xl px-4 mb-6 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -185,9 +227,19 @@ const AIInterview = () => {
                             <div className="flex-1 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-4">
 
                                 {/* LEFT: Avatar */}
-                                <div className="relative w-full aspect-square flex items-center justify-center">
-                                    <div className="absolute inset-0 bg-gradient-to-b from-stone-100 to-white rounded-full blur-3xl -z-10 transform scale-90 opacity-60" />
-                                    <VisemeDisplay text={textToSpeak} audioSrc={audioSrc} onAudioEnd={handleAudioEnd} />
+                                <div className="relative w-full flex flex-col items-center gap-4">
+                                    <div className="relative w-full aspect-square flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-gradient-to-b from-stone-100 to-white rounded-full blur-3xl -z-10 transform scale-90 opacity-60" />
+                                        <VisemeDisplay text={textToSpeak} audioSrc={audioSrc} onAudioEnd={handleAudioEnd} />
+                                    </div>
+                                    {/* Status pill */}
+                                    <div className={cn(
+                                        "inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-semibold transition-all duration-300",
+                                        currentStatus.pill
+                                    )}>
+                                        <span className={cn("w-2 h-2 rounded-full", currentStatus.dot)} />
+                                        {currentStatus.label}
+                                    </div>
                                 </div>
 
                                 {/* RIGHT: Interaction Panel */}
@@ -195,9 +247,19 @@ const AIInterview = () => {
 
                                     {/* AI Question Display */}
                                     <div className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/20 group-hover:bg-emerald-500 transition-colors" />
-                                        <h3 className="text-xs font-bold text-stone-400 mb-4 uppercase tracking-widest">Current Question</h3>
-                                        <p className="text-xl md:text-2xl text-stone-800 font-serif leading-relaxed">
+                                        <div className={cn(
+                                            "absolute top-0 left-0 w-1 h-full transition-colors duration-500",
+                                            status === "speaking" ? "bg-sky-400" : "bg-emerald-500/20 group-hover:bg-emerald-500"
+                                        )} />
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest">Current Question</h3>
+                                            {questionNum > 0 && (
+                                                <span className="text-xs font-bold text-stone-300 uppercase tracking-widest">
+                                                    Q{questionNum}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p key={questionNum} className="text-xl md:text-2xl text-stone-800 font-serif leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500">
                                             {textToSpeak || "Waiting for question..."}
                                         </p>
                                     </div>
