@@ -23,6 +23,7 @@ import CouponDashboard from "./pages/CouponDashboard";
 import AIInterview from "./pages/AIInterview";
 import AIInterviewSelection from "./pages/AIInterviewSelection";
 import PremiumRoute from "@/components/PremiumRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
@@ -88,7 +89,6 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/:companyId" element={<Dashboard />} />
               <Route path="/terms" element={<TermsOfService />} />
@@ -136,9 +136,11 @@ const App = () => {
               <Route
                 path="/game/communication"
                 element={
-                  <PremiumRoute>
-                    <CommunicationRounds />
-                  </PremiumRoute>
+                  <ErrorBoundary>
+                    <PremiumRoute>
+                      <CommunicationRounds />
+                    </PremiumRoute>
+                  </ErrorBoundary>
                 }
               />
 
@@ -146,9 +148,11 @@ const App = () => {
               <Route
                 path="/game/communication-p2"
                 element={
-                  <PremiumRoute>
-                    <CommunicationRoundsP2 />
-                  </PremiumRoute>
+                  <ErrorBoundary>
+                    <PremiumRoute>
+                      <CommunicationRoundsP2 />
+                    </PremiumRoute>
+                  </ErrorBoundary>
                 }
               />
 

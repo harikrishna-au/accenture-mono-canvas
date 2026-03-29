@@ -24,7 +24,7 @@ export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudio
 
         try {
             // Use environment variable for backend URL
-            const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000').replace(/\/$/, '');
+            const backendUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
             const response = await fetch(`${backendUrl}/api/tts`, {
                 method: 'POST',
                 headers: {
@@ -44,8 +44,6 @@ export function AudioPlayer({ text, voiceType = 'male_1', audioUrl: initialAudio
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     const blob = new Blob([bytes], { type: 'audio/mpeg' });
-
-                    console.log("TTS Audio Parsed from Base64:", blob.size, "bytes");
                     const url = URL.createObjectURL(blob);
                     setAudioUrl(url);
                     setUseFallback(false);

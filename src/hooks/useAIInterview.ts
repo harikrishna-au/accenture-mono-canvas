@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 
 const INTERVIEW_DURATION_SECONDS = 10 * 60; // 10 minutes
 
@@ -81,7 +82,7 @@ export const useAIInterview = () => {
             return true;
         } catch (error) {
             console.error("Mic permission denied:", error);
-            alert("Microphone access is required for the interview. Please allow access.");
+            toast.error("Microphone access is required for the interview. Please allow access.");
             return false;
         }
     };
@@ -111,7 +112,7 @@ export const useAIInterview = () => {
             });
 
             if (response.status === 403) {
-                alert("You have reached your 2-interview limit!");
+                toast.error("You have reached your 2-interview limit.");
                 setIsResumeSubmitting(false); // Make sure to stop loading
                 return;
             }
@@ -123,12 +124,6 @@ export const useAIInterview = () => {
             }
 
             const data = await response.json();
-            console.log("startInterview: Backend Response:", {
-                session_id: data.session_id,
-                ai_message_preview: data.ai_message?.substring(0, 30),
-                has_audio: !!data.audio_content,
-                audio_length: data.audio_content?.length
-            });
 
             setSessionId(data.session_id);
             setInterviewStarted(true);
@@ -136,7 +131,6 @@ export const useAIInterview = () => {
 
             // Play Audio
             if (data.audio_content) {
-                console.log("startInterview: Setting audioSrc immediately (length: " + data.audio_content.length + ")");
                 setAudioSrc(data.audio_content);
                 setStatus("speaking");
             } else {
@@ -145,7 +139,7 @@ export const useAIInterview = () => {
 
         } catch (error) {
             console.error("Error starting interview:", error);
-            alert(`Failed to start AI session: ${error instanceof Error ? error.message : "Unknown error"}`);
+            toast.error(`Failed to start AI session: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setIsResumeSubmitting(false);
         }
@@ -243,16 +237,10 @@ export const useAIInterview = () => {
             }
 
             const data = await response.json();
-            console.log("processText: Backend Response:", {
-                status: data.status,
-                ai_message_preview: data.ai_message?.substring(0, 30),
-                has_audio: !!data.audio_content
-            });
 
             setTextToSpeak(data.ai_message);
 
             if (data.audio_content) {
-                console.log("processText: Setting audioSrc (length: " + data.audio_content.length + ")");
                 setAudioSrc(data.audio_content);
                 setStatus("speaking");
             } else if (data.status === "completed") {
@@ -269,7 +257,7 @@ export const useAIInterview = () => {
         } catch (error) {
             console.error("Error processing chat:", error);
             setStatus("idle");
-            alert(`Chat Failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+            toast.error(`Chat Failed: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setIsProcessing(false);
         }
@@ -304,7 +292,7 @@ export const useAIInterview = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            alert("Your browser does not support Speech Recognition. Please use Chrome or Safari.");
+            toast.error("Your browser does not support Speech Recognition. Please use Chrome or Safari.");
             return;
         }
 
@@ -320,7 +308,6 @@ export const useAIInterview = () => {
 
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            console.log("Transcript captured:", transcript);
             // Update state directly (we don't want to cancel inside onresult loop repeatedly, wait, actually we do want to ensure no timer)
             cancelAutoSubmit();
 
