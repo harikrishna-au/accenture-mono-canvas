@@ -31,6 +31,13 @@ import BlogPost from "./pages/BlogPost";
 import BlogWrite from "./pages/BlogWrite";
 import BlogMyPosts from "./pages/BlogMyPosts";
 import BlogAdmin from "./pages/BlogAdmin";
+import HackWithInfyLanding from "./pages/hackwithinfy/HackWithInfyLanding";
+import HackWithInfySyllabus from "./pages/hackwithinfy/HackWithInfySyllabus";
+import HackWithInfyResources from "./pages/hackwithinfy/HackWithInfyResources";
+import HackWithInfyTips from "./pages/hackwithinfy/HackWithInfyTips";
+import HackWithInfyPreviousYears from "./pages/hackwithinfy/HackWithInfyPreviousYears";
+import ForgePage from "./pages/ForgePage";
+import ForgeProfilePage from "./pages/ForgeProfilePage";
 
 import GeoSudo from "./pages/GeoSudo";
 import GridChallenge from "./pages/GridChallenge";
@@ -144,8 +151,19 @@ const App = () => {
               <Route path="/blog/my" element={<BlogMyPosts />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
 
+              {/* HackWithInfy */}
+              <Route path="/hackwithinfy" element={<HackWithInfyLanding />} />
+              <Route path="/hackwithinfy/syllabus" element={<HackWithInfySyllabus />} />
+              <Route path="/hackwithinfy/resources" element={<HackWithInfyResources />} />
+              <Route path="/hackwithinfy/tips" element={<HackWithInfyTips />} />
+              <Route path="/hackwithinfy/previous-years" element={<HackWithInfyPreviousYears />} />
+
               {/* Admin */}
               <Route path="/admin/blog" element={<BlogAdmin />} />
+
+              {/* Forge - Resume Builder */}
+              <Route path="/forge" element={<ForgePage />} />
+              <Route path="/forge/profile" element={<ForgeProfilePage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

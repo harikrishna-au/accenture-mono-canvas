@@ -19,7 +19,11 @@ function renderMarkdown(md: string): string {
     .replace(/^>\s(.+)/gm, '<blockquote style="padding-left:1rem;border-left:3px solid #d6d3d1;color:#78716c;font-style:italic;margin:0.75rem 0">$1</blockquote>')
     .replace(/^[-*]\s(.+)/gm, '<li style="margin-left:1.25rem;list-style-type:disc;color:#57534e;margin-top:2px">$1</li>')
     .replace(/^\d+\.\s(.+)/gm, '<li style="margin-left:1.25rem;list-style-type:decimal;color:#57534e;margin-top:2px">$1</li>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#557d6b;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+      const safe = /^https?:\/\//i.test(url) || /^mailto:/i.test(url) || url.startsWith('/') || url.startsWith('#');
+      if (!safe) return text;
+      return `<a href="${url.replace(/"/g, '%22')}" style="color:#557d6b;text-decoration:underline" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    })
     .replace(/\n\n/g, '</p><p style="margin-top:0.75rem;color:#57534e;line-height:1.75;font-family:Inter,sans-serif;font-size:15px">')
     .replace(/\n/g, '<br/>');
 }

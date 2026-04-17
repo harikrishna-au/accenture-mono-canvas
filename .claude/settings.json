@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(./node_modules/.bin/vite build)",
+      "Bash(grep -n \"href=\"\"$2\"\"\" src/components/blog/AdminBlogRow.tsx src/components/blog/BlogEditor.tsx)",
+      "Bash(git add src/components/blog/BlogFilters.tsx src/pages/Blog.tsx src/pages/BlogMyPosts.tsx src/lib/admin-auth.ts supabase/migrations/20260309_create_blogs_table.sql)",
+      "Bash(git commit:*)",
+      "Bash(git add src/pages/BlogAdmin.tsx src/components/blog/AdminBlogRow.tsx)",
+      "Bash(git push fork feature/blog-seo-improvements)"
+    ]
+  }
+}

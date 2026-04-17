@@ -40,7 +40,10 @@ export function useBlogBySlug(slug: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
     (async () => {
       setLoading(true);
       const { data, error: err } = await (supabase as any)
@@ -52,12 +55,9 @@ export function useBlogBySlug(slug: string) {
       if (err) setError(err.message);
       else {
         setBlog(data);
-        // increment view count (fire-and-forget)
+        // atomic increment view count (fire-and-forget)
         if (data?.id) {
-          (supabase as any)
-            .from('blogs')
-            .update({ views: (data.views ?? 0) + 1 })
-            .eq('id', data.id);
+          (supabase as any).rpc('increment_blog_views', { blog_id: data.id });
         }
       }
       setLoading(false);
@@ -73,7 +73,11 @@ export function useMyBlogs(authorId: string) {
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
-    if (!authorId) return;
+    if (!authorId) {
+      setBlogs([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data } = await (supabase as any)
       .from('blogs')
@@ -142,7 +146,11 @@ export function useRelatedBlogs(type: string, excludeSlug: string, limit = 3) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!type || !excludeSlug) return;
+    if (!type || !excludeSlug) {
+      setBlogs([]);
+      setLoading(false);
+      return;
+    }
     (async () => {
       setLoading(true);
       const { data } = await (supabase as any)
@@ -172,6 +180,10 @@ export async function submitBlog(params: {
   author_name: string;
   author_email?: string;
 }): Promise<{ data: Blog | null; error: string | null }> {
+  if (params.content.trim().length < 500) {
+    return { data: null, error: 'Content must be at least 500 characters' };
+  }
+
   const slug = generateSlug(params.title);
   const read_time = calcReadTime(params.content);
   const excerpt = generateExcerpt(params.content);
