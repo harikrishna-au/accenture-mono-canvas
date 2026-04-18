@@ -82,10 +82,12 @@ serve(async (req: Request) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
 
-        // Update User Profile
+        // Update User Profile — mark as lifetime plan (one-time payment)
         const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
             user_id: verified_clerk_user_id,
             is_premium: true,
+            plan_type: 'lifetime',
+            premium_expires_at: null,
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
 
@@ -100,7 +102,7 @@ serve(async (req: Request) => {
                 'Authorization': `Bearer ${clerkSecret}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ public_metadata: { isPremium: true } }),
+            body: JSON.stringify({ public_metadata: { isPremium: true, planType: 'lifetime', premiumExpiry: null } }),
         });
         if (!clerkRes.ok) {
             const body = await clerkRes.text();

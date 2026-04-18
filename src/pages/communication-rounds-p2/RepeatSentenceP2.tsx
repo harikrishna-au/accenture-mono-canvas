@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { P2Layout } from './P2Layout';
 import { AudioPlayer } from '../communication-rounds/components/AudioPlayer';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useSpeechRecognition } from '../communication-rounds/hooks/useSpeechRec
 import { useP2Questions } from './hooks/useP2Questions';
 
 const PICK_COUNT = 5;
+const REPEAT_TIME = 30; // seconds to repeat
 
 type Phase = 'listen' | 'repeat' | 'done';
 
@@ -16,9 +17,29 @@ export function RepeatSentenceP2() {
     const { questions, isLoading, error } = useP2Questions('P2_REPEAT_SENTENCE', PICK_COUNT);
     const [idx, setIdx] = useState(0);
     const [phase, setPhase] = useState<Phase>('listen');
+    const [timeLeft, setTimeLeft] = useState(REPEAT_TIME);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const { transcript, isRecording, startRecording, stopRecording, resetTranscript, error: speechError } = useSpeechRecognition();
 
+    const clearTimer = () => {
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    };
+
+    useEffect(() => {
+        if (phase === 'repeat') {
+            setTimeLeft(REPEAT_TIME);
+            timerRef.current = setInterval(() => {
+                setTimeLeft(prev => {
+                    if (prev <= 1) { clearTimer(); handleStop(); return 0; }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => clearTimer();
+    }, [phase, idx]);
+
     const handleStop = () => {
+        clearTimer();
         stopRecording();
         setPhase('done');
     };
@@ -32,43 +53,37 @@ export function RepeatSentenceP2() {
         });
         resetTranscript();
         setPhase('listen');
-
-        if (idx < questions.length - 1) {
-            setIdx(prev => prev + 1);
-        } else {
-            nextRound();
-        }
+        if (idx < questions.length - 1) setIdx(prev => prev + 1);
+        else nextRound();
     };
 
-    if (isLoading) {
-        return (
-            <P2Layout title="Listen and Repeat" description="Loading questions..." accent="#059669">
-                <div className="flex flex-col items-center gap-3 py-12">
-                    <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
-                    <p className="text-neutral-500 text-sm">Fetching questions...</p>
-                </div>
-            </P2Layout>
-        );
-    }
+    if (isLoading) return (
+        <P2Layout title="Listen and Repeat" description="Loading questions..." accent="#059669">
+            <div className="flex flex-col items-center gap-3 py-12">
+                <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+                <p className="text-neutral-500 text-sm">Fetching questions...</p>
+            </div>
+        </P2Layout>
+    );
 
-    if (error || questions.length === 0) {
-        return (
-            <P2Layout title="Listen and Repeat" description="" accent="#059669">
-                <div className="flex flex-col items-center gap-3 py-12 text-center">
-                    <AlertCircle className="w-10 h-10 text-red-400" />
-                    <p className="text-red-600 text-sm font-medium">{error ?? 'No questions available.'}</p>
-                    <Button onClick={nextRound} variant="outline" size="sm">Skip Section</Button>
-                </div>
-            </P2Layout>
-        );
-    }
+    if (error || questions.length === 0) return (
+        <P2Layout title="Listen and Repeat" description="" accent="#059669">
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+                <AlertCircle className="w-10 h-10 text-red-400" />
+                <p className="text-red-600 text-sm font-medium">{error ?? 'No questions available.'}</p>
+                <Button onClick={nextRound} variant="outline" size="sm">Skip Section</Button>
+            </div>
+        </P2Layout>
+    );
 
     const q = questions[idx];
+    const timerPct = (timeLeft / REPEAT_TIME) * 100;
+    const timerColor = timeLeft > 15 ? '#059669' : timeLeft > 8 ? '#d97706' : '#e11d48';
 
     return (
         <P2Layout
             title="Listen and Repeat"
-            description="Listen to the sentence, then repeat it as accurately as possible"
+            description="Listen carefully, then repeat the sentence as accurately as possible"
             accent="#059669"
         >
             <div className="space-y-6">
@@ -77,14 +92,16 @@ export function RepeatSentenceP2() {
                 </div>
 
                 {/* Step 1 — Listen */}
-                <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6">
+                <div className={`bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 transition-opacity ${phase !== 'listen' ? 'opacity-50' : ''}`}>
                     <p className="text-center text-sm font-bold text-emerald-700 uppercase tracking-widest mb-4">
                         Step 1 — Listen
                     </p>
+                    {/* speechRate 0.85 = slightly slower than normal */}
                     <AudioPlayer
                         text={q.audioSrc ?? ''}
                         voiceType={q.voiceType ?? 'male_1'}
                         audioUrl={q.audioUrl}
+                        speechRate={0.85}
                         playOnce={true}
                         onPlayComplete={() => setPhase('repeat')}
                     />
@@ -96,6 +113,21 @@ export function RepeatSentenceP2() {
                         <p className="text-center text-sm font-bold text-emerald-700 uppercase tracking-widest">
                             Step 2 — Repeat
                         </p>
+
+                        {/* Timer */}
+                        {phase === 'repeat' && (
+                            <div className="space-y-1.5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-neutral-500 font-medium">Time to repeat</span>
+                                    <span className="text-sm font-bold tabular-nums" style={{ color: timerColor }}>
+                                        {timeLeft}s
+                                    </span>
+                                </div>
+                                <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${timerPct}%`, background: timerColor }} />
+                                </div>
+                            </div>
+                        )}
 
                         {speechError && (
                             <div className="bg-red-50 border border-red-200 p-3 rounded-lg text-red-700 text-sm">

@@ -68,6 +68,7 @@ const ConnectPage = () => {
                 const { data } = await supabase
                     .from('experts')
                     .select('*')
+                    .eq('approved', true)
                     .order('created_at', { ascending: false })
                     .abortSignal(controller.signal);
                 if (data) setExperts(data as unknown as Expert[]);

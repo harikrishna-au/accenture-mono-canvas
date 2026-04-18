@@ -18,18 +18,17 @@ export function usePremiumStatus() {
         }
 
         async function checkPremium() {
-            // Reload to get latest metadata from Clerk server (not cached session)
             await user!.reload();
 
-            // Fast path: check Clerk metadata after fresh reload
-            if (user!.publicMetadata?.isPremium) {
-                console.log('[PremiumStatus] premium via Clerk metadata');
+            const meta = user!.publicMetadata as { isPremium?: boolean };
+
+            if (meta?.isPremium) {
                 setIsPremium(true);
                 setLoading(false);
                 return;
             }
 
-            // Fallback: check Supabase for users who paid before Clerk sync was added
+            // Fallback: check Supabase (handles cases not yet synced to Clerk)
             const { data } = await supabase
                 .from('profiles')
                 .select('is_premium')
@@ -37,14 +36,11 @@ export function usePremiumStatus() {
                 .maybeSingle();
 
             if (data?.is_premium) {
-                console.log('[PremiumStatus] premium via Supabase fallback — syncing to Clerk');
                 setIsPremium(true);
-                // Auto-heal: sync to Clerk so future checks are instant
+                // Auto-heal: sync back to Clerk
                 await supabase.functions.invoke('sync-premium-to-clerk', {
                     body: { clerk_user_id: user!.id },
-                }).catch(() => {}); // non-critical
-            } else {
-                console.log('[PremiumStatus] not premium (Clerk: false, Supabase: false)');
+                }).catch(() => {});
             }
 
             setLoading(false);

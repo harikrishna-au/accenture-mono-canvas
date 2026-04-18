@@ -28,6 +28,9 @@ const loadRazorpay = (): Promise<boolean> =>
 const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: PaymentHandlerProps) => {
   const [loading, setLoading] = useState(false);
 
+  const platformFee = Math.round(expert.price_inr * 0.1);
+  const totalAmount = expert.price_inr + platformFee;
+
   const handlePayment = async () => {
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast.error('Please fill in all fields before proceeding');
@@ -57,7 +60,7 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            amount: expert.price_inr,
+            amount: totalAmount,
             expert_id: expert.id,
             guest_email: formData.email,
           }),
@@ -168,10 +171,19 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
           <span className="text-stone-500">Duration</span>
           <span className="text-stone-700">20 minutes</span>
         </div>
+        <div className="h-px bg-stone-100" />
+        <div className="flex justify-between items-center text-sm font-['Inter']">
+          <span className="text-stone-500">Session fee</span>
+          <span className="text-stone-700">₹{expert.price_inr}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm font-['Inter']">
+          <span className="text-stone-500">Platform fee (10%)</span>
+          <span className="text-stone-700">₹{platformFee}</span>
+        </div>
         <div className="h-px bg-stone-200" />
         <div className="flex justify-between items-center font-['Inter']">
           <span className="text-stone-700 font-semibold text-sm">Total</span>
-          <span className="text-stone-900 font-bold text-xl">₹{expert.price_inr}</span>
+          <span className="text-stone-900 font-bold text-xl">₹{totalAmount}</span>
         </div>
       </div>
 
@@ -186,7 +198,7 @@ const PaymentHandler = ({ expert, date, slot, formData, onSuccess, onError }: Pa
             Processing...
           </>
         ) : (
-          `Pay ₹${expert.price_inr} & Confirm Booking`
+          `Pay ₹${totalAmount} & Confirm Booking`
         )}
       </button>
 

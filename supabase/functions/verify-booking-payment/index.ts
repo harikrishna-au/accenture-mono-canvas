@@ -101,7 +101,8 @@ serve(async (req: Request) => {
         );
         if (orderRes.ok) {
           const rzpOrder = await orderRes.json();
-          const expectedPaise = expert.price_inr * 100;
+          const platformFee = Math.round(expert.price_inr * 0.1);
+          const expectedPaise = (expert.price_inr + platformFee) * 100;
           if (rzpOrder.amount !== expectedPaise) {
             console.error(
               `[verify-booking-payment] Amount mismatch: order=${rzpOrder.amount} expected=${expectedPaise}`,

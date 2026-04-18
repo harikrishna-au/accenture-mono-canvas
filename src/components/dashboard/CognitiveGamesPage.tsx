@@ -122,6 +122,42 @@ const COGNIZANT_GAMES = [
     border: "rgba(124,58,237,0.17)",
     glow: "rgba(124,58,237,0.15)",
   },
+  {
+    num: "10",
+    name: "Swith Challenge",
+    path: "/game/swith",
+    desc: "Symbols appear in two rows — decode the output order back to input positions. Tests logical mapping and speed.",
+    tag: "Logic · Mapping",
+    emoji: "🔁",
+    color: "#ca8a04",
+    bg: "rgba(202,138,4,0.06)",
+    border: "rgba(202,138,4,0.17)",
+    glow: "rgba(202,138,4,0.15)",
+  },
+  {
+    num: "11",
+    name: "Dual Task Challenge",
+    path: "/game/dual-task",
+    desc: "Remember which circle blinks, judge symmetry of patterns, then recall all 3 circles in order. Tests divided attention and memory.",
+    tag: "Attention · Memory",
+    emoji: "🧩",
+    color: "#059669",
+    bg: "rgba(5,150,105,0.06)",
+    border: "rgba(5,150,105,0.17)",
+    glow: "rgba(5,150,105,0.15)",
+  },
+  {
+    num: "12",
+    name: "Inductive Challenge",
+    path: "/game/inductive",
+    desc: "Two grids show a hidden transformation rule. Find which two of four answer grids follow the same rule.",
+    tag: "Inductive · Recognition",
+    emoji: "🔍",
+    color: "#7c3aed",
+    bg: "rgba(124,58,237,0.06)",
+    border: "rgba(124,58,237,0.17)",
+    glow: "rgba(124,58,237,0.15)",
+  },
 ];
 
 // ─── Shared card hover handlers ────────────────────────────────────────────────
@@ -210,11 +246,11 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
           </div>
           <div className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
             style={{ color: '#7c3aed', background: 'rgba(124,58,237,0.07)', borderColor: 'rgba(124,58,237,0.2)' }}>
-            6 Games
+            9 Games
           </div>
         </div>
         <p className="text-stone-400 text-[0.8rem] font-['Inter'] font-light mb-5">
-          Game-based cognitive assessments modelled on real MNC hiring tests. 6 unique challenges covering logic, memory, reaction, and risk.
+          Game-based cognitive assessments modelled on real MNC hiring tests. 9 unique challenges covering logic, memory, reaction, and risk.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {COGNIZANT_GAMES.map((game) => (

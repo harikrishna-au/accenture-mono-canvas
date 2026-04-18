@@ -23,6 +23,7 @@ import CouponDashboard from "./pages/CouponDashboard";
 import AIInterview from "./pages/AIInterview";
 import AIInterviewSelection from "./pages/AIInterviewSelection";
 import PremiumRoute from "@/components/PremiumRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ConnectPage from "./pages/ConnectPage";
 import PlacedGuruPage from "./pages/PlacedGuruPage";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
@@ -40,15 +41,22 @@ import ForgePage from "./pages/ForgePage";
 import ForgeProfilePage from "./pages/ForgeProfilePage";
 import CodingQuestionsPage from "./pages/coding-questions/CodingQuestionsPage";
 
+import ForgePage from "./pages/ForgePage";
+import ForgeProfilePage from "./pages/ForgeProfilePage";
+import RadarPage from "./pages/RadarPage";
 import GeoSudo from "./pages/GeoSudo";
 import GridChallenge from "./pages/GridChallenge";
 import MotionChallenge from "./pages/MotionChallenge";
 import SwitchChallenge from "./pages/SwitchChallenge";
 import DigitChallenge from "./pages/DigitChallenge";
 import BARTGame from "./pages/BARTGame";
+import SwithChallenge from "./pages/SwithChallenge";
+import InductiveChallenge from "./pages/InductiveChallenge";
+import DualTaskChallenge from "./pages/DualTaskChallenge";
 
 import { useState } from "react";
 import SplashScreen from "@/components/SplashScreen";
+import CustomerSupport from "@/components/CustomerSupport";
 
 const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -79,6 +87,7 @@ const App = () => {
           {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
           <Toaster />
           <Sonner />
+          <CustomerSupport />
           <BrowserRouter
             future={{
               v7_startTransition: true,
@@ -88,7 +97,6 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/:companyId" element={<Dashboard />} />
               <Route path="/terms" element={<TermsOfService />} />
@@ -97,6 +105,9 @@ const App = () => {
               <Route path="/coupon-stats" element={<CouponDashboard />} />
               <Route path="/ai-interview" element={<AIInterviewSelection />} />
               <Route path="/ai-interview/:type" element={<AIInterview />} />
+              <Route path="/forge" element={<ForgePage />} />
+              <Route path="/forge/profile" element={<ForgeProfilePage />} />
+              <Route path="/radar" element={<RadarPage />} />
               <Route path="/connect" element={<ConnectPage />} />
               <Route path="/connect/:expertId" element={<ConnectPage />} />
               <Route path="/placed-guru" element={<PlacedGuruPage />} />
@@ -119,6 +130,9 @@ const App = () => {
               <Route path="/game/switch" element={<SwitchChallenge />} />
               <Route path="/game/digit" element={<DigitChallenge />} />
               <Route path="/game/bart" element={<BARTGame />} />
+              <Route path="/game/swith" element={<SwithChallenge />} />
+              <Route path="/game/inductive" element={<InductiveChallenge />} />
+              <Route path="/game/dual-task" element={<DualTaskChallenge />} />
 
               {/* Communication Pattern Selector */}
               <Route
@@ -130,9 +144,11 @@ const App = () => {
               <Route
                 path="/game/communication"
                 element={
-                  <PremiumRoute>
-                    <CommunicationRounds />
-                  </PremiumRoute>
+                  <ErrorBoundary>
+                    <PremiumRoute>
+                      <CommunicationRounds />
+                    </PremiumRoute>
+                  </ErrorBoundary>
                 }
               />
 
@@ -140,9 +156,11 @@ const App = () => {
               <Route
                 path="/game/communication-p2"
                 element={
-                  <PremiumRoute>
-                    <CommunicationRoundsP2 />
-                  </PremiumRoute>
+                  <ErrorBoundary>
+                    <PremiumRoute>
+                      <CommunicationRoundsP2 />
+                    </PremiumRoute>
+                  </ErrorBoundary>
                 }
               />
 
@@ -163,6 +181,7 @@ const App = () => {
               <Route path="/coding-questions" element={<CodingQuestionsPage />} />
 
               {/* Admin */}
+              <Route path="/admin" element={<BlogAdmin />} />
               <Route path="/admin/blog" element={<BlogAdmin />} />
 
               {/* Forge - Resume Builder */}

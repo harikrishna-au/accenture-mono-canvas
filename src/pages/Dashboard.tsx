@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
-import { Lock, Crown, ClipboardList, Users, Linkedin, Bot, ArrowLeft, MessageCircle } from "lucide-react";
+import { Lock, Crown, ClipboardList, Users, Linkedin, Bot, ArrowLeft, MessageCircle, Hammer } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import OutlineButton from "@/components/OutlineButton";
 import CompletionPopup from "@/components/CompletionPopup";
@@ -19,6 +19,13 @@ import { CognitiveGamesPage } from "@/components/dashboard/CognitiveGamesPage";
 import PaymentPopup from "@/components/PaymentPopup";
 
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+
+const EXTERNAL_LINKS = {
+  topmate: "https://topmate.io/hari_krishna_nallana/",
+  linkedin: "https://www.linkedin.com/in/hari-krishna-nallana-33949b277/",
+  whatsapp: "https://chat.whatsapp.com/CBORD8aR3x91d5rmwo87de",
+  googleDrive: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing",
+};
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -112,10 +119,17 @@ const Dashboard = () => {
       id: 5,
       name: "Connect with me",
       subtitle: `${companyName} Interview Guidance – Paid 1-on-1 Session`,
-      path: "https://topmate.io/hari_krishna_nallana/",
+      path: EXTERNAL_LINKS.topmate,
       isExternal: true,
       typingHighlight: true,
       typingText: "BOOK 1:1 SESSION"
+    },
+    {
+      id: 13,
+      name: "Forge",
+      subtitle: "Resume Builder",
+      path: "/forge",
+      icon: <Hammer className="w-8 h-8 text-orange-500" />
     },
     {
       id: 10,
@@ -143,16 +157,16 @@ const Dashboard = () => {
       id: 9,
       name: "LinkedIn Profile",
       subtitle: "Connect with me on LinkedIn",
-      path: "https://www.linkedin.com/in/hari-krishna-nallana-33949b277/",
+      path: EXTERNAL_LINKS.linkedin,
       isExternal: true,
       icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
     },
-    { id: 6, name: `${companyName} Resources`, path: "https://drive.google.com/drive/folders/1wepyyapyvzyUR9T26CZJjQE-fGesd3A3?usp=sharing", isExternal: true },
+    { id: 6, name: `${companyName} Resources`, path: EXTERNAL_LINKS.googleDrive, isExternal: true },
     {
       id: 11,
       name: `${companyName} Community`,
       subtitle: "Join the WhatsApp Group",
-      path: "https://chat.whatsapp.com/CBORD8aR3x91d5rmwo87de",
+      path: EXTERNAL_LINKS.whatsapp,
       isExternal: true,
       icon: <div className="p-2 bg-green-100 rounded-full"><MessageCircle className="w-6 h-6 text-green-600" /></div>
     },
@@ -162,10 +176,17 @@ const Dashboard = () => {
   const cognizantGames = [
     // You can add different games/endpoints here for Cognizant
     {
+      id: 13,
+      name: "Forge",
+      subtitle: "Resume Builder",
+      path: "/forge",
+      icon: <Hammer className="w-8 h-8 text-orange-500" />
+    },
+    {
       id: 5,
       name: "Connect with me",
       subtitle: `${companyName} Interview Guidance – Paid 1-on-1 Session`,
-      path: "https://topmate.io/hari_krishna_nallana/",
+      path: EXTERNAL_LINKS.topmate,
       isExternal: true,
       typingHighlight: true,
       typingText: "BOOK 1:1 SESSION"
@@ -174,7 +195,7 @@ const Dashboard = () => {
       id: 9,
       name: "LinkedIn Profile",
       subtitle: "Connect with me on LinkedIn",
-      path: "https://www.linkedin.com/in/hari-krishna-nallana-33949b277/",
+      path: EXTERNAL_LINKS.linkedin,
       isExternal: true,
       icon: <div className="p-2 bg-blue-100 rounded-full"><Linkedin className="w-6 h-6 text-blue-600" /></div>
     },

@@ -6,18 +6,15 @@ import { Question, SectionType, SECTIONS } from "../data/types";
 export class CommunicationBackendService {
 
     // Use env var or fallback to localhost
-    private backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8000").replace(/\/$/, "");
+    private backendUrl = (import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
 
     async getQuestionsForSection(section: SectionType): Promise<Question[]> {
-        console.log(`🔌 Fetching questions for section ${section} from ${this.backendUrl}`);
-
         try {
             const response = await fetch(`${this.backendUrl}/api/questions?section=${section}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch questions: ${response.statusText}`);
             }
             const data = await response.json();
-            console.log('✅ Received questions:', data);
 
             // Backend now returns camelCase directly
             return data || [];
@@ -50,7 +47,6 @@ export class CommunicationBackendService {
     // New: Analyze full game history
     async analyzeGame(history: { question: string, answer: string, score: number, section: string }[]): Promise<any> {
         try {
-            console.log("Analyzing full game...", history);
             const response = await fetch(`${this.backendUrl}/api/analyze-game`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

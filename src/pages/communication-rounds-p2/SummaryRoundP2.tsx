@@ -10,9 +10,9 @@ const service = new CommunicationBackendService();
 const SECTION_LABELS: Record<string, string> = {
     READ_SENTENCE: 'Read the Sentence',
     REPEAT_SENTENCE: 'Listen & Repeat',
-    QA_SPOKEN: 'Spoken Q&A',
-    REARRANGEMENT: 'Sentence Rearrangement',
-    STORY_RETELLING: 'Story Retelling',
+    QA_SPOKEN: 'Spoken Q&A + Rearrangement',
+    REARRANGEMENT: 'Fill in the Blank',
+    STORY_RETELLING: 'Personal Questions',
 };
 
 export function SummaryRoundP2() {
