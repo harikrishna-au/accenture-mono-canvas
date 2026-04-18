@@ -170,15 +170,15 @@ const App = () => {
               <Route path="/blog/my" element={<BlogMyPosts />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
 
-              {/* HackWithInfy */}
-              <Route path="/hackwithinfy" element={<HackWithInfyLanding />} />
-              <Route path="/hackwithinfy/syllabus" element={<HackWithInfySyllabus />} />
-              <Route path="/hackwithinfy/resources" element={<HackWithInfyResources />} />
-              <Route path="/hackwithinfy/tips" element={<HackWithInfyTips />} />
-              <Route path="/hackwithinfy/previous-years" element={<HackWithInfyPreviousYears />} />
+              {/* HackWithInfy — Premium */}
+              <Route path="/hackwithinfy" element={<PremiumRoute><HackWithInfyLanding /></PremiumRoute>} />
+              <Route path="/hackwithinfy/syllabus" element={<PremiumRoute><HackWithInfySyllabus /></PremiumRoute>} />
+              <Route path="/hackwithinfy/resources" element={<PremiumRoute><HackWithInfyResources /></PremiumRoute>} />
+              <Route path="/hackwithinfy/tips" element={<PremiumRoute><HackWithInfyTips /></PremiumRoute>} />
+              <Route path="/hackwithinfy/previous-years" element={<PremiumRoute><HackWithInfyPreviousYears /></PremiumRoute>} />
 
-              {/* Coding Questions */}
-              <Route path="/coding-questions" element={<CodingQuestionsPage />} />
+              {/* Coding Questions — Premium */}
+              <Route path="/coding-questions" element={<PremiumRoute><CodingQuestionsPage /></PremiumRoute>} />
 
               {/* Admin */}
               <Route path="/admin" element={<BlogAdmin />} />
