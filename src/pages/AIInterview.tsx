@@ -14,7 +14,10 @@ import { useParams } from "react-router-dom";
 const AIInterview = () => {
     const { user } = useUser();
     const { type } = useParams<{ type?: string }>();
-    const interviewType: "hr" | "technical" = type === "technical" ? "technical" : "hr";
+    const interviewType: "hr" | "technical" | "hackwithinfy" =
+        type === "technical" ? "technical"
+        : type === "hackwithinfy" ? "hackwithinfy"
+        : "hr";
     const {
         setResumeText,
         interviewStarted,
@@ -28,7 +31,6 @@ const AIInterview = () => {
         startInterview,
         endInterview,
         toggleRecording,
-        uploadResumeToS3,
         userResponse,
         setUserResponse,
         submitResponse,
@@ -104,7 +106,6 @@ const AIInterview = () => {
                     {!interviewStarted ? (
                         <ResumeCollection
                             onSubmit={(text) => startInterview(text, user?.id, interviewType)}
-                            onUpload={uploadResumeToS3}
                             isSubmitting={isResumeSubmitting}
                             interviewType={interviewType}
                         />

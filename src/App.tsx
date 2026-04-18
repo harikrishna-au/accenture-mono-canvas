@@ -38,6 +38,7 @@ import HackWithInfyTips from "./pages/hackwithinfy/HackWithInfyTips";
 import HackWithInfyPreviousYears from "./pages/hackwithinfy/HackWithInfyPreviousYears";
 import ForgePage from "./pages/ForgePage";
 import ForgeProfilePage from "./pages/ForgeProfilePage";
+import CodingQuestionsPage from "./pages/coding-questions/CodingQuestionsPage";
 
 import GeoSudo from "./pages/GeoSudo";
 import GridChallenge from "./pages/GridChallenge";
@@ -157,6 +158,9 @@ const App = () => {
               <Route path="/hackwithinfy/resources" element={<HackWithInfyResources />} />
               <Route path="/hackwithinfy/tips" element={<HackWithInfyTips />} />
               <Route path="/hackwithinfy/previous-years" element={<HackWithInfyPreviousYears />} />
+
+              {/* Coding Questions */}
+              <Route path="/coding-questions" element={<CodingQuestionsPage />} />
 
               {/* Admin */}
               <Route path="/admin/blog" element={<BlogAdmin />} />

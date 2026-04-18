@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useCallback } from "react";
-import { Layers, Mic2, Bot, Users, ArrowUpRight, Trophy } from "lucide-react";
+import { Layers, Mic2, Bot, Users, ArrowUpRight, Trophy, Code2 } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { WaitlistPopup } from "./WaitlistPopup";
@@ -161,6 +161,34 @@ const ConnectViz = () => (
     </span>
   </div>
 );
+
+// ─── DSACheckViz — mini checklist decoration for Coding Questions card ───────
+const DSACheckViz = () => {
+  const rows = [
+    { w: 72, checked: true  },
+    { w: 55, checked: true  },
+    { w: 80, checked: false },
+    { w: 60, checked: false },
+    { w: 68, checked: true  },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, opacity: 0.9 }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{
+            width: 12, height: 12, borderRadius: 3, flexShrink: 0,
+            background: r.checked ? "rgba(220,38,38,0.55)" : "transparent",
+            border: `1.5px solid rgba(220,38,38,${r.checked ? 0.55 : 0.22})`,
+          }} />
+          <div style={{
+            height: 6, borderRadius: 4, width: `${r.w}%`,
+            background: `rgba(220,38,38,${0.1 + (r.w / 100) * 0.18})`,
+          }} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // ─── 3D Tilt wrapper ──────────────────────────────────────────────────────────
 
@@ -739,6 +767,89 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           <div
             className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{ background: "linear-gradient(90deg, #007CC3, transparent 70%)" }}
+          />
+        </TiltCard>
+
+        {/* ── Card 06: Important Coding Questions Checklist — full-width banner ── */}
+        <TiltCard
+          onClick={() => navigate("/coding-questions")}
+          glow="rgba(220,38,38,0.14)"
+          border="rgba(220,38,38,0.22)"
+          className="w-full rounded-2xl"
+          style={{ background: "rgba(255,249,249,0.97)" }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 50% 120% at 92% 50%, rgba(220,38,38,0.08) 0%, transparent 65%)",
+            }}
+          />
+
+          <div className="relative z-10 p-5 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+            {/* Left: icon + text */}
+            <div className="flex items-center gap-5">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: "rgba(220,38,38,0.1)",
+                  border: "1px solid rgba(220,38,38,0.18)",
+                }}
+              >
+                <Code2 className="w-5 h-5" style={{ color: "#dc2626" }} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5 mb-0.5">
+                  <div
+                    className="text-[9px] font-bold tracking-[0.38em] uppercase font-['Inter']"
+                    style={{ color: "#dc2626" }}
+                  >
+                    06
+                  </div>
+                  <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
+                    style={{
+                      color: "#dc2626",
+                      background: "rgba(220,38,38,0.09)",
+                      borderColor: "rgba(220,38,38,0.22)",
+                    }}
+                  >
+                    DSA
+                  </span>
+                </div>
+                <h3
+                  className="text-xl font-bold tracking-tight font-['Inter'] mb-1"
+                  style={{ color: "#1c1c1e", letterSpacing: "-0.015em" }}
+                >
+                  Important Coding Questions
+                </h3>
+                <p className="text-stone-500 text-[13px] font-['Inter']">
+                  330+ curated DSA problems across 16 topics — Arrays, DP, Graphs, Trees & more. Track your progress with a built-in checklist.
+                </p>
+              </div>
+            </div>
+
+            {/* Right: viz + CTA */}
+            <div className="flex flex-col sm:items-end gap-3 flex-shrink-0">
+              <div className="w-40 hidden sm:block">
+                <DSACheckViz />
+              </div>
+              <button
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn transition-all hover:scale-[1.03] active:scale-[0.97]"
+                style={{
+                  background: "linear-gradient(135deg, #dc2626, #991b1b)",
+                  boxShadow: "0 4px 16px rgba(220,38,38,0.28)",
+                }}
+              >
+                Open Checklist
+                <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+              </button>
+            </div>
+          </div>
+
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: "linear-gradient(90deg, #dc2626, transparent 70%)" }}
           />
         </TiltCard>
       </div>

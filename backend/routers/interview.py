@@ -3,7 +3,7 @@ try:
     from backend.schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions
+    from backend.services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions, generate_hackwithinfy_questions
     from backend.services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -11,7 +11,7 @@ except ImportError:
     from schemas import (
         InterviewStartResponse, InterviewChatRequest, InterviewChatResponse, InterviewEndRequest
     )
-    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions
+    from services.ai_utils import generate_chat_completion, transcribe_audio, openai_client, generate_openai_audio, generate_interview_feedback, generate_interview_questions, generate_hackwithinfy_questions
     from services.aws_utils import (
         generate_polly_audio, save_session, get_session, update_session_history, mark_session_completed, interview_table
     )
@@ -27,8 +27,9 @@ router = APIRouter(prefix="/api/interview", tags=["interview"])
 
 @router.post("/start", response_model=InterviewStartResponse)
 def start_interview(
-    resume_text: str = Form(None), 
+    resume_text: str = Form(None),
     user_id: str = Form(None),
+    interview_type: str = Form("hr"),
     resume_file: UploadFile = File(None)
 ):
     # 0. Check Attempt Limit - REMOVED (Unlimited Access)
@@ -66,30 +67,40 @@ def start_interview(
         raise HTTPException(status_code=400, detail="Resume content is required")
 
     session_id = str(uuid.uuid4())
-    
+
+    is_infy = interview_type == "hackwithinfy"
+
     system_prompt = f"""
-    You are Devi, an AI Interviewer at a top tech company.
-    
+    You are {"Priya, an Infosys technical interviewer conducting the HackWithInfy Round 3 interview" if is_infy else "Devi, an AI Interviewer at a top tech company"}.
+
     CANDIDATE RESUME:
     "{final_resume_text}"
 
-    GOAL: Conduct a structured interview based on the pre-generated question queue.
+    GOAL: Conduct a structured {"HackWithInfy Round 3" if is_infy else ""} interview based on the pre-generated question queue.
+    {"Cover DSA concepts, CS fundamentals (OOPs, OS, DBMS, CN), resume projects, and Infosys HR questions." if is_infy else ""}
+    Ask one question at a time. Do not add commentary between questions.
     """
-    
+
     # 2. Pre-generate Questions
     try:
         if not openai_client:
-             raise HTTPException(status_code=500, detail="OpenAI API Key not configured")
+            raise HTTPException(status_code=500, detail="OpenAI API Key not configured")
 
-        # Generate Full Question Queue
-        q_data = generate_interview_questions(final_resume_text)
+        q_data = (
+            generate_hackwithinfy_questions(final_resume_text)
+            if is_infy
+            else generate_interview_questions(final_resume_text)
+        )
         question_queue = q_data.get("questions", [])
-        
+
         if not question_queue:
             raise HTTPException(status_code=500, detail="Failed to generate interview questions")
 
-        # Prepend Intro to Q1
-        intro_msg = "Hello, I am Devi, your AI Interviewer taking a mock interview for you. "
+        intro_msg = (
+            "Hello! I am Priya, your Infosys interviewer for the HackWithInfy Round 3 mock interview. "
+            if is_infy
+            else "Hello, I am Devi, your AI Interviewer taking a mock interview for you. "
+        )
         initial_ai_text = intro_msg + question_queue[0]
 
     except Exception as e:
@@ -110,6 +121,7 @@ def start_interview(
             'history': json.dumps(full_history),
             'question_queue': json.dumps(question_queue),
             'current_question_index': 0,
+            'interview_type': interview_type,
             'created_at': int(time.time()),
             'status': 'active'
         })
@@ -183,7 +195,8 @@ def chat_interview(body: InterviewChatRequest):
         }
     else:
         # End of Interview
-        feedback = generate_interview_feedback(history, next_index, len(question_queue))
+        stored_type = item.get('interview_type', 'hr')
+        feedback = generate_interview_feedback(history, next_index, len(question_queue), stored_type)
         mark_session_completed(body.session_id, feedback)
         
         return {
@@ -205,12 +218,12 @@ def end_interview_session(body: InterviewEndRequest):
         history = json.loads(item.get('history', '[]'))
         question_queue = json.loads(item.get('question_queue', '[]'))
         current_index = int(item.get('current_question_index', 0))
+        stored_type = item.get('interview_type', 'hr')
 
         # 2. Generate Feedback (Safely)
         feedback = {}
         try:
-            # Pass indices to penalize if incomplete
-            feedback = generate_interview_feedback(history, current_index, len(question_queue))
+            feedback = generate_interview_feedback(history, current_index, len(question_queue), stored_type)
         except Exception as e:
             print(f"Feedback Generation Failed: {e}")
             feedback = {

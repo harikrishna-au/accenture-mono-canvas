@@ -14,7 +14,7 @@ type Difficulty = "Easy" | "Medium" | "Hard";
 type Question = {
   title: string;
   year: number;
-  round: "Round 1" | "Interview";
+  round: "Round 1" | "Round 2" | "Interview";
   difficulty: Difficulty;
   topics: string[];
   desc: string;
@@ -183,10 +183,135 @@ const QUESTIONS: Question[] = [
     desc: "Design an algorithm to serialize a binary tree to a string and reconstruct it. BFS-based approach with null markers.",
     link: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
   },
+
+  // ── 2022 verified (Codeforces discussions) ────────────────────────────────
+  {
+    title: "Prime Number Pairs",
+    year: 2022,
+    round: "Round 1",
+    difficulty: "Medium",
+    topics: ["Number Theory", "Sieve", "Math"],
+    desc: "Given N, find two primes X and Y such that X² + Y² = N. Output the minimum value of X+Y, or -1 if no such pair exists. Use Sieve of Eratosthenes + iterate primes.",
+    link: "https://www.geeksforgeeks.org/sieve-of-eratosthenes/",
+  },
+  {
+    title: "Substring Deletion — Minimum Cost",
+    year: 2022,
+    round: "Round 1",
+    difficulty: "Hard",
+    topics: ["DP", "Strings", "Subsequence"],
+    desc: "String S of length N with deletion costs. Delete minimum cost characters from S so pattern C no longer appears as a subsequence. DP over states (position in S, matched length in C).",
+    link: "https://leetcode.com/problems/minimum-cost-to-cut-a-stick/",
+  },
+  {
+    title: "Count Good Subarrays",
+    year: 2022,
+    round: "Round 1",
+    difficulty: "Medium",
+    topics: ["Arrays", "Monotonic Stack", "Sliding Window"],
+    desc: "A 'good' subarray of size ≥ 2 has (second_minimum - minimum) ≤ D. Count all such subarrays. Use a monotonic deque to maintain minimums efficiently.",
+    link: "https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times/",
+  },
+  {
+    title: "Minimum Inversions with One Subarray Reversal",
+    year: 2022,
+    round: "Round 1",
+    difficulty: "Hard",
+    topics: ["Arrays", "Merge Sort", "Inversions"],
+    desc: "Given a permutation of 1..N, reverse exactly one subarray of size K to minimize the number of inversions. Count inversions with merge sort; try all valid reversal windows.",
+    link: "https://www.geeksforgeeks.org/count-inversions-in-an-array/",
+  },
+
+  // ── 2023 additional ───────────────────────────────────────────────────────
+  {
+    title: "Maximum XOR Subarray",
+    year: 2023,
+    round: "Round 1",
+    difficulty: "Hard",
+    topics: ["Bit Manipulation", "Trie", "Prefix XOR"],
+    desc: "Find the maximum XOR value of any subarray. Build a prefix XOR array, then insert each prefix into a Trie and greedily maximize XOR at each bit position.",
+    link: "https://www.geeksforgeeks.org/maximum-xor-subarray/",
+  },
+  {
+    title: "Minimum Swaps to Group All 1s",
+    year: 2023,
+    round: "Round 1",
+    difficulty: "Easy",
+    topics: ["Arrays", "Sliding Window"],
+    desc: "Find minimum swaps to group all 1s together in a binary array. Use a sliding window of size = count(1s) and minimize zeros inside the window.",
+    link: "https://leetcode.com/problems/minimum-swaps-to-group-all-1s-together-ii/",
+  },
+
+  // ── 2024 additional ───────────────────────────────────────────────────────
+  {
+    title: "Minimum Operations to Balance Array",
+    year: 2024,
+    round: "Round 1",
+    difficulty: "Easy",
+    topics: ["Arrays", "Greedy", "Math"],
+    desc: "Count minimum increments/decrements to make all elements equal. Greedily compute the target (median or mean based on cost function) and sum up differences.",
+    link: "https://leetcode.com/problems/minimum-moves-to-equal-array-elements-ii/",
+  },
+  {
+    title: "Path with Maximum Gold (Grid DFS)",
+    year: 2024,
+    round: "Round 1",
+    difficulty: "Medium",
+    topics: ["Graphs", "DFS", "Backtracking", "Grid"],
+    desc: "In a grid where 0 means blocked, start from any cell and collect max gold by moving in 4 directions without revisiting. Classic DFS + backtracking on grid.",
+    link: "https://leetcode.com/problems/path-with-maximum-gold/",
+  },
+  {
+    title: "K-th Largest Element in a Stream",
+    year: 2024,
+    round: "Round 1",
+    difficulty: "Easy",
+    topics: ["Heap", "Priority Queue"],
+    desc: "Design a class to find the k-th largest element in a stream of integers. Maintain a min-heap of size K; return heap top on each add.",
+    link: "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
+  },
+
+  // ── 2025 ──────────────────────────────────────────────────────────────────
+  {
+    title: "Frequency Array Query",
+    year: 2025,
+    round: "Round 1",
+    difficulty: "Easy",
+    topics: ["Arrays", "Hashing", "Prefix Sum"],
+    desc: "Given an array, answer Q queries: for each query (l, r, x), return frequency of x in subarray A[l..r]. Precompute frequency maps per value using index lists + binary search.",
+    link: "https://leetcode.com/problems/range-frequency-queries/",
+  },
+  {
+    title: "Minimum Cost Path in Weighted Grid",
+    year: 2025,
+    round: "Round 1",
+    difficulty: "Medium",
+    topics: ["Graphs", "Dijkstra", "BFS", "Grid"],
+    desc: "Grid cells have a cost to enter. Find minimum cost path from top-left to bottom-right. Use Dijkstra's (0-1 BFS or priority queue) on the grid graph.",
+    link: "https://leetcode.com/problems/minimum-cost-to-make-at-least-one-valid-path-in-a-grid/",
+  },
+  {
+    title: "Longest Substring with At Most K Distinct Characters",
+    year: 2025,
+    round: "Round 1",
+    difficulty: "Medium",
+    topics: ["Strings", "Sliding Window", "Hashing"],
+    desc: "Find length of the longest substring containing at most K distinct characters. Sliding window with a frequency map — shrink left when distinct count exceeds K.",
+    link: "https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/",
+  },
+  {
+    title: "Shortest Path with K Stops (Cheapest Flights)",
+    year: 2025,
+    round: "Round 1",
+    difficulty: "Hard",
+    topics: ["Graphs", "BFS", "DP", "Bellman-Ford"],
+    desc: "Find cheapest flight from src to dst with at most K stops. BFS with at most K+1 layers (modified Bellman-Ford). Classic graph DP.",
+    link: "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+  },
 ];
 
-const YEARS = [2019, 2020, 2021, 2022, 2023, 2024];
-const ROUNDS = ["Round 1", "Interview"] as const;
+const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+const ROUNDS = ["Round 1", "Round 2", "Interview"] as const;
 const DIFFS: Difficulty[] = ["Easy", "Medium", "Hard"];
 
 const DIFF_STYLES: Record<Difficulty, { color: string; bg: string; border: string }> = {
@@ -324,7 +449,7 @@ const HackWithInfyPreviousYears = () => {
             Real HackWithInfy Problems
           </h1>
           <p className="text-stone-500 text-[0.88rem] font-['Inter'] font-light">
-            {QUESTIONS.length} verified questions from 2019–2024. Click any card to see the problem and solution link.
+            {QUESTIONS.length} verified questions from 2019–2025. Click any card to see the problem and solution link.
           </p>
         </div>
 

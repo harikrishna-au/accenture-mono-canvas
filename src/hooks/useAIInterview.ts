@@ -84,7 +84,7 @@ export const useAIInterview = () => {
         }
     };
 
-    const startInterview = async (resume: string, userId?: string | null, interviewType: "hr" | "technical" = "hr") => {
+    const startInterview = async (resume: string, userId?: string | null, interviewType: "hr" | "technical" | "hackwithinfy" = "hr") => {
 
         // Request Mic immediately
         const hasMic = await requestMicPermission();

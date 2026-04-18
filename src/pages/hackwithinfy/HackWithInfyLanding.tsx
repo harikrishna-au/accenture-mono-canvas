@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import {
-  ArrowLeft, ArrowUpRight, Code2, BookOpen, FileText,
+  ArrowLeft, ArrowUpRight, Code2, FileText,
   Trophy, Clock, Target, ChevronRight, Zap, Sparkles,
 } from "lucide-react";
 import gsap from "gsap";
@@ -83,6 +83,13 @@ const SECTIONS = [
     tag: "Round 1 · Round 2 · Interview",
   },
   {
+    icon: Code2,
+    title: "Practice Questions",
+    desc: "330+ DSA problems across 16 topics — Arrays, Trees, Graphs, DP and more. Track your progress with a built-in checklist.",
+    path: "/coding-questions",
+    tag: "330+ Problems · LeetCode · GFG",
+  },
+  {
     icon: Sparkles,
     title: "Resume Builder",
     desc: "Don't have a resume? Build an ATS-friendly one in minutes — tailored for Infosys DSE & SP roles.",
@@ -94,11 +101,11 @@ const SECTIONS = [
 // ─── CodeViz ─ decorative terminal-like animation ─────────────────────────────
 const CodeViz = () => {
   const lines = [
-    { text: "def solve(n, arr):",        w: 88, indent: 0 },
-    { text: "  dp = [0] * (n + 1)",      w: 74, indent: 0 },
-    { text: "  for i in range(n):",      w: 66, indent: 0 },
-    { text: "    dp[i+1] = max(...)",     w: 80, indent: 0 },
-    { text: "  return dp[n]",            w: 56, indent: 0 },
+    { text: "def solve(n, arr):",        w: 88 },
+    { text: "  dp = [0] * (n + 1)",      w: 74 },
+    { text: "  for i in range(n):",      w: 66 },
+    { text: "    dp[i+1] = max(...)",     w: 80 },
+    { text: "  return dp[n]",            w: 56 },
   ];
   return (
     <div
@@ -163,8 +170,8 @@ const HackWithInfyLanding = () => {
           Back to Dashboard
         </button>
 
-        {/* Hero */}
-        <div className="mb-12">
+        {/* ── Hero ── */}
+        <div className="mb-10">
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.2em] uppercase font-['Inter'] mb-5"
             style={{ background: INFY_BG, color: INFY_BLUE, border: `1px solid ${INFY_BDR}` }}
@@ -178,12 +185,99 @@ const HackWithInfyLanding = () => {
             <br />
             <span className="text-stone-400 font-light italic">Land your dream role.</span>
           </h1>
-          <p className="text-stone-500 text-[0.9rem] font-['Inter'] font-light max-w-lg leading-relaxed mb-6">
-            India's biggest coding competition — with roles from DSE (₹7 LPA) up to SP Level 3 (₹21 LPA).
-            No academic criteria. All eligible streams. No active backlogs required.
+          <p className="text-stone-500 text-[0.9rem] font-['Inter'] font-light max-w-lg leading-relaxed">
+            India's biggest coding competition — roles from DSE (₹7 LPA) up to SP Level 3 (₹21 LPA).
+            No academic criteria. All eligible streams.
           </p>
+        </div>
 
-          {/* Role tiers */}
+        {/* ── VIDEO — moved to top ── */}
+        <div className="mb-5">
+          <p
+            className="text-[9.5px] font-bold tracking-[0.22em] uppercase font-['Inter'] mb-3"
+            style={{ color: INFY_BLUE, opacity: 0.7 }}
+          >
+            Watch First
+          </p>
+          <h2 className="text-[18px] font-serif text-stone-800 tracking-tight mb-4 leading-snug">
+            Official HackWithInfy Walkthrough
+          </h2>
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              border: `1px solid ${INFY_BDR}`,
+              boxShadow: `0 4px 24px ${INFY_GLOW}, 0 1px 4px rgba(0,0,0,0.06)`,
+              aspectRatio: "16/9",
+            }}
+          >
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/50mbEzZHekQ?si=Nmuy4mxKv1HXffdH"
+              title="HackWithInfy Official Walkthrough"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              style={{ display: "block" }}
+            />
+          </div>
+        </div>
+
+        {/* ── AI MOCK INTERVIEW — moved to top ── */}
+        <div
+          className="rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative overflow-hidden group cursor-pointer mb-12"
+          style={{
+            background: `linear-gradient(135deg, rgba(0,124,195,0.06) 0%, rgba(0,124,195,0.02) 100%)`,
+            border: `1px solid ${INFY_BDR}`,
+          }}
+          onClick={() => navigate("/ai-interview")}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: `radial-gradient(ellipse 60% 120% at 95% 50%, rgba(0,124,195,0.09) 0%, transparent 65%)` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+
+          <div className="relative z-10 flex items-start gap-4">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: INFY_BG, border: `1px solid ${INFY_BDR}` }}
+            >
+              <Code2 className="w-5 h-5" style={{ color: INFY_BLUE }} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-[15px] font-bold font-['Inter'] text-stone-800">AI Mock Interview — Infosys Mode</h3>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
+                  style={{ color: INFY_BLUE, background: INFY_BG, borderColor: INFY_BDR }}
+                >
+                  AVAILABLE
+                </span>
+              </div>
+              <p className="text-stone-500 text-[13px] font-['Inter'] leading-relaxed">
+                Practice the interview round — live coding, DSA questions, OOPs, OS, DBMS, and HR. Real-time AI feedback.
+              </p>
+            </div>
+          </div>
+          <div
+            className="relative z-10 flex items-center gap-1.5 flex-shrink-0 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] transition-all hover:scale-[1.03] active:scale-[0.97]"
+            style={{ background: `linear-gradient(135deg, ${INFY_BLUE}, #005a8e)`, boxShadow: `0 4px 16px ${INFY_GLOW}` }}
+          >
+            Start Mock
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* ── Role tiers ── */}
+        <div className="mb-10">
+          <p
+            className="text-[9.5px] font-bold tracking-[0.22em] uppercase font-['Inter'] mb-3"
+            style={{ color: INFY_BLUE, opacity: 0.7 }}
+          >
+            Roles & Packages
+          </p>
           <div className="flex flex-wrap gap-2">
             {ROLES.map((r) => (
               <div
@@ -201,7 +295,7 @@ const HackWithInfyLanding = () => {
           </div>
         </div>
 
-        {/* Round overview */}
+        {/* ── Competition structure ── */}
         <div className="mb-12">
           <p
             className="text-[9.5px] font-bold tracking-[0.22em] uppercase font-['Inter'] mb-4"
@@ -257,7 +351,7 @@ const HackWithInfyLanding = () => {
           </div>
         </div>
 
-        {/* Quick nav sections */}
+        {/* ── Prep sections ── */}
         <div className="mb-12">
           <p
             className="text-[9.5px] font-bold tracking-[0.22em] uppercase font-['Inter'] mb-4"
@@ -329,87 +423,8 @@ const HackWithInfyLanding = () => {
           </div>
         </div>
 
-        {/* YouTube — Official HackWithInfy video */}
-        <div className="mb-12">
-          <p
-            className="text-[9.5px] font-bold tracking-[0.22em] uppercase font-['Inter'] mb-3"
-            style={{ color: INFY_BLUE, opacity: 0.7 }}
-          >
-            Watch First
-          </p>
-          <h2 className="text-[18px] font-serif text-stone-800 tracking-tight mb-4 leading-snug">
-            Official HackWithInfy Walkthrough
-          </h2>
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{
-              border: `1px solid ${INFY_BDR}`,
-              boxShadow: `0 4px 24px ${INFY_GLOW}, 0 1px 4px rgba(0,0,0,0.06)`,
-              aspectRatio: "16/9",
-            }}
-          >
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/50mbEzZHekQ?si=Nmuy4mxKv1HXffdH"
-              title="HackWithInfy Official Walkthrough"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              style={{ display: "block" }}
-            />
-          </div>
-        </div>
-
-        {/* AI Interview CTA */}
-        <div
-          className="rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative overflow-hidden group cursor-pointer"
-          style={{
-            background: `linear-gradient(135deg, rgba(0,124,195,0.06) 0%, rgba(0,124,195,0.02) 100%)`,
-            border: `1px solid ${INFY_BDR}`,
-          }}
-          onClick={() => navigate("/ai-interview")}
-        >
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse 60% 120% at 95% 50%, rgba(0,124,195,0.09) 0%, transparent 65%)` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-
-          <div className="relative z-10 flex items-start gap-4">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: INFY_BG, border: `1px solid ${INFY_BDR}` }}
-            >
-              <Code2 className="w-5 h-5" style={{ color: INFY_BLUE }} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-[15px] font-bold font-['Inter'] text-stone-800">AI Mock Interview — Infosys Mode</h3>
-                <span
-                  className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
-                  style={{ color: INFY_BLUE, background: INFY_BG, borderColor: INFY_BDR }}
-                >
-                  AVAILABLE
-                </span>
-              </div>
-              <p className="text-stone-500 text-[13px] font-['Inter'] leading-relaxed">
-                Practice the interview round — live coding, DSA questions, OOPs, OS, DBMS, and HR. Real-time AI feedback.
-              </p>
-            </div>
-          </div>
-          <div
-            className="relative z-10 flex items-center gap-1.5 flex-shrink-0 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] transition-all hover:scale-[1.03] active:scale-[0.97]"
-            style={{ background: `linear-gradient(135deg, ${INFY_BLUE}, #005a8e)`, boxShadow: `0 4px 16px ${INFY_GLOW}` }}
-          >
-            Start Mock
-            <ChevronRight className="w-4 h-4" />
-          </div>
-        </div>
-
-        {/* Code viz decorative — bottom */}
-        <div className="mt-8 opacity-40">
+        {/* ── Decorative code viz ── */}
+        <div className="opacity-40">
           <CodeViz />
         </div>
       </div>

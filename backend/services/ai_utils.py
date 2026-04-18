@@ -54,7 +54,7 @@ def generate_openai_audio(text: str, voice: str = "alloy") -> str:
         print(f"OpenAI TTS Error: {e}")
         return ""
 
-def generate_interview_feedback(history: list, current_question_index: int = 0, total_questions: int = 1) -> dict:
+def generate_interview_feedback(history: list, current_question_index: int = 0, total_questions: int = 1, interview_type: str = "hr") -> dict:
     """
     Analyzes the interview history and returns a structured JSON feedback report.
     Takes indices to penalize incomplete interviews.
@@ -63,32 +63,43 @@ def generate_interview_feedback(history: list, current_question_index: int = 0, 
         print("OpenAI API Key not configured for Feedback")
         return {}
 
+    infy_criteria = """
+    EVALUATION CRITERIA (HackWithInfy Round 3):
+    Score each of these dimensions and factor them into the overall rating:
+    - DSA Conceptual Clarity: Can they explain data structures / algorithms clearly?
+    - CS Fundamentals Depth: OOPs, OS, DBMS, CN — accuracy and depth of answers.
+    - Project Understanding: Do they own their resume projects or just list them?
+    - Communication & Confidence: Clear, structured answers; no excessive filler words.
+    - Infosys Fit: Awareness of Infosys, genuine motivation, relocation readiness.
+    """ if interview_type == "hackwithinfy" else ""
+
     prompt = f"""
-    Analyze the following interview transcript between a candidate and an AI Interviewer (Devi).
+    Analyze the following interview transcript between a candidate and an AI Interviewer.
     Provide a detailed evaluation in VALID JSON format.
-    
+    {infy_criteria}
     COMPLETENESS CONTEXT:
     - The interview was designed for {total_questions} questions.
     - The candidate reached question {current_question_index + 1} of {total_questions}.
-    
+
     CRITICAL SCORING RULES:
     1. If the candidate COMPLETED all {total_questions} questions, score them normally based on answer quality.
-    2. If the candidate ENDED EARLY (reached < {total_questions} or many indices skipped), YOU MUST PENALIZE the 'rating'.
-    3. PENALTY: For every missing or skipped question, reduce the potential rating out of 10. (e.g., if they only did 2/15 questions, their rating should be extremely low like 1/10 or 2/10 regardless of quality).
-    4. Provide specific COACHING in the 'summary' and 'areas_for_improvement' about completing the full interview.
-    
+    2. If the candidate ENDED EARLY, YOU MUST PENALIZE the 'rating'.
+    3. PENALTY: For every missing question, reduce the potential rating proportionally
+       (e.g., 2/15 answered → max rating 2/10 regardless of quality).
+    4. Include coaching in 'summary' and 'areas_for_improvement' about completing the full interview.
+
     OUTPUT FORMAT:
     {{
         "feedback": {{
             "strengths": ["List 3-4 key strengths identified"],
-            "areas_for_improvement": ["List 3-4 specific areas to improve (Include coaching on interview completion if applicable)"],
-            "rating": "Provide a score out of 10 (MUST BE PENALIZED IF INCOMPLETE)",
-            "summary": "A concise summary focusing on performance and completeness.",
+            "areas_for_improvement": ["List 3-4 specific, actionable areas to improve"],
+            "rating": "Score out of 10 (penalized if incomplete)",
+            "summary": "Concise 2-3 sentence summary of overall performance.",
             "detailed_analysis": [
                 {{
                     "topic": "Brief topic name",
-                    "analysis": "Critique of the user's answer.",
-                    "better_answer_example": "Example of better phrasing."
+                    "analysis": "Specific critique of the candidate's answer.",
+                    "better_answer_example": "A stronger phrasing or key points they missed."
                 }}
             ]
         }}
@@ -111,6 +122,75 @@ def generate_interview_feedback(history: list, current_question_index: int = 0, 
     except Exception as e:
         print(f"Feedback Generation Error: {e}")
         return {}
+
+def generate_hackwithinfy_questions(resume_text: str) -> dict:
+    """
+    Generates 15 interview questions tailored to the Infosys HackWithInfy
+    Round 3 interview format — covers DSA concepts, core CS subjects,
+    resume projects, and Infosys-specific HR questions.
+    """
+    if not openai_client:
+        raise Exception("OpenAI API Key not configured or Client Init Failed")
+
+    prompt = """
+    You are Priya, an Infosys technical interviewer conducting the Round 3 (Interview Round)
+    of HackWithInfy — India's biggest campus coding competition.
+
+    The HackWithInfy interview tests:
+    - DSA conceptual understanding (not just coding — explain logic, time/space complexity, real-world use)
+    - Core CS subjects: OOPs, OS, DBMS, Computer Networks (for CS/IT candidates)
+    - Resume-based technical deep-dives (projects, tech stack, challenges faced)
+    - Infosys-specific HR questions (why Infosys, relocation, role fit, career goals)
+
+    Generate exactly 15 interview questions following this structure:
+
+    Q1  : "Please introduce yourself and tell me about your background."
+    Q2  : Academic background + why they chose their stream / branch
+    Q3-4: Deep-dive into their strongest resume project (what did you build, tech choices, challenges)
+    Q5-6: DSA conceptual (e.g., explain a data structure, time complexity, when to use which algorithm —
+           pick topics relevant to their resume; default to arrays, trees, sorting if none found)
+    Q7  : OOPs concept question (inheritance vs composition, polymorphism, SOLID principle, etc.)
+    Q8  : OS question (process vs thread, scheduling, deadlock, memory management)
+    Q9  : DBMS question (normalization, indexing, ACID, SQL query logic)
+    Q10 : CN question (TCP vs UDP, OSI layers, HTTP vs HTTPS, DNS)
+    Q11 : Second resume project or technology they listed (framework, language, tool)
+    Q12 : Problem-solving / scenario question based on their domain
+    Q13 : "Why do you want to join Infosys specifically?"
+    Q14 : Behavioral (teamwork challenge, conflict resolution, or leadership example)
+    Q15 : "Where do you see yourself in 3 years, and how does this role fit your plan?"
+
+    RULES:
+    - Q1 must be exactly: "Please introduce yourself and tell me about your background."
+    - All other questions must be concise (1-2 sentences max).
+    - For CS questions (Q7-Q10), ask a specific concept, not just "tell me about OS".
+      E.g., "Can you explain what a deadlock is and how an OS can prevent it?"
+    - Do NOT include question numbers in the strings.
+    - Tailor Q3-4, Q5-6, Q11-12 to the actual resume content provided.
+    - If the resume is from a non-CS stream, replace Q7-Q10 with domain-relevant fundamentals.
+
+    OUTPUT FORMAT:
+    {
+        "questions": [
+            "Question 1 text...",
+            ...
+            "Question 15 text..."
+        ]
+    }
+    """
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": f"Generate questions in strict JSON. CANDIDATE RESUME:\n{resume_text[:3000]}"}
+    ]
+
+    completion = openai_client.chat.completions.create(
+        messages=messages,
+        model="gpt-4o",
+        response_format={"type": "json_object"}
+    )
+    import json
+    return json.loads(completion.choices[0].message.content)
+
 
 def generate_interview_questions(resume_text: str) -> dict:
     """
