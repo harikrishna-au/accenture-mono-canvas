@@ -44,7 +44,7 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE: communication_questions
-          BEDROCK_REGION: ap-south-1
+          BEDROCK_REGION: !Ref AWS::Region
           OPENAI_API_KEY: !Ref OpenAiApiKey
           AZURE_SPEECH_KEY: !Ref AzureSpeechKey
           AZURE_SPEECH_REGION: !Ref AzureSpeechRegion

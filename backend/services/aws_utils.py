@@ -5,17 +5,20 @@ import base64
 from botocore.config import Config
 
 # Initialize AWS Clients
+# Use region from environment or default to us-east-1
+region = os.environ.get('AWS_REGION', os.environ.get('AWS_DEFAULT_REGION', 'us-east-1'))
+
 # Explicitly set region for S3 to avoid 307 Temporary Redirects (Global -> Regional) which break CORS
 # Using s3v4 signature version is also best practice
 # FORCE endpoint_url to ensure presigned URLs are regional
 s3_client = boto3.client(
     's3', 
-    region_name='ap-south-1', 
-    endpoint_url='https://s3.ap-south-1.amazonaws.com',
+    region_name=region, 
+    endpoint_url=f'https://s3.{region}.amazonaws.com',
     config=Config(signature_version='s3v4')
 )
-polly_client = boto3.client('polly', region_name='ap-south-1')
-dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')
+polly_client = boto3.client('polly', region_name=region)
+dynamodb = boto3.resource('dynamodb', region_name=region)
 
 # Table References
 interview_table = dynamodb.Table(os.environ.get('INTERVIEW_TABLE', 'interview_sessions'))
