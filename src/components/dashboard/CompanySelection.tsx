@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useCallback } from "react";
-import { Layers, Mic2, Bot, Users, ArrowUpRight, Trophy, Code2 } from "lucide-react";
+import { Layers, Mic2, Bot, Users, ArrowUpRight, Trophy, Code2, Hammer, Radar } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { WaitlistPopup } from "./WaitlistPopup";
@@ -19,6 +19,10 @@ const STYLES = `
   @keyframes pulseDot {
     0%, 100% { transform: translate(-50%,-50%) scale(1);    opacity: 1;   }
     50%       { transform: translate(-50%,-50%) scale(0.8); opacity: 0.65; }
+  }
+  @keyframes scanRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
 `;
 
@@ -852,6 +856,81 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             style={{ background: "linear-gradient(90deg, #dc2626, transparent 70%)" }}
           />
         </TiltCard>
+
+        {/* ── Row: Forge + Radar side by side ── */}
+        <div className="flex flex-col md:flex-row gap-4">
+
+          {/* ── Forge — Resume Builder ── */}
+          <TiltCard
+            id="onboarding-premium-card"
+            onClick={() => navigate("/forge")}
+            glow="rgba(28,25,23,0.18)"
+            border="rgba(255,255,255,0.07)"
+            className="flex-1 rounded-2xl"
+            style={{ background: "#1c1917" } as React.CSSProperties}
+          >
+            <div className="absolute bottom-3 right-5 pointer-events-none select-none">
+              <span className="font-['Merriweather'] font-black" style={{ fontSize: "7rem", color: "rgba(255,255,255,0.04)", lineHeight: 1 }}>07</span>
+            </div>
+            <div className="relative z-10 p-6 flex flex-col h-full gap-3">
+              <div className="flex items-center justify-between">
+                <p className="font-['Inter'] text-stone-500" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>07 / Forge</p>
+                <span className="font-['Inter'] font-bold text-stone-500" style={{ fontSize: 9, letterSpacing: "0.2em", border: "1px solid rgba(255,255,255,0.12)", padding: "2px 7px", borderRadius: 4 }}>FREE</span>
+              </div>
+              <div style={{ flex: 1 }} />
+              <div>
+                <h3 className="font-['Merriweather'] font-black text-stone-100" style={{ fontSize: "1.55rem", letterSpacing: "-0.02em", marginBottom: 8 }}>Resume Builder</h3>
+                <p className="text-stone-500 font-['Inter']" style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>Upload PDF or DOCX — AI extracts everything. Export as LaTeX.</p>
+                <div className="flex items-center gap-1.5 group/cta">
+                  <Hammer className="w-3.5 h-3.5 text-stone-400" />
+                  <span className="font-['Inter'] font-semibold text-stone-400" style={{ fontSize: 12 }}>Build resume</span>
+                  <ArrowUpRight className="w-3 h-3 text-stone-500 transition-transform duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.15), transparent 65%)" }} />
+          </TiltCard>
+
+          {/* ── Radar — Job Match ── */}
+          <TiltCard
+            id="onboarding-radar-card"
+            onClick={() => navigate("/radar")}
+            glow="rgba(28,25,23,0.08)"
+            border="rgba(28,25,23,0.07)"
+            className="flex-1 rounded-2xl bg-white"
+          >
+            <div className="absolute top-4 right-4 pointer-events-none" style={{ opacity: 0.45 }}>
+              <div style={{ width: 78, height: 78, animation: "scanRotate 8s linear infinite" }}>
+                <svg width="78" height="78" viewBox="0 0 78 78" fill="none">
+                  <circle cx="39" cy="39" r="36" stroke="rgba(28,25,23,0.2)" strokeWidth="1" strokeDasharray="4 4" />
+                  <circle cx="39" cy="39" r="23" stroke="rgba(28,25,23,0.12)" strokeWidth="0.75" />
+                  <circle cx="39" cy="39" r="10" stroke="rgba(28,25,23,0.1)" strokeWidth="0.75" />
+                  <line x1="39" y1="2" x2="39" y2="15" stroke="rgba(28,25,23,0.28)" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="39" y1="63" x2="39" y2="76" stroke="rgba(28,25,23,0.28)" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="2" y1="39" x2="15" y2="39" stroke="rgba(28,25,23,0.28)" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="63" y1="39" x2="76" y2="39" stroke="rgba(28,25,23,0.28)" strokeWidth="1" strokeLinecap="round" />
+                  <path d="M 75 39 A 36 36 0 0 1 39 75" stroke="rgba(28,25,23,0.55)" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle cx="39" cy="39" r="2.5" fill="rgba(28,25,23,0.5)" />
+                </svg>
+              </div>
+            </div>
+            <div className="relative z-10 p-6 flex flex-col h-full gap-3">
+              <p className="font-['Inter'] text-stone-400" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>08 / Radar</p>
+              <div style={{ flex: 1 }} />
+              <div>
+                <h3 className="font-['Merriweather'] font-black text-stone-900" style={{ fontSize: "1.55rem", letterSpacing: "-0.02em", marginBottom: 8 }}>Job Match</h3>
+                <p className="text-stone-400 font-['Inter']" style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>Skills scanned against real openings. Match score + gaps.</p>
+                <div className="flex items-center gap-1.5 group/cta">
+                  <Radar className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="font-['Inter'] font-semibold text-stone-500" style={{ fontSize: 12 }}>Scan now</span>
+                  <ArrowUpRight className="w-3 h-3 text-stone-400 transition-transform duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(90deg, rgba(28,25,23,0.18), transparent 65%)" }} />
+          </TiltCard>
+
+        </div>
       </div>
     </div>
   );
