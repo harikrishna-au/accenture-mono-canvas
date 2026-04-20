@@ -67,6 +67,10 @@ def start_interview(
         final_resume_text = "No resume provided. Ask general interview questions suitable for a fresher or entry-level candidate."
 
     session_id = str(uuid.uuid4())
+    
+    # Generate default user_id if not provided (required for DynamoDB index)
+    if not user_id:
+        user_id = f"guest-{uuid.uuid4().hex[:8]}"
 
     is_infy = interview_type == "hackwithinfy"
 

@@ -42,3 +42,4 @@ venv/
 .venv/
 .pytest_cache/
 
+samconfig.toml.user_backup
