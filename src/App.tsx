@@ -40,9 +40,7 @@ import HackWithInfyPreviousYears from "./pages/hackwithinfy/HackWithInfyPrevious
 import ForgePage from "./pages/ForgePage";
 import ForgeProfilePage from "./pages/ForgeProfilePage";
 import CodingQuestionsPage from "./pages/coding-questions/CodingQuestionsPage";
-
-import ForgePage from "./pages/ForgePage";
-import ForgeProfilePage from "./pages/ForgeProfilePage";
+import PrivateRoute from "@/components/PrivateRoute";
 import RadarPage from "./pages/RadarPage";
 import GeoSudo from "./pages/GeoSudo";
 import GridChallenge from "./pages/GridChallenge";
@@ -97,47 +95,47 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/:companyId" element={<Dashboard />} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/dashboard/:companyId" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/refund" element={<RefundPolicy />} />
               <Route path="/about" element={<AboutUs />} />
-              <Route path="/coupon-stats" element={<CouponDashboard />} />
-              <Route path="/ai-interview" element={<AIInterviewSelection />} />
-              <Route path="/ai-interview/:type" element={<AIInterview />} />
-              <Route path="/forge" element={<ForgePage />} />
-              <Route path="/forge/profile" element={<ForgeProfilePage />} />
-              <Route path="/radar" element={<RadarPage />} />
-              <Route path="/connect" element={<ConnectPage />} />
-              <Route path="/connect/:expertId" element={<ConnectPage />} />
-              <Route path="/placed-guru" element={<PlacedGuruPage />} />
+              <Route path="/coupon-stats" element={<PrivateRoute><CouponDashboard /></PrivateRoute>} />
+              <Route path="/ai-interview" element={<PrivateRoute><AIInterviewSelection /></PrivateRoute>} />
+              <Route path="/ai-interview/:type" element={<PrivateRoute><AIInterview /></PrivateRoute>} />
+              <Route path="/forge" element={<PrivateRoute><ForgePage /></PrivateRoute>} />
+              <Route path="/forge/profile" element={<PrivateRoute><ForgeProfilePage /></PrivateRoute>} />
+              <Route path="/radar" element={<PrivateRoute><RadarPage /></PrivateRoute>} />
+              <Route path="/connect" element={<PrivateRoute><ConnectPage /></PrivateRoute>} />
+              <Route path="/connect/:expertId" element={<PrivateRoute><ConnectPage /></PrivateRoute>} />
+              <Route path="/placed-guru" element={<PrivateRoute><PlacedGuruPage /></PrivateRoute>} />
               <Route path="/oauth/google/callback" element={<GoogleOAuthCallback />} />
 
               {/* Matrix Flow Game */}
-              <Route path="/game/matrix" element={<Guidelines />} />
-              <Route path="/game/matrix/play" element={<FindMin />} />
+              <Route path="/game/matrix" element={<PrivateRoute><Guidelines /></PrivateRoute>} />
+              <Route path="/game/matrix/play" element={<PrivateRoute><FindMin /></PrivateRoute>} />
 
               {/* Balloon Math Game */}
-              <Route path="/game/balloon" element={<BalloonMathGame />} />
+              <Route path="/game/balloon" element={<PrivateRoute><BalloonMathGame /></PrivateRoute>} />
 
               {/* Hidden Maze Game */}
-              <Route path="/game/hidden-maze" element={<HiddenMaze />} />
+              <Route path="/game/hidden-maze" element={<PrivateRoute><HiddenMaze /></PrivateRoute>} />
 
               {/* Assessment Games */}
-              <Route path="/game/geo-sudo" element={<GeoSudo />} />
-              <Route path="/game/grid-challenge" element={<GridChallenge />} />
-              <Route path="/game/motion" element={<MotionChallenge />} />
-              <Route path="/game/switch" element={<SwitchChallenge />} />
-              <Route path="/game/digit" element={<DigitChallenge />} />
-              <Route path="/game/bart" element={<BARTGame />} />
-              <Route path="/game/swith" element={<SwithChallenge />} />
-              <Route path="/game/inductive" element={<InductiveChallenge />} />
-              <Route path="/game/dual-task" element={<DualTaskChallenge />} />
+              <Route path="/game/geo-sudo" element={<PrivateRoute><GeoSudo /></PrivateRoute>} />
+              <Route path="/game/grid-challenge" element={<PrivateRoute><GridChallenge /></PrivateRoute>} />
+              <Route path="/game/motion" element={<PrivateRoute><MotionChallenge /></PrivateRoute>} />
+              <Route path="/game/switch" element={<PrivateRoute><SwitchChallenge /></PrivateRoute>} />
+              <Route path="/game/digit" element={<PrivateRoute><DigitChallenge /></PrivateRoute>} />
+              <Route path="/game/bart" element={<PrivateRoute><BARTGame /></PrivateRoute>} />
+              <Route path="/game/swith" element={<PrivateRoute><SwithChallenge /></PrivateRoute>} />
+              <Route path="/game/inductive" element={<PrivateRoute><InductiveChallenge /></PrivateRoute>} />
+              <Route path="/game/dual-task" element={<PrivateRoute><DualTaskChallenge /></PrivateRoute>} />
 
               {/* Communication Pattern Selector */}
               <Route
                 path="/game/communication-patterns"
-                element={<CommunicationPatternsPage />}
+                element={<PrivateRoute><CommunicationPatternsPage /></PrivateRoute>}
               />
 
               {/* Communication Game - Pattern 1 */}
@@ -166,8 +164,8 @@ const App = () => {
 
               {/* Blog */}
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/write" element={<BlogWrite />} />
-              <Route path="/blog/my" element={<BlogMyPosts />} />
+              <Route path="/blog/write" element={<PrivateRoute><BlogWrite /></PrivateRoute>} />
+              <Route path="/blog/my" element={<PrivateRoute><BlogMyPosts /></PrivateRoute>} />
               <Route path="/blog/:slug" element={<BlogPost />} />
 
               {/* HackWithInfy — Premium */}
@@ -183,10 +181,6 @@ const App = () => {
               {/* Admin */}
               <Route path="/admin" element={<BlogAdmin />} />
               <Route path="/admin/blog" element={<BlogAdmin />} />
-
-              {/* Forge - Resume Builder */}
-              <Route path="/forge" element={<ForgePage />} />
-              <Route path="/forge/profile" element={<ForgeProfilePage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
