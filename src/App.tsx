@@ -168,8 +168,8 @@ const App = () => {
               <Route path="/blog/my" element={<PrivateRoute><BlogMyPosts /></PrivateRoute>} />
               <Route path="/blog/:slug" element={<BlogPost />} />
 
-              {/* HackWithInfy — Premium */}
-              <Route path="/hackwithinfy" element={<PremiumRoute><HackWithInfyLanding /></PremiumRoute>} />
+              {/* HackWithInfy — landing is public (teaser), resources are premium */}
+              <Route path="/hackwithinfy" element={<PrivateRoute><HackWithInfyLanding /></PrivateRoute>} />
               <Route path="/hackwithinfy/syllabus" element={<PremiumRoute><HackWithInfySyllabus /></PremiumRoute>} />
               <Route path="/hackwithinfy/resources" element={<PremiumRoute><HackWithInfyResources /></PremiumRoute>} />
               <Route path="/hackwithinfy/tips" element={<PremiumRoute><HackWithInfyTips /></PremiumRoute>} />
