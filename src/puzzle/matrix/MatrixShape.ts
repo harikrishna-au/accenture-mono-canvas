@@ -1,5 +1,5 @@
 import { Connector, invertFlow, rotateDirection, Direction } from "./directions";
-import { Matrix3x3, MatrixSymbol, TileType } from "./types";
+import type { Matrix3x3, MatrixSymbol, TileType } from "./types";
 import { createEmptyMatrix } from "./utils";
 
 const rotateMatrix = (matrix: Matrix3x3, steps: number): Matrix3x3 => {
