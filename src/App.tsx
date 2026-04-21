@@ -101,11 +101,11 @@ const App = () => {
               <Route path="/refund" element={<RefundPolicy />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/coupon-stats" element={<PrivateRoute><CouponDashboard /></PrivateRoute>} />
-              <Route path="/ai-interview" element={<PrivateRoute><AIInterviewSelection /></PrivateRoute>} />
-              <Route path="/ai-interview/:type" element={<PrivateRoute><AIInterview /></PrivateRoute>} />
-              <Route path="/forge" element={<PrivateRoute><ForgePage /></PrivateRoute>} />
-              <Route path="/forge/profile" element={<PrivateRoute><ForgeProfilePage /></PrivateRoute>} />
-              <Route path="/radar" element={<PrivateRoute><RadarPage /></PrivateRoute>} />
+              <Route path="/ai-interview" element={<PremiumRoute><AIInterviewSelection /></PremiumRoute>} />
+              <Route path="/ai-interview/:type" element={<PremiumRoute><AIInterview /></PremiumRoute>} />
+              <Route path="/forge" element={<PremiumRoute><ForgePage /></PremiumRoute>} />
+              <Route path="/forge/profile" element={<PremiumRoute><ForgeProfilePage /></PremiumRoute>} />
+              <Route path="/radar" element={<PremiumRoute><RadarPage /></PremiumRoute>} />
               <Route path="/connect" element={<PrivateRoute><ConnectPage /></PrivateRoute>} />
               <Route path="/connect/:expertId" element={<PrivateRoute><ConnectPage /></PrivateRoute>} />
               <Route path="/placed-guru" element={<PrivateRoute><PlacedGuruPage /></PrivateRoute>} />
