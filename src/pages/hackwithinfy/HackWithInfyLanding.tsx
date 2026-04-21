@@ -157,32 +157,66 @@ const HackWithInfyLanding = () => {
 
           {/* Right — Author card */}
           <div
-            className="flex items-center gap-4 p-4 rounded-2xl flex-shrink-0"
-            style={{ background: "#ffffff", border: `1px solid rgba(0,0,0,0.07)`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}
+            className="flex-shrink-0 flex flex-col items-center text-center p-5 rounded-2xl w-[180px]"
+            style={{
+              background: "linear-gradient(160deg, #ffffff 60%, rgba(217,119,6,0.04) 100%)",
+              border: `1px solid rgba(217,119,6,0.18)`,
+              boxShadow: "0 4px 24px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset",
+            }}
           >
-            <img
-              src="/harry.png"
-              alt="Nalla Harikrishna"
-              className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-              style={{ boxShadow: `0 0 0 2.5px ${GOLD}, 0 0 16px ${GOLD_BG}` }}
-            />
-            <div>
-              <div className="text-stone-800 font-semibold font-['Inter'] text-[14px] mb-0.5">Nalla Harikrishna</div>
-              <div className="text-[12px] font-semibold font-['Inter'] mb-2" style={{ color: GOLD }}>
-                SP Role · ₹11 LPA · Infosys
-              </div>
-              <a
-                href="https://www.linkedin.com/in/hari-krishna-nallana-33949b277/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold font-['Inter'] transition-colors hover:opacity-80"
-                style={{ background: "rgba(10,102,194,0.08)", color: "#0A66C2", border: "1px solid rgba(10,102,194,0.18)" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                View LinkedIn
-              </a>
+            {/* Selected badge */}
+            <div
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase font-['Inter'] mb-3"
+              style={{ background: GOLD_BG, color: GOLD, border: `1px solid ${GOLD_BDR}` }}
+            >
+              <BadgeCheck className="w-2.5 h-2.5" /> Selected
             </div>
+
+            {/* Photo */}
+            <div
+              className="relative mb-3"
+              style={{
+                width: 88, height: 88,
+                borderRadius: "50%",
+                padding: 3,
+                background: `linear-gradient(135deg, ${GOLD}, #fcd34d, ${GOLD})`,
+              }}
+            >
+              <img
+                src="/harry.png"
+                alt="Nalla Harikrishna"
+                style={{
+                  width: "100%", height: "100%",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  display: "block",
+                  border: "2px solid #fff",
+                }}
+              />
+            </div>
+
+            <div className="text-stone-800 font-semibold font-['Inter'] text-[13.5px] leading-tight mb-0.5">
+              Nalla Harikrishna
+            </div>
+            <div className="text-[11px] font-semibold font-['Inter'] mb-3" style={{ color: GOLD }}>
+              SP Role · ₹11 LPA
+            </div>
+            <div
+              className="text-[10.5px] font-['Inter'] text-stone-400 mb-3 leading-relaxed"
+            >
+              Infosys Specialist<br />Programmer
+            </div>
+            <a
+              href="https://www.linkedin.com/in/hari-krishna-nallana-33949b277/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10.5px] font-semibold font-['Inter'] transition-all hover:opacity-80 w-full justify-center"
+              style={{ background: "rgba(10,102,194,0.08)", color: "#0A66C2", border: "1px solid rgba(10,102,194,0.18)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3 h-3" />
+              LinkedIn
+            </a>
           </div>
         </div>
 
