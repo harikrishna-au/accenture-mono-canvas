@@ -76,7 +76,7 @@ const ROUND2_TIPS: Section[] = [
     title: "SP Role Strategy in Round 2",
     subtitle: "Round 2 is where SP L1, L2, L3 roles are decided",
     tips: [
-      { text: "SP L1 (₹11 LPA): Solve all 3 chosen problems fully. Clean code and optimal solutions matter.", type: "info" },
+      { text: "SP L1: Solve all 3 chosen problems fully. Clean code and optimal solutions matter. (Campus SP L1 packages vary.)", type: "info" },
       { text: "SP L2/L3 (₹16–21 LPA): Solving harder combinations (Medium + Hard + Complex) distinguishes you.", type: "info" },
       { text: "Code quality and approach matter — write readable code with comments where needed.", type: "do" },
       { text: "Don't rush to submit — test against edge cases before final submission in Round 2 too.", type: "dont" },

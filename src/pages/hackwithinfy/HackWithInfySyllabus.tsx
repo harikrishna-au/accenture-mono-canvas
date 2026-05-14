@@ -238,7 +238,7 @@ const HackWithInfySyllabus = () => {
               >
                 {role}
                 {role === "SP" && (
-                  <span className="ml-1.5 text-[9px] opacity-80">₹11 LPA</span>
+                  <span className="ml-1.5 text-[9px] opacity-80">₹9.5 LPA</span>
                 )}
                 {role === "DSE" && (
                   <span className="ml-1.5 text-[9px] opacity-80">₹7 LPA</span>

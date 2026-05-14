@@ -20,7 +20,7 @@ const GOLD_BDR  = "rgba(217,119,6,0.22)";
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const ROLES = [
   { label: "DSE",   lpa: "₹7 LPA",  sub: "6.25L + ₹75K joining",    color: "#0891b2", bg: "rgba(8,145,178,0.08)",  border: "rgba(8,145,178,0.2)"  },
-  { label: "SP L1", lpa: "₹11 LPA", sub: "10L + ₹1L joining · Harry's role", color: GOLD, bg: GOLD_BG, border: GOLD_BDR, gold: true },
+  { label: "SP L1", lpa: "₹9.5 LPA", sub: "Harry's campus offer (SP packages vary by college)", color: GOLD, bg: GOLD_BG, border: GOLD_BDR, gold: true },
   { label: "SP L2", lpa: "₹16 LPA", sub: "Post probation (6 months)", color: INFY_BLUE, bg: INFY_BG, border: INFY_BDR },
   { label: "SP L3", lpa: "₹21 LPA", sub: "Post probation (6 months)", color: "#7c3aed", bg: "rgba(124,58,237,0.07)", border: "rgba(124,58,237,0.18)" },
 ];
@@ -127,7 +127,7 @@ const HackWithInfyLanding = () => {
             <p className="text-stone-500 text-[0.9rem] font-['Inter'] font-light max-w-lg leading-relaxed mb-5">
               These resources were curated by{" "}
               <span className="font-semibold text-stone-700">Nalla Harikrishna</span>
-              {" "}— selected for SP role at Infosys at ₹11 LPA. Not generic prep.
+              {" "}— selected for SP role at Infosys at ₹9.5 LPA. Not generic prep.
               Real strategy from someone who went through every round.
             </p>
 
@@ -135,7 +135,7 @@ const HackWithInfyLanding = () => {
             <div className="flex flex-wrap gap-2">
               {[
                 { icon: <BadgeCheck className="w-3 h-3" />, label: "SP Role Secured", gold: true  },
-                { icon: <Star       className="w-3 h-3" />, label: "₹11 LPA Offer",   gold: true  },
+                { icon: <Star       className="w-3 h-3" />, label: "₹9.5 LPA Offer",   gold: true  },
                 { icon: <Trophy     className="w-3 h-3" />, label: "Infosys Selected", gold: true  },
                 { icon: <Zap        className="w-3 h-3" />, label: "Last-min Friendly", gold: false },
               ].map((p) => (
@@ -199,7 +199,7 @@ const HackWithInfyLanding = () => {
               Nalla Harikrishna
             </div>
             <div className="text-[11px] font-semibold font-['Inter'] mb-3" style={{ color: GOLD }}>
-              SP Role · ₹11 LPA
+              SP Role · ₹9.5 LPA
             </div>
             <div
               className="text-[10.5px] font-['Inter'] text-stone-400 mb-3 leading-relaxed"
@@ -407,7 +407,7 @@ const HackWithInfyLanding = () => {
               Made by Nalla Harikrishna
             </div>
             <div className="text-stone-500 text-[12px] font-['Inter'] font-light">
-              Infosys SP Role · ₹11 LPA · These are the resources he used and wished existed when he was preparing.
+              Infosys SP Role · ₹9.5 LPA · These are the resources he used and wished existed when he was preparing.
             </div>
           </div>
           <a
