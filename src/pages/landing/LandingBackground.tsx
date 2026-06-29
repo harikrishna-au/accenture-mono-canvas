@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { TrendingUp } from "lucide-react";
+import { Zap } from "lucide-react";
 
 const shapes = [
   { w: 72, h: 72, top: "32%", left: "4%", rz: 18, delay: 0, dur: 5.5 },
@@ -76,8 +76,10 @@ export const LandingBackground = () => (
         y: { duration: 4, delay: 0.9, repeat: Infinity, ease: "easeInOut" },
       }}
     >
-      <TrendingUp className="w-3.5 h-3.5 text-stone-600" />
-      <span className="text-[12px] font-['Inter'] font-semibold text-stone-700">500+ Students Placed</span>
+      <span className="flex items-center justify-center w-5 h-5 rounded-md bg-amber-50 border border-amber-100">
+        <Zap className="w-3 h-3 text-amber-500 fill-amber-400" />
+      </span>
+      <span className="text-[12px] font-['Inter'] font-semibold text-stone-700">Real-time AI feedback</span>
     </motion.div>
   </div>
 );

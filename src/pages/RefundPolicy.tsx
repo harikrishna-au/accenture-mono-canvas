@@ -66,19 +66,19 @@ const RefundPolicy = () => (
         </div>
 
         {/* Sections */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           {policies.map(({ title, body }, i) => (
             <div
               key={title}
-              className="bg-white rounded-2xl px-7 py-6 border border-stone-100 shadow-sm"
+              className="group bg-white rounded-2xl px-7 py-6 border border-stone-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-stone-200 hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="font-['Inter'] text-[11px] font-bold text-stone-300 tabular-nums">
+              <div className="flex items-center gap-3.5 mb-3">
+                <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-stone-50 border border-stone-200 font-['Inter'] text-[11px] font-bold text-stone-500 tabular-nums flex-shrink-0 transition-colors duration-300 group-hover:bg-amber-50 group-hover:border-amber-200 group-hover:text-amber-600">
                   {i + 1 < 10 ? `0${i + 1}` : i + 1}
                 </span>
                 <h2 className="font-['Merriweather'] font-bold text-stone-800 text-[1.05rem]">{title}</h2>
               </div>
-              <p className="font-['Inter'] text-[14px] text-stone-500 leading-relaxed pl-7">{body}</p>
+              <p className="font-['Inter'] text-[14px] text-stone-500 leading-relaxed pl-[2.6rem]">{body}</p>
             </div>
           ))}
         </div>

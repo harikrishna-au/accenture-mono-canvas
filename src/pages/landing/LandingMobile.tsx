@@ -7,7 +7,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { Link, NavigateFunction } from "react-router-dom";
-import { ArrowRight, CheckCircle, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronRight, Sparkles, ShieldCheck } from "lucide-react";
 import { AuthView, clerkAppearance, AuthSkeleton } from "./authConfig";
 
 interface Feature {
@@ -110,10 +110,14 @@ export const LandingMobile = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-5 bg-stone-100 border border-stone-200"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-5 bg-white border border-stone-200"
+            style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.03)" }}
           >
-            <Sparkles className="w-2.5 h-2.5 text-stone-500" />
-            <span className="text-[10px] font-['Inter'] font-medium text-stone-600">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
+            <span className="text-[10px] font-['Inter'] font-semibold text-stone-600">
               Campus Placement Accelerator · Free to join
             </span>
           </motion.div>
@@ -200,7 +204,7 @@ export const LandingMobile = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.35, delay: 0.35 + i * 0.06 }}
-                className={`flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-stone-100 shadow-sm${to ? " cursor-pointer hover:border-stone-200 hover:shadow-md transition-all active:scale-[0.98]" : ""}`}
+                className={`flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-stone-100 shadow-sm${to ? " cursor-pointer hover:border-amber-200 hover:shadow-md transition-all active:scale-[0.98]" : ""}`}
                 onClick={to ? () => navigate(to) : undefined}
               >
                 <div className="w-9 h-9 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center flex-shrink-0">
@@ -210,7 +214,11 @@ export const LandingMobile = ({
                   <p className="font-['Inter'] text-[13px] font-semibold text-stone-800">{label}</p>
                   <p className="font-['Inter'] text-[11px] text-stone-400">{sub}</p>
                 </div>
-                <CheckCircle className="w-4 h-4 text-stone-300 flex-shrink-0" />
+                {to ? (
+                  <ChevronRight className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-stone-200 flex-shrink-0 mr-1.5" />
+                )}
               </motion.div>
             ))}
           </div>
@@ -285,6 +293,12 @@ export const LandingMobile = ({
                   )}
                 </motion.div>
               </AnimatePresence>
+              <div className="flex items-center justify-center gap-2 text-stone-400 pt-6">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500/70" />
+                <span className="font-['Inter'] text-[11px]">
+                  Secure sign-in · We never share your data
+                </span>
+              </div>
             </>
           )}
         </SignedOut>
