@@ -28,13 +28,19 @@ export default function Landing() {
   const [view, setView] = useState<AuthView>("sign-in");
   const [clerkStep, setClerkStep] = useState<string>("");
   const { isPremium } = usePremiumStatus();
-  const { isLoaded } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     const onHash = () => setClerkStep(window.location.hash);
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      navigate("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, navigate]);
 
   const isClerkVerificationStep = clerkStep.includes("verify") || clerkStep.includes("factor");
 

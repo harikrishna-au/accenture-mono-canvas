@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 
 const shapes = [
-  { w: 72, h: 72, top: "9%", left: "4%", rz: 18, delay: 0, dur: 5.5 },
+  { w: 72, h: 72, top: "32%", left: "4%", rz: 18, delay: 0, dur: 5.5 },
   { w: 48, h: 48, top: "22%", right: "5%", rz: -22, delay: 1.1, dur: 6.2 },
-  { w: 36, h: 36, top: "55%", left: "2%", rz: 40, delay: 2.3, dur: 5 },
+  { w: 36, h: 36, top: "68%", left: "2%", rz: 40, delay: 2.3, dur: 5 },
   { w: 60, h: 60, top: "72%", right: "8%", rz: -12, delay: 0.6, dur: 6.8 },
-  { w: 28, h: 28, top: "40%", left: "10%", rz: 60, delay: 1.8, dur: 4.5 },
+  { w: 28, h: 28, top: "50%", left: "10%", rz: 60, delay: 1.8, dur: 4.5 },
 ];
 
 export const LandingBackground = () => (
