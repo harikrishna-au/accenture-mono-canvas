@@ -25,7 +25,9 @@ const features = [
 export default function Landing() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [view, setView] = useState<AuthView>("sign-in");
+  // Default new visitors to Sign Up — most first-timers were landing on Sign In,
+  // failing to log in (no account yet), and bouncing.
+  const [view, setView] = useState<AuthView>("sign-up");
   const [clerkStep, setClerkStep] = useState<string>("");
   const { isPremium } = usePremiumStatus();
   const { isLoaded, isSignedIn } = useAuth();

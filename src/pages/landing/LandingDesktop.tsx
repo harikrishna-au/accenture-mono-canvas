@@ -7,7 +7,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { Link, NavigateFunction } from "react-router-dom";
-import { ArrowRight, Sparkles, ShieldCheck, Star, Mail } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Star, Mail, UserPlus, LogIn, Check } from "lucide-react";
 import { AuthView, clerkAppearance, AuthSkeleton } from "./authConfig";
 
 interface Feature {
@@ -227,22 +227,31 @@ export const LandingDesktop = ({
               <AuthSkeleton />
             ) : (
               <>
-                <div className={`flex p-1 rounded-xl bg-stone-100 border border-stone-200 mb-7 ${isClerkVerificationStep ? "hidden" : ""}`}>
-                  {(["sign-in", "sign-up"] as AuthView[]).map((v) => (
-                    <button
-                      key={v}
-                      onClick={() => setView(v)}
-                      className="flex-1 py-2 rounded-[10px] font-['Inter'] transition-all duration-200 active:scale-[0.97] flex flex-col items-center leading-tight"
-                      style={
-                        view === v
-                          ? { background: "#ffffff", color: "#1c1c1e", boxShadow: "0 1px 5px rgba(0,0,0,0.09)" }
-                          : { color: "#a8a29e" }
-                      }
-                    >
-                      <span className="text-[13px] font-semibold">{v === "sign-in" ? "Sign In" : "Sign Up"}</span>
-                      <span className="text-[10px] font-medium opacity-75">{v === "sign-in" ? "I have an account" : "I'm new here"}</span>
-                    </button>
-                  ))}
+                <div className={`flex gap-1 p-1 rounded-2xl bg-stone-100 border border-stone-200 mb-7 ${isClerkVerificationStep ? "hidden" : ""}`}>
+                  {(["sign-up", "sign-in"] as AuthView[]).map((v) => {
+                    const active = view === v;
+                    const Icon = v === "sign-up" ? UserPlus : LogIn;
+                    return (
+                      <button
+                        key={v}
+                        onClick={() => setView(v)}
+                        className="flex-1 py-2.5 rounded-xl font-['Inter'] transition-all duration-200 active:scale-[0.97] flex flex-col items-center leading-tight gap-0.5"
+                        style={
+                          active
+                            ? { background: "#ffffff", color: "#1c1c1e", boxShadow: "0 2px 8px rgba(0,0,0,0.10)" }
+                            : { color: "#a8a29e" }
+                        }
+                      >
+                        <span className="flex items-center gap-1.5 text-[13px] font-bold">
+                          <Icon className="w-3.5 h-3.5" />
+                          {v === "sign-up" ? "Sign Up" : "Sign In"}
+                        </span>
+                        <span className="text-[10px] font-medium opacity-75">
+                          {v === "sign-up" ? "New here — it's free" : "I have an account"}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {!isClerkVerificationStep && (
@@ -256,24 +265,35 @@ export const LandingDesktop = ({
                       className="mb-5"
                     >
                       {view === "sign-in" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                          Already registered
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-stone-100 text-stone-600 border border-stone-200 mb-3">
+                          <span className="w-1.5 h-1.5 rounded-full bg-stone-400 inline-block" />
+                          Welcome back
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-violet-50 text-violet-700 border border-violet-200 mb-3">
-                          <span className="w-1.5 h-1.5 rounded-full bg-violet-500 inline-block" />
-                          Welcome! Register now
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3">
+                          <Sparkles className="w-3 h-3" />
+                          Free forever · No credit card
                         </span>
                       )}
-                      <h2 className="font-['Merriweather'] font-bold text-[1.3rem] text-stone-900 mb-1">
-                        {view === "sign-in" ? "Welcome back" : "Get started free"}
+                      <h2 className="font-['Merriweather'] font-bold text-[1.35rem] text-stone-900 mb-1">
+                        {view === "sign-in" ? "Welcome back" : "Create your free account"}
                       </h2>
                       <p className="font-['Inter'] text-[13px] text-stone-500">
                         {view === "sign-in"
                           ? "Sign in to continue your prep."
-                          : "No credit card required. Ready in seconds."}
+                          : "Join 500+ students. Takes under a minute."}
                       </p>
+
+                      {view === "sign-up" && (
+                        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 mt-3">
+                          {["Free forever", "No credit card", "Ready in 60s"].map((b) => (
+                            <span key={b} className="inline-flex items-center gap-1 text-[11px] font-['Inter'] font-medium text-stone-500">
+                              <Check className="w-3 h-3 text-emerald-500" strokeWidth={3} />
+                              {b}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 )}
