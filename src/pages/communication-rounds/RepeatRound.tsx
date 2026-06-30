@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RoundLayout } from './components/RoundLayout';
+import { RoundLoadError } from './components/RoundLoadError';
 import { AudioPlayer } from './components/AudioPlayer';
 import { Button } from '@/components/ui/button';
 import { Mic, Square } from 'lucide-react';
@@ -16,6 +17,7 @@ export function RepeatRound() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const { transcript, isRecording, startRecording, stopRecording, resetTranscript, error: speechError } = useSpeechRecognition();
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -24,11 +26,18 @@ export function RepeatRound() {
     }, []);
 
     const loadQuestions = async () => {
+        setIsLoading(true);
+        setLoadError(false);
         try {
             const qs = await service.getQuestionsForSection('D');
-            setQuestions(qs);
+            if (!qs || qs.length === 0) {
+                setLoadError(true);
+            } else {
+                setQuestions(qs);
+            }
         } catch (error) {
             console.error('Failed to load questions:', error);
+            setLoadError(true);
         } finally {
             setIsLoading(false);
         }
@@ -73,6 +82,14 @@ export function RepeatRound() {
                     <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-neutral-600">Loading questions...</p>
                 </div>
+            </RoundLayout>
+        );
+    }
+
+    if (loadError || !currentQuestion) {
+        return (
+            <RoundLayout title="Listen and Repeat" description="Listen to the sentence and repeat it exactly" showNavigation={false}>
+                <RoundLoadError onRetry={loadQuestions} />
             </RoundLayout>
         );
     }

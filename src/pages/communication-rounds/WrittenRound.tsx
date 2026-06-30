@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RoundLayout } from './components/RoundLayout';
+import { RoundLoadError } from './components/RoundLoadError';
 import { Button } from '@/components/ui/button';
 import { useGame } from './GameContext';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +21,7 @@ export function WrittenRound() {
     }, []);
 
     const loadQuestion = async () => {
+        setIsLoading(true);
         try {
             const questions = await service.getQuestionsForSection('WRITTEN');
             if (questions && questions.length > 0) {
@@ -81,9 +83,7 @@ export function WrittenRound() {
     if (!question) {
         return (
             <RoundLayout title="Written Communication" description="Demonstrate your professional email writing skills" showNavigation={false}>
-                <div className="text-center py-12">
-                    <p className="text-red-600">Failed to load question. Please try again.</p>
-                </div>
+                <RoundLoadError onRetry={loadQuestion} />
             </RoundLayout>
         );
     }

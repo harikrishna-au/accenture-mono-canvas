@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { RoundLayout } from './components/RoundLayout';
+import { RoundLoadError } from './components/RoundLoadError';
 import { AudioPlayer } from './components/AudioPlayer';
 import { Button } from '@/components/ui/button';
-import { Mic, Square } from 'lucide-react';
+import { Mic, Square, Eye } from 'lucide-react';
 import { useGame } from './GameContext';
 import { CommunicationBackendService } from '@/communication/service/CommunicationService';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
@@ -18,6 +19,8 @@ export function ListeningComprehensionRound() {
     const [contextPlayed, setContextPlayed] = useState(false);
     const { transcript, isRecording, startRecording, stopRecording, resetTranscript, error: speechError } = useSpeechRecognition();
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [showQuestionText, setShowQuestionText] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -38,11 +41,18 @@ export function ListeningComprehensionRound() {
     }, []);
 
     const loadQuestions = async () => {
+        setIsLoading(true);
+        setLoadError(false);
         try {
             const qs = await service.getQuestionsForSection('B');
-            setQuestions(qs);
+            if (!qs || qs.length === 0) {
+                setLoadError(true);
+            } else {
+                setQuestions(qs);
+            }
         } catch (error) {
             console.error('Failed to load questions:', error);
+            setLoadError(true);
         } finally {
             setIsLoading(false);
         }
@@ -78,6 +88,7 @@ export function ListeningComprehensionRound() {
         resetTranscript();
 
         // Move to next question with slight delay to ensure state clears
+        setShowQuestionText(false);
         setTimeout(() => {
             const hasMoreSubQuestions = currentQuestion?.subQuestions &&
                 currentSubQuestionIndex < currentQuestion.subQuestions.length - 1;
@@ -101,6 +112,14 @@ export function ListeningComprehensionRound() {
                     <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-neutral-600">Loading questions...</p>
                 </div>
+            </RoundLayout>
+        );
+    }
+
+    if (loadError || !currentQuestion) {
+        return (
+            <RoundLayout title="Listening Comprehension" description="Listen to the passage and answer questions" showNavigation={false}>
+                <RoundLoadError onRetry={loadQuestions} />
             </RoundLayout>
         );
     }
@@ -142,10 +161,27 @@ export function ListeningComprehensionRound() {
                             />
                         </div>
 
-                        <div className="bg-purple-50 p-6 rounded-xl">
-                            <p className="text-lg text-neutral-800 text-center italic">
-                                (Listen to the audio to hear the question)
-                            </p>
+                        <div className="bg-purple-50 p-6 rounded-xl flex flex-col items-center gap-3">
+                            {showQuestionText && (currentSubQuestion.text || currentSubQuestion.audioSrc) ? (
+                                <p className="text-lg text-neutral-800 text-center font-medium">
+                                    {currentSubQuestion.text || currentSubQuestion.audioSrc}
+                                </p>
+                            ) : (
+                                <>
+                                    <p className="text-base text-neutral-600 text-center italic">
+                                        Listen to the audio to hear the question.
+                                    </p>
+                                    {(currentSubQuestion.text || currentSubQuestion.audioSrc) && (
+                                        <button
+                                            onClick={() => setShowQuestionText(true)}
+                                            className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-700 hover:text-purple-900 transition-colors"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            Can't hear it? Show question text
+                                        </button>
+                                    )}
+                                </>
+                            )}
                         </div>
 
                         <div className="flex flex-col items-center gap-4">

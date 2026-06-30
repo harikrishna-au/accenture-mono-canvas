@@ -9,12 +9,20 @@ interface SpeechRecognitionResult {
     error: string | null;
 }
 
+// The Web Speech API streams audio to the browser vendor's servers (e.g. Google
+// for Chrome). It intermittently emits a 'network' error even on a perfectly
+// healthy connection. We auto-retry these a couple of times before surfacing
+// anything to the user, so a transient hiccup doesn't look like "no internet".
+const MAX_NETWORK_RETRIES = 2;
+
 export function useSpeechRecognition(): SpeechRecognitionResult {
     const [transcript, setTranscript] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
     const isMounted = useRef(true);
+    const networkRetries = useRef(0);
+    const startRef = useRef<(isRetry?: boolean) => void>(() => {});
 
     useEffect(() => {
         isMounted.current = true;
@@ -32,7 +40,13 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
         };
     }, []);
 
-    const startRecording = useCallback(() => {
+    const startRecording = useCallback((isRetry?: unknown) => {
+        // A fresh user-initiated start resets the transient-retry counter.
+        // (Only our internal auto-retry passes the literal `true`; callers that
+        // bind this to onClick pass an event object, which must NOT count as a retry.)
+        if (isRetry !== true) {
+            networkRetries.current = 0;
+        }
         // Check browser support dynamically or cached
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -71,6 +85,10 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
                 }
             }
 
+            // Got speech back — the service is reachable, so reset retry budget.
+            if (finalTranscript || interimTranscript) {
+                networkRetries.current = 0;
+            }
             setTranscript(finalTranscript || interimTranscript);
         };
 
@@ -88,11 +106,24 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
                 return;
             }
 
+            // Transient 'network' errors are usually the speech service hiccuping,
+            // not the user's connection. Silently auto-retry a couple of times.
+            if (event.error === 'network' && networkRetries.current < MAX_NETWORK_RETRIES) {
+                networkRetries.current += 1;
+                console.warn(`Speech 'network' error — auto-retry ${networkRetries.current}/${MAX_NETWORK_RETRIES}`);
+                try { recognition.stop(); } catch (e) { /* ignore */ }
+                recognitionRef.current = null;
+                setTimeout(() => {
+                    if (isMounted.current) startRef.current(true);
+                }, 600);
+                return;
+            }
+
             let errorMessage = `Error: ${event.error}`;
             // Map errors...
             switch (event.error) {
                 case 'network':
-                    errorMessage = "Network connection failed. Please check your internet.";
+                    errorMessage = "The speech service dropped briefly. Tap Retry to continue — this is usually a temporary hiccup, not your connection.";
                     break;
                 case 'not-allowed':
                 case 'service-not-allowed':
@@ -134,6 +165,10 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
         }
     }, []);
 
+    // Keep a stable ref to the latest start fn so the auto-retry inside onerror
+    // can re-invoke it without a circular dependency.
+    startRef.current = startRecording;
+
     const stopRecording = useCallback(() => {
         if (recognitionRef.current) {
             try {
@@ -151,6 +186,7 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
     const resetTranscript = useCallback(() => {
         setTranscript('');
         setError(null);
+        networkRetries.current = 0;
     }, []);
 
     return {

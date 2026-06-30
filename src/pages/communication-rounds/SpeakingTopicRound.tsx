@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RoundLayout } from './components/RoundLayout';
+import { RoundLoadError } from './components/RoundLoadError';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Clock } from 'lucide-react';
 import { useGame } from './GameContext';
@@ -15,6 +16,7 @@ export function SpeakingTopicRound() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const { transcript, isRecording, startRecording, stopRecording, resetTranscript, error: speechError } = useSpeechRecognition();
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
     const [isPreparing, setIsPreparing] = useState(true);
     const [prepTimeLeft, setPrepTimeLeft] = useState(25);
     const [speakTimeLeft, setSpeakTimeLeft] = useState(45);
@@ -44,13 +46,20 @@ export function SpeakingTopicRound() {
     }, [isPreparing, isRecording, speakTimeLeft]);
 
     const loadQuestions = async () => {
+        setIsLoading(true);
+        setLoadError(false);
         try {
             const qs = await service.getQuestionsForSection('G');
-            // Shuffle questions to ensure variety
-            const shuffled = [...qs].sort(() => 0.5 - Math.random());
-            setQuestions(shuffled.slice(0, 1)); // Limit to 1 random question
+            if (!qs || qs.length === 0) {
+                setLoadError(true);
+            } else {
+                // Shuffle questions to ensure variety
+                const shuffled = [...qs].sort(() => 0.5 - Math.random());
+                setQuestions(shuffled.slice(0, 1)); // Limit to 1 random question
+            }
         } catch (error) {
             console.error('Failed to load questions:', error);
+            setLoadError(true);
         } finally {
             setIsLoading(false);
         }
@@ -98,6 +107,14 @@ export function SpeakingTopicRound() {
                     <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-neutral-600">Loading questions...</p>
                 </div>
+            </RoundLayout>
+        );
+    }
+
+    if (loadError || !currentQuestion) {
+        return (
+            <RoundLayout title="Speaking on a Topic" description="Speak for 45 seconds" showNavigation={false}>
+                <RoundLoadError onRetry={loadQuestions} />
             </RoundLayout>
         );
     }

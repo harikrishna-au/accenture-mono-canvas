@@ -9,20 +9,34 @@ export class CommunicationBackendService {
     private backendUrl = (import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
 
     async getQuestionsForSection(section: SectionType): Promise<Question[]> {
-        try {
-            const response = await fetch(`${this.backendUrl}/api/questions?section=${section}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch questions: ${response.statusText}`);
+        // Retry transient failures (flaky network, cold backend) before giving up.
+        const maxAttempts = 3;
+        let lastError: unknown = null;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const response = await fetch(`${this.backendUrl}/api/questions?section=${section}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch questions: ${response.status} ${response.statusText}`);
+                }
+                const data = await response.json();
+
+                // Backend now returns camelCase directly
+                return data || [];
+            } catch (error) {
+                lastError = error;
+                console.warn(`Question fetch attempt ${attempt}/${maxAttempts} failed for section ${section}:`, error);
+                if (attempt < maxAttempts) {
+                    // Backoff: 400ms, 800ms
+                    await new Promise(res => setTimeout(res, attempt * 400));
+                }
             }
-            const data = await response.json();
-
-            // Backend now returns camelCase directly
-            return data || [];
-
-        } catch (error) {
-            console.error('Error fetching questions from backend:', error);
-            return [];
         }
+
+        console.error('Error fetching questions from backend (all retries exhausted):', lastError);
+        // Re-throw so callers can distinguish "load failed" from "no questions for section"
+        // and show a retry UI instead of a broken prompt.
+        throw lastError instanceof Error ? lastError : new Error('Failed to load questions');
     }
 
     // Submit an audio response (grading)
