@@ -8,25 +8,69 @@ export const clerkAppearance = {
     colorTextSecondary: "#78716c",
     colorInputBackground: "#faf9f7",
     colorInputText: "#1c1c1e",
+    colorDanger: "#dc2626",
     borderRadius: "12px",
     fontFamily: "'Inter', sans-serif",
     fontSize: "14px",
   },
   elements: {
-    card: { boxShadow: "none", border: "none", padding: "0", backgroundColor: "transparent" },
-    cardBox: { boxShadow: "none", border: "none", backgroundColor: "transparent", width: "100%" },
-    main: { backgroundColor: "transparent" },
-    headerTitle: { fontSize: "0.95rem", fontWeight: "600", color: "#1c1c1e" },
-    headerSubtitle: { fontSize: "0.8rem", color: "#78716c" },
-    footer: { display: "none" },
     rootBox: { width: "100%" },
+    card: { boxShadow: "none", border: "none", padding: "0", backgroundColor: "transparent", width: "100%" },
+    cardBox: { boxShadow: "none", border: "none", backgroundColor: "transparent", width: "100%" },
+    main: { backgroundColor: "transparent", gap: "0.9rem" },
+
+    // Hide Clerk's built-in header — the landing page renders its own branded
+    // heading above the form, so showing Clerk's "Create your account" too
+    // produced a confusing duplicate title.
+    header: { display: "none" },
+
+    // Form fields — match the card's stone/rounded styling
+    form: { gap: "0.85rem" },
+    formFieldLabel: {
+      fontSize: "12.5px",
+      fontWeight: "600",
+      color: "#44403c",
+      marginBottom: "4px",
+    },
+    formFieldInput: {
+      backgroundColor: "#faf9f7",
+      border: "1px solid #e7e5e0",
+      borderRadius: "12px",
+      fontSize: "14px",
+      padding: "11px 14px",
+      boxShadow: "none",
+    },
     formButtonPrimary: {
       backgroundColor: "#1c1c1e",
       fontFamily: "'Inter', sans-serif",
+      fontSize: "14px",
       fontWeight: "600",
+      textTransform: "none",
+      borderRadius: "12px",
+      padding: "11px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
     },
-    socialButtonsBlockButton: { border: "1px solid #e7e5e0" },
+
+    // Social / OAuth buttons
+    socialButtonsBlockButton: {
+      border: "1px solid #e7e5e0",
+      borderRadius: "12px",
+      backgroundColor: "#ffffff",
+    },
+    socialButtonsBlockButtonText: { fontWeight: "500", color: "#44403c" },
+
     dividerLine: { backgroundColor: "#e7e5e0" },
+    dividerText: { color: "#a8a29e", fontSize: "12px" },
+
+    // Verification / OTP step
+    identityPreview: { backgroundColor: "#faf9f7", border: "1px solid #e7e5e0", borderRadius: "10px" },
+    otpCodeFieldInput: { border: "1px solid #e7e5e0", borderRadius: "10px" },
+    formResendCodeLink: { color: "#1c1c1e", fontWeight: "600" },
+
+    // We provide our own switch links below the form
+    footer: { display: "none" },
+    formFieldAction: { color: "#78716c", fontSize: "12px", fontWeight: "500" },
+    formFieldInputShowPasswordButton: { color: "#a8a29e" },
   },
 };
 

@@ -7,7 +7,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { Link, NavigateFunction } from "react-router-dom";
-import { ArrowRight, Sparkles, ShieldCheck, Star } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Star, Mail } from "lucide-react";
 import { AuthView, clerkAppearance, AuthSkeleton } from "./authConfig";
 
 interface Feature {
@@ -232,14 +232,15 @@ export const LandingDesktop = ({
                     <button
                       key={v}
                       onClick={() => setView(v)}
-                      className="flex-1 py-2 rounded-[10px] text-[13px] font-['Inter'] font-semibold transition-all duration-200 active:scale-[0.97]"
+                      className="flex-1 py-2 rounded-[10px] font-['Inter'] transition-all duration-200 active:scale-[0.97] flex flex-col items-center leading-tight"
                       style={
                         view === v
                           ? { background: "#ffffff", color: "#1c1c1e", boxShadow: "0 1px 5px rgba(0,0,0,0.09)" }
                           : { color: "#a8a29e" }
                       }
                     >
-                      {v === "sign-in" ? "Sign In" : "Sign Up"}
+                      <span className="text-[13px] font-semibold">{v === "sign-in" ? "Sign In" : "Sign Up"}</span>
+                      <span className="text-[10px] font-medium opacity-75">{v === "sign-in" ? "I have an account" : "I'm new here"}</span>
                     </button>
                   ))}
                 </div>
@@ -277,6 +278,20 @@ export const LandingDesktop = ({
                   </AnimatePresence>
                 )}
 
+                {isClerkVerificationStep && (
+                  <div className="mb-5 flex items-start gap-3 p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+                    <Mail className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-['Inter'] text-[12.5px] font-semibold text-amber-900 leading-snug">
+                        Check your email to verify
+                      </p>
+                      <p className="font-['Inter'] text-[11.5px] text-amber-700 leading-snug mt-0.5">
+                        We just sent you a verification email. Enter the code below — and check your <span className="font-semibold">spam folder</span> if it's not in your inbox within a minute.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={view + "-clerk"}
@@ -293,6 +308,18 @@ export const LandingDesktop = ({
                     )}
                   </motion.div>
                 </AnimatePresence>
+
+                {!isClerkVerificationStep && (
+                  <p className="mt-5 text-center font-['Inter'] text-[12.5px] text-stone-500">
+                    {view === "sign-in" ? "New to Harry The Blaze? " : "Already have an account? "}
+                    <button
+                      onClick={() => setView(view === "sign-in" ? "sign-up" : "sign-in")}
+                      className="font-semibold text-stone-900 hover:underline underline-offset-2"
+                    >
+                      {view === "sign-in" ? "Create a free account" : "Sign in instead"}
+                    </button>
+                  </p>
+                )}
               </>
             )}
           </SignedOut>

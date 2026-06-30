@@ -59,6 +59,19 @@ import CustomerSupport from "@/components/CustomerSupport";
 const queryClient = new QueryClient();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+// Reword Clerk's default auth errors so users immediately know to switch
+// between Sign In and Sign Up instead of getting stuck.
+const clerkLocalization = {
+  unstable__errors: {
+    form_identifier_not_found:
+      "No account found with this email. Tap “Sign Up — I'm new here” above to create one.",
+    form_identifier_exists:
+      "This email is already registered. Tap “Sign In — I have an account” above to log in.",
+    form_password_incorrect:
+      "Incorrect password. Try again, or use “Forgot password?” to reset it.",
+  },
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
     // Only show splash if not already shown in this session
@@ -75,6 +88,7 @@ const App = () => {
       publishableKey={clerkPubKey}
       signInUrl="/"
       signUpUrl="/"
+      localization={clerkLocalization}
       appearance={{
         baseTheme: undefined,
         variables: { colorPrimary: '#000000' }
