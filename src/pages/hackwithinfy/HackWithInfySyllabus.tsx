@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Circle, ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -161,6 +161,10 @@ const HackWithInfySyllabus = () => {
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [openSection, setOpenSection] = useState<string | null>(null);
 
+  useEffect(() => {
+    setOpenSection(null);
+  }, [activeRole]);
+
   useGSAP(
     () => {
       gsap.fromTo(containerRef.current, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" });
@@ -238,7 +242,7 @@ const HackWithInfySyllabus = () => {
               >
                 {role}
                 {role === "SP" && (
-                  <span className="ml-1.5 text-[9px] opacity-80">₹9.5 LPA</span>
+                  <span className="ml-1.5 text-[9px] opacity-80">₹11 LPA</span>
                 )}
                 {role === "DSE" && (
                   <span className="ml-1.5 text-[9px] opacity-80">₹7 LPA</span>
@@ -268,15 +272,15 @@ const HackWithInfySyllabus = () => {
         <div className="flex flex-col gap-3 mb-12">
           {filteredSections.map((sec) => {
             const secDone = sec.topics.filter((t) => checked.has(`${sec.title}::${t.name}`)).length;
-            const isOpen = openSection === sec.title || openSection === null;
+            const isOpen = openSection === sec.title;
             return (
               <div
                 key={sec.title}
-                className="rounded-2xl overflow-hidden"
+                className="rounded-2xl overflow-hidden scroll-mt-8"
                 style={{ border: `1px solid ${INFY_BDR}`, background: "#fff" }}
               >
                 <button
-                  onClick={() => setOpenSection(isOpen && openSection === sec.title ? null : sec.title)}
+                  onClick={() => setOpenSection(openSection === sec.title ? null : sec.title)}
                   className="w-full flex items-center justify-between p-5 text-left group"
                 >
                   <div className="flex items-center gap-3">

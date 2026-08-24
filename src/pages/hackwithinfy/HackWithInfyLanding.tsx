@@ -20,7 +20,7 @@ const GOLD_BDR  = "rgba(217,119,6,0.22)";
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const ROLES = [
   { label: "DSE",   lpa: "₹7 LPA",  sub: "6.25L + ₹75K joining",    color: "#0891b2", bg: "rgba(8,145,178,0.08)",  border: "rgba(8,145,178,0.2)"  },
-  { label: "SP L1", lpa: "₹9.5 LPA", sub: "Harry's campus offer (SP packages vary by college)", color: GOLD, bg: GOLD_BG, border: GOLD_BDR, gold: true },
+  { label: "SP L1", lpa: "₹11 LPA", sub: "10L + ₹1L joining · campus offers vary", color: GOLD, bg: GOLD_BG, border: GOLD_BDR, gold: true },
   { label: "SP L2", lpa: "₹16 LPA", sub: "Post probation (6 months)", color: INFY_BLUE, bg: INFY_BG, border: INFY_BDR },
   { label: "SP L3", lpa: "₹21 LPA", sub: "Post probation (6 months)", color: "#7c3aed", bg: "rgba(124,58,237,0.07)", border: "rgba(124,58,237,0.18)" },
 ];
@@ -115,7 +115,7 @@ const HackWithInfyLanding = () => {
               style={{ background: INFY_BG, color: INFY_BLUE, border: `1px solid ${INFY_BDR}` }}
             >
               <Trophy className="w-3 h-3" />
-              Infosys · HackWithInfy Prep
+              All about Infosys
             </div>
 
             <h1 className="text-3xl md:text-4xl font-serif text-stone-800 tracking-tight leading-[1.15] mb-3">

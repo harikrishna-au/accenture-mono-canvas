@@ -33,19 +33,6 @@ const ACTIVE = [
     glow: "rgba(5,150,105,0.14)",
     Icon: Code2,
   },
-  {
-    num: "03",
-    name: "HackWithInfy Round 3",
-    path: "/ai-interview/hackwithinfy",
-    desc: "Infosys HackWithInfy Round 3 — 15 tailored questions covering DSA, OOPs, OS, DBMS, Networks, resume projects, and HR. Target: 1 hour real interview.",
-    points: ["DSA & Algorithms", "CS Fundamentals (OOP, OS, DBMS, CN)", "Resume-based projects", "Infosys HR questions"],
-    tag: "Infosys · Campus Competition",
-    color: "#007CC3",
-    bg: "rgba(0,124,195,0.06)",
-    border: "rgba(0,124,195,0.17)",
-    glow: "rgba(0,124,195,0.14)",
-    Icon: Code2,
-  },
 ];
 
 const COMING_SOON = [
