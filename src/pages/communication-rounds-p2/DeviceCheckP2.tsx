@@ -31,7 +31,7 @@ export function DeviceCheckP2() {
                             </p>
                         </div>
                         <AudioPlayer
-                            text="Hello! Welcome to the Pattern 2 Communication Assessment. If you can hear this clearly, your speakers are working."
+                            text="Hello! Welcome to the Cognizant Communication Assessment. If you can hear this clearly, your speakers are working."
                             voiceType="female_1"
                             playOnce={false}
                             onPlayComplete={() => setSpeakerTested(true)}

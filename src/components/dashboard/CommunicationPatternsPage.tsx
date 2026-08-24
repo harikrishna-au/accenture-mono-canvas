@@ -17,28 +17,33 @@ import PaymentPopup from "@/components/PaymentPopup";
 
 // ─── Pattern definitions ───────────────────────────────────────────────────────
 
+// Each pattern mirrors a specific company's Communication Assessment, so the
+// cards are named after that company. Accents match the company dots used on
+// the Cognitive Games page.
 const ACTIVE_PATTERN = {
     num: "01",
-    name: "Pattern 1",
+    name: "Accenture",
     path: "/game/communication",
     desc: "Full Communication Round simulation — conversation, listening, reading aloud, repeat sentences, fill-in-the-blank, error correction, speaking topic, and written email.",
     tag: "All Sections · AI Feedback",
-    color: "#7c3aed",
-    bg: "rgba(124,58,237,0.06)",
-    border: "rgba(124,58,237,0.17)",
-    glow: "rgba(124,58,237,0.15)",
+    color: "#A100FF",
+    bg: "rgba(161,0,255,0.06)",
+    border: "rgba(161,0,255,0.17)",
+    glow: "rgba(161,0,255,0.15)",
+    dark: "#7A00C2",
 };
 
 const PATTERN_2 = {
     num: "02",
-    name: "Pattern 2",
+    name: "Cognizant",
     path: "/game/communication-p2",
     desc: "Read sentences aloud, listen and repeat, spoken Q&A, sentence rearrangement, and story retelling — a fresh set of skills with AI feedback.",
     tag: "5 Sections · AI Feedback",
-    color: "#0891b2",
-    bg: "rgba(8,145,178,0.06)",
-    border: "rgba(8,145,178,0.17)",
-    glow: "rgba(8,145,178,0.15)",
+    color: "#0033A0",
+    bg: "rgba(0,51,160,0.06)",
+    border: "rgba(0,51,160,0.17)",
+    glow: "rgba(0,51,160,0.15)",
+    dark: "#002374",
 };
 
 const PATTERN_2_SECTIONS = [
@@ -52,7 +57,7 @@ const PATTERN_2_SECTIONS = [
 ];
 
 const COMING_SOON_PATTERNS = [
-    { num: "03", name: "Pattern 3" },
+    { num: "03", name: "More companies" },
 ];
 
 // ─── Exam sections shown inside the modal ─────────────────────────────────────
@@ -170,15 +175,15 @@ function PatternDetailModal({
                 style={{
                     maxHeight: "90dvh",
                     boxShadow: "0 32px 80px rgba(0,0,0,0.2)",
-                    border: "1px solid rgba(124,58,237,0.12)",
+                    border: `1px solid ${ACTIVE_PATTERN.border}`,
                 }}
             >
                 {/* Header */}
                 <div
                     className="px-6 pt-6 pb-4 flex-shrink-0"
                     style={{
-                        background: `linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(124,58,237,0.02) 100%)`,
-                        borderBottom: "1px solid rgba(124,58,237,0.1)",
+                        background: `linear-gradient(135deg, ${ACTIVE_PATTERN.bg} 0%, transparent 100%)`,
+                        borderBottom: `1px solid ${ACTIVE_PATTERN.border}`,
                     }}
                 >
                     {/* Drag handle (mobile) */}
@@ -295,8 +300,8 @@ function PatternDetailModal({
                             onClick={onStart}
                             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-[14px] font-['Inter'] text-white transition-all active:scale-[0.98]"
                             style={{
-                                background: `linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)`,
-                                boxShadow: "0 4px 20px rgba(124,58,237,0.35)",
+                                background: `linear-gradient(135deg, ${ACTIVE_PATTERN.color} 0%, ${ACTIVE_PATTERN.dark} 100%)`,
+                                boxShadow: `0 4px 20px ${ACTIVE_PATTERN.glow}`,
                             }}
                         >
                             <Play className="w-4 h-4 fill-white" />
@@ -328,7 +333,7 @@ function PatternDetailModal({
     );
 }
 
-// ─── Pattern 2 Detail Modal ────────────────────────────────────────────────────
+// ─── Cognizant Detail Modal ───────────────────────────────────────────────────
 
 function Pattern2Modal({
     isOpen,
@@ -356,7 +361,7 @@ function Pattern2Modal({
                 style={{ maxHeight: "90dvh", boxShadow: "0 32px 80px rgba(0,0,0,0.2)", border: `1px solid ${PATTERN_2.border}` }}
             >
                 {/* Header */}
-                <div className="px-6 pt-6 pb-4 flex-shrink-0" style={{ background: `linear-gradient(135deg, ${PATTERN_2.bg} 0%, rgba(8,145,178,0.02) 100%)`, borderBottom: `1px solid ${PATTERN_2.border}` }}>
+                <div className="px-6 pt-6 pb-4 flex-shrink-0" style={{ background: `linear-gradient(135deg, ${PATTERN_2.bg} 0%, transparent 100%)`, borderBottom: `1px solid ${PATTERN_2.border}` }}>
                     <div className="w-9 h-1 bg-stone-200 rounded-full mx-auto mb-4 sm:hidden" />
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -415,7 +420,7 @@ function Pattern2Modal({
                         <button
                             onClick={onStart}
                             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-[14px] font-['Inter'] text-white transition-all active:scale-[0.98]"
-                            style={{ background: `linear-gradient(135deg, ${PATTERN_2.color} 0%, #0e7490 100%)`, boxShadow: `0 4px 20px ${PATTERN_2.glow}` }}
+                            style={{ background: `linear-gradient(135deg, ${PATTERN_2.color} 0%, ${PATTERN_2.dark} 100%)`, boxShadow: `0 4px 20px ${PATTERN_2.glow}` }}
                         >
                             <Play className="w-4 h-4 fill-white" />
                             Start Practice Round
@@ -551,17 +556,17 @@ function PatternsContent() {
                         Communication Round
                     </div>
                     <h1 className="text-3xl md:text-4xl font-serif text-stone-800 tracking-tight leading-[1.15] mb-2">
-                        Select a Pattern
+                        Select a Company
                     </h1>
                     <p className="text-stone-400 text-[0.88rem] font-['Inter'] font-light">
-                        Choose a practice pattern modelled on the real MNC Communication Assessment.
+                        Each round is modelled on that company's real Communication Assessment.
                     </p>
                 </div>
 
                 {/* ── Grid ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                    {/* Pattern 1 — Active */}
+                    {/* Accenture — Active */}
                     <div
                         onClick={handlePatternClick}
                         className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
@@ -663,7 +668,7 @@ function PatternsContent() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <span className="text-[12px] font-semibold font-['Inter']" style={{ color: ACTIVE_PATTERN.color }}>
-                                        View Pattern
+                                        View Round
                                     </span>
                                     <ArrowUpRight
                                         className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -674,7 +679,7 @@ function PatternsContent() {
                         </div>
                     </div>
 
-                    {/* Pattern 2 — Active */}
+                    {/* Cognizant — Active */}
                     <div
                         onClick={() => setShowPattern2Modal(true)}
                         className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
@@ -730,14 +735,14 @@ function PatternsContent() {
                                     {PATTERN_2.tag}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="text-[12px] font-semibold font-['Inter']" style={{ color: PATTERN_2.color }}>View Pattern</span>
+                                    <span className="text-[12px] font-semibold font-['Inter']" style={{ color: PATTERN_2.color }}>View Round</span>
                                     <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: PATTERN_2.color }} />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Pattern 3 — Coming Soon */}
+                    {/* Coming Soon */}
                     {COMING_SOON_PATTERNS.map((pattern) => (
                         <div
                             key={pattern.num}
@@ -774,7 +779,7 @@ function PatternsContent() {
 export function CommunicationPatternsPage() {
     return (
         <PageWrapper>
-            <SEO title="Communication Round — Select Pattern" />
+            <SEO title="Communication Round — Select Company" />
             <Header />
             <div className="pt-20 flex justify-center">
                 <PatternsContent />

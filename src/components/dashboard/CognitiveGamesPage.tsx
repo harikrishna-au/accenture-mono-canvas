@@ -6,7 +6,14 @@ import { useGSAP } from "@gsap/react";
 
 // ─── Game definitions ─────────────────────────────────────────────────────────
 
-const ACTIVE = [
+// Each group mirrors the assessment used by a specific company, so the games
+// are grouped and labelled by that company rather than by an internal name.
+const COMPANIES = {
+  accenture: { name: "Accenture", accent: "#A100FF" },
+  cognizant: { name: "Cognizant", accent: "#0033A0" },
+} as const;
+
+const ACCENTURE_GAMES = [
   {
     num: "01",
     name: "Matrix Flow",
@@ -48,7 +55,6 @@ const ACTIVE = [
   },
 ];
 
-// Assessment pack games
 const COGNIZANT_GAMES = [
   {
     num: "04",
@@ -219,13 +225,15 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
         </p>
       </div>
 
-      {/* ── Classic games ── */}
-      <div className="mb-2">
-        <div className="text-[10px] font-bold tracking-[0.25em] uppercase text-stone-400 font-['Inter'] mb-4">
-          Classic Games
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-          {ACTIVE.map((game) => (
+      {/* ── Accenture ── */}
+      <div className="mb-10">
+        <CompanyHeader
+          company={COMPANIES.accenture}
+          count={ACCENTURE_GAMES.length}
+          blurb="Modelled on the Accenture cognitive assessment — pattern logic, numerical fluency and spatial memory."
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ACCENTURE_GAMES.map((game) => (
             <GameCard
               key={game.num}
               game={game}
@@ -238,20 +246,13 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
         </div>
       </div>
 
-      {/* ── Assessment Pack ── */}
+      {/* ── Cognizant ── */}
       <div className="mb-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="text-[10px] font-bold tracking-[0.25em] uppercase text-stone-400 font-['Inter']">
-            Assessment Pack
-          </div>
-          <div className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
-            style={{ color: '#7c3aed', background: 'rgba(124,58,237,0.07)', borderColor: 'rgba(124,58,237,0.2)' }}>
-            9 Games
-          </div>
-        </div>
-        <p className="text-stone-400 text-[0.8rem] font-['Inter'] font-light mb-5">
-          Game-based cognitive assessments modelled on real MNC hiring tests. 9 unique challenges covering logic, memory, reaction, and risk.
-        </p>
+        <CompanyHeader
+          company={COMPANIES.cognizant}
+          count={COGNIZANT_GAMES.length}
+          blurb="Modelled on the Cognizant assessment pack — logic, memory, reaction speed and risk appetite."
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {COGNIZANT_GAMES.map((game) => (
             <CognizantGameCard key={game.num} game={game} navigate={navigate} />
@@ -262,6 +263,33 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
   );
 };
 
+// ─── Company group header ─────────────────────────────────────────────────────
+
+function CompanyHeader({
+  company,
+  count,
+  blurb,
+}: {
+  company: { name: string; accent: string };
+  count: number;
+  blurb: string;
+}) {
+  return (
+    <div className="mb-5">
+      <div className="flex items-center gap-2.5 mb-1.5">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: company.accent }} />
+        <h2 className="text-[15px] font-bold tracking-tight font-['Inter'] text-stone-800">
+          {company.name}
+        </h2>
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border border-stone-200 bg-stone-50 text-stone-500 font-['Inter']">
+          {count} GAMES
+        </span>
+      </div>
+      <p className="text-stone-400 text-[12.5px] font-['Inter'] font-light">{blurb}</p>
+    </div>
+  );
+}
+
 // ─── Classic game card ────────────────────────────────────────────────────────
 
 function GameCard({
@@ -271,7 +299,7 @@ function GameCard({
   navigate,
   showPremium,
 }: {
-  game: typeof ACTIVE[0];
+  game: typeof ACCENTURE_GAMES[0];
   isPremium: boolean;
   onSubscribe: () => void;
   navigate: ReturnType<typeof useNavigate>;

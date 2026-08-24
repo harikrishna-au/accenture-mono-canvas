@@ -68,7 +68,7 @@ export function SummaryRoundP2() {
                         </div>
                     </div>
                     <h1 className="text-3xl font-extrabold text-neutral-900">Assessment Complete</h1>
-                    <p className="text-neutral-500">Pattern 2 — Performance Summary</p>
+                    <p className="text-neutral-500">Cognizant — Performance Summary</p>
                 </div>
 
                 {/* Quick score */}

@@ -33,7 +33,7 @@ export function CommunicationRoundsP2() {
     return (
         <GameProviderP2>
             <PageWrapper>
-                <SEO title="Communication Assessment — Pattern 2" />
+                <SEO title="Communication Assessment — Cognizant" />
                 <Header />
                 <RoundRouterP2 />
             </PageWrapper>
