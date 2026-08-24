@@ -89,39 +89,28 @@ export const DashboardFooter = ({ onFeedbackClick, onSupportClick, onMouseEnter,
                 <div className="w-full max-w-xs h-px bg-gradient-to-r from-transparent via-stone-200 to-transparent" />
 
                 {/* All about Infosys — sole entry into Infosys-themed prep */}
-                <button
-                    onClick={() => navigate("/hackwithinfy")}
-                    className="w-full max-w-md flex items-center justify-between gap-4 px-5 py-4 rounded-2xl text-left transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] group"
-                    style={{
-                        background: "linear-gradient(135deg, rgba(0,124,195,0.08) 0%, rgba(0,124,195,0.03) 100%)",
-                        border: "1px solid rgba(0,124,195,0.2)",
-                        boxShadow: "0 2px 14px rgba(0,124,195,0.08)",
-                    }}
-                >
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{
-                                background: "rgba(0,124,195,0.1)",
-                                border: "1px solid rgba(0,124,195,0.18)",
-                            }}
-                        >
-                            <Building2 className="w-4.5 h-4.5" style={{ color: "#007CC3", width: 18, height: 18 }} />
-                        </div>
-                        <div className="min-w-0">
-                            <div className="text-[14px] font-bold font-['Inter'] text-stone-800 leading-tight">
-                                All about Infosys
-                            </div>
-                            <div className="text-[12px] font-['Inter'] text-stone-500 mt-0.5">
-                                HackWithInfy prep, roles & interview resources
-                            </div>
-                        </div>
-                    </div>
-                    <ArrowUpRight
-                        className="w-4 h-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                        style={{ color: "#007CC3" }}
-                    />
-                </button>
+                <div className="flex flex-col items-center gap-3">
+                    <p className="text-stone-400 text-[11px] uppercase tracking-[0.22em] font-medium font-['Inter']">
+                        Company specific prep
+                    </p>
+                    <button
+                        onClick={() => navigate("/hackwithinfy")}
+                        className="flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-[13.5px] font-['Inter'] transition-all duration-200 hover:-translate-y-0.5 active:scale-95 group"
+                        style={{
+                            background: "#ffffff",
+                            border: "1px solid rgba(0,0,0,0.09)",
+                            color: "#1c1c1e",
+                            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                        }}
+                    >
+                        <Building2 className="w-4 h-4" style={{ color: "#007CC3" }} />
+                        All about Infosys
+                        <ArrowUpRight
+                            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                            style={{ color: "#007CC3" }}
+                        />
+                    </button>
+                </div>
 
                 {/* Social / Creator section */}
                 <div className="flex flex-col items-center gap-5">

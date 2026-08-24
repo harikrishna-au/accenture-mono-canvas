@@ -8,38 +8,35 @@ import {
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-// ─── Color tokens ─────────────────────────────────────────────────────────────
-const INFY_BLUE = "#007CC3";
-const INFY_BG   = "rgba(0,124,195,0.07)";
-const INFY_BDR  = "rgba(0,124,195,0.18)";
-const INFY_GLOW = "rgba(0,124,195,0.15)";
-const GOLD      = "#D97706";
-const GOLD_BG   = "rgba(217,119,6,0.07)";
-const GOLD_BDR  = "rgba(217,119,6,0.22)";
+import {
+  INFY_BLUE, INFY_BG, INFY_BDR, INFY_GLOW, INFY_DARK,
+  GOLD, GOLD_BG, GOLD_BDR,
+  PRIMARY_TONE, ACCENT_TONE, NEUTRAL_TONE,
+} from "./theme";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const ROLES = [
-  { label: "DSE",   lpa: "₹7 LPA",  sub: "6.25L + ₹75K joining",    color: "#0891b2", bg: "rgba(8,145,178,0.08)",  border: "rgba(8,145,178,0.2)"  },
-  { label: "SP L1", lpa: "₹11 LPA", sub: "10L + ₹1L joining · campus offers vary", color: GOLD, bg: GOLD_BG, border: GOLD_BDR, gold: true },
-  { label: "SP L2", lpa: "₹16 LPA", sub: "Post probation (6 months)", color: INFY_BLUE, bg: INFY_BG, border: INFY_BDR },
-  { label: "SP L3", lpa: "₹21 LPA", sub: "Post probation (6 months)", color: "#7c3aed", bg: "rgba(124,58,237,0.07)", border: "rgba(124,58,237,0.18)" },
+  { label: "DSE",   lpa: "₹7 LPA",  sub: "6.25L + ₹75K joining",    ...NEUTRAL_TONE },
+  { label: "SP L1", lpa: "₹11 LPA", sub: "10L + ₹1L joining · campus offers vary", ...ACCENT_TONE, gold: true },
+  { label: "SP L2", lpa: "₹16 LPA", sub: "Post probation (6 months)", ...PRIMARY_TONE },
+  { label: "SP L3", lpa: "₹21 LPA", sub: "Post probation (6 months)", ...PRIMARY_TONE },
 ];
 
 const ROUNDS = [
   {
     num: "01", title: "Round 1 — Online Coding Test",
     desc: "3 questions in 3 hours (Virtual). Easy → Medium → Hard. Shortlisting for DSE & SP roles. Languages: C, C++, Java, Python, JavaScript.",
-    badge: "3 Qs · 3 hrs · Virtual", color: INFY_BLUE, bg: INFY_BG, border: INFY_BDR,
+    badge: "3 Qs · 3 hrs · Virtual", ...PRIMARY_TONE,
   },
   {
     num: "02", title: "Round 2 — Advanced Coding Test",
     desc: "4 questions (Easy, Medium, Hard, Complex) — choose any 3 to solve in 3 hours. Mode: Physical (on-site). Shortlisting for SP roles.",
-    badge: "4 Qs choose 3 · 3 hrs · Physical", color: "#059669", bg: "rgba(5,150,105,0.07)", border: "rgba(5,150,105,0.18)",
+    badge: "4 Qs choose 3 · 3 hrs · Physical", ...PRIMARY_TONE,
   },
   {
     num: "03", title: "Interview Round",
     desc: "~1 hour: technical and behavioral. CS/IT: DSA, automata, compilers, OS, networks, OOP. Other streams: DSA, digital electronics, math, control systems.",
-    badge: "~1 hr · Technical + Behavioral", color: "#7c3aed", bg: "rgba(124,58,237,0.07)", border: "rgba(124,58,237,0.18)",
+    badge: "~1 hr · Technical + Behavioral", ...PRIMARY_TONE,
   },
 ];
 
@@ -127,7 +124,7 @@ const HackWithInfyLanding = () => {
             <p className="text-stone-500 text-[0.9rem] font-['Inter'] font-light max-w-lg leading-relaxed mb-5">
               These resources were curated by{" "}
               <span className="font-semibold text-stone-700">Nalla Harikrishna</span>
-              {" "}— selected for SP role at Infosys at ₹9.5 LPA. Not generic prep.
+              {" "}— selected for SP role at Infosys at ₹11 LPA. Not generic prep.
               Real strategy from someone who went through every round.
             </p>
 
@@ -135,7 +132,7 @@ const HackWithInfyLanding = () => {
             <div className="flex flex-wrap gap-2">
               {[
                 { icon: <BadgeCheck className="w-3 h-3" />, label: "SP Role Secured", gold: true  },
-                { icon: <Star       className="w-3 h-3" />, label: "₹9.5 LPA Offer",   gold: true  },
+                { icon: <Star       className="w-3 h-3" />, label: "₹11 LPA Offer",   gold: true  },
                 { icon: <Trophy     className="w-3 h-3" />, label: "Infosys Selected", gold: true  },
                 { icon: <Zap        className="w-3 h-3" />, label: "Last-min Friendly", gold: false },
               ].map((p) => (
@@ -199,7 +196,7 @@ const HackWithInfyLanding = () => {
               Nalla Harikrishna
             </div>
             <div className="text-[11px] font-semibold font-['Inter'] mb-3" style={{ color: GOLD }}>
-              SP Role · ₹9.5 LPA
+              SP Role · ₹11 LPA
             </div>
             <div
               className="text-[10.5px] font-['Inter'] text-stone-400 mb-3 leading-relaxed"
@@ -211,7 +208,7 @@ const HackWithInfyLanding = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10.5px] font-semibold font-['Inter'] transition-all hover:opacity-80 w-full justify-center"
-              style={{ background: "rgba(10,102,194,0.08)", color: "#0A66C2", border: "1px solid rgba(10,102,194,0.18)" }}
+              style={{ background: "#ffffff", color: GOLD, border: `1px solid ${GOLD_BDR}` }}
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="w-3 h-3" />
@@ -293,7 +290,7 @@ const HackWithInfyLanding = () => {
           </div>
           <div
             className="relative z-10 flex items-center gap-1.5 flex-shrink-0 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] transition-all hover:scale-[1.03] active:scale-[0.97]"
-            style={{ background: `linear-gradient(135deg, ${INFY_BLUE}, #005a8e)`, boxShadow: `0 4px 16px ${INFY_GLOW}` }}
+            style={{ background: `linear-gradient(135deg, ${INFY_BLUE}, ${INFY_DARK})`, boxShadow: `0 4px 16px ${INFY_GLOW}` }}
           >
             Start Mock
             <ChevronRight className="w-4 h-4" />
@@ -407,7 +404,7 @@ const HackWithInfyLanding = () => {
               Made by Nalla Harikrishna
             </div>
             <div className="text-stone-500 text-[12px] font-['Inter'] font-light">
-              Infosys SP Role · ₹9.5 LPA · These are the resources he used and wished existed when he was preparing.
+              Infosys SP Role · ₹11 LPA · These are the resources he used and wished existed when he was preparing.
             </div>
           </div>
           <a

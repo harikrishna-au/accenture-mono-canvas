@@ -4,9 +4,7 @@ import { ArrowLeft, FileText, X, ExternalLink, Download, Archive } from "lucide-
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const INFY_BLUE = "#007CC3";
-const INFY_BG   = "rgba(0,124,195,0.07)";
-const INFY_BDR  = "rgba(0,124,195,0.18)";
+import { INFY_BLUE, INFY_BG, INFY_BDR, PRIMARY_TONE, ACCENT_TONE } from "./theme";
 
 // ─── Real prep files from Google Drive ────────────────────────────────────────
 // Preview URL: https://drive.google.com/file/d/{ID}/preview  (no download toolbar)
@@ -34,9 +32,7 @@ const RESOURCES: Resource[] = [
     tag: "Full Bundle",
     type: "zip",
     category: "Bundle",
-    color: "#059669",
-    bg: "rgba(5,150,105,0.07)",
-    border: "rgba(5,150,105,0.18)",
+    ...ACCENT_TONE,
   },
   // ── Individual files (preview only) ──────────────────────────────────────
   {
@@ -46,9 +42,7 @@ const RESOURCES: Resource[] = [
     tag: "DSA",
     type: "pdf",
     category: "Core Prep",
-    color: INFY_BLUE,
-    bg: INFY_BG,
-    border: INFY_BDR,
+    ...PRIMARY_TONE,
   },
   {
     id: "1D6nrO9wRSeg0Ple5_rRMMFdmQke3k92c",
@@ -58,9 +52,7 @@ const RESOURCES: Resource[] = [
     type: "pdf",
     category: "Core Prep",
     pages: "50 problems",
-    color: INFY_BLUE,
-    bg: INFY_BG,
-    border: INFY_BDR,
+    ...PRIMARY_TONE,
   },
   {
     id: "1nfr_MHDGiQncC6AbN3W83aYaosQe1IxF",
@@ -69,9 +61,7 @@ const RESOURCES: Resource[] = [
     tag: "CS Fundamentals",
     type: "pdf",
     category: "CS Fundamentals",
-    color: "#7c3aed",
-    bg: "rgba(124,58,237,0.07)",
-    border: "rgba(124,58,237,0.18)",
+    ...PRIMARY_TONE,
   },
   {
     id: "127XV5IolcMuWbVUh3dTCoDu9vPeToRgm",
@@ -81,9 +71,7 @@ const RESOURCES: Resource[] = [
     type: "pdf",
     category: "SP Interview",
     pages: "1,002 KB",
-    color: "#d97706",
-    bg: "rgba(217,119,6,0.07)",
-    border: "rgba(217,119,6,0.18)",
+    ...ACCENT_TONE,
   },
   {
     id: "1NhEvCW-vbqTkIxvkO9oqatQcEUbEgrid",
@@ -92,9 +80,7 @@ const RESOURCES: Resource[] = [
     tag: "Last Mile",
     type: "docx",
     category: "Last Mile",
-    color: "#059669",
-    bg: "rgba(5,150,105,0.07)",
-    border: "rgba(5,150,105,0.18)",
+    ...PRIMARY_TONE,
   },
   {
     id: "1oQNyG_j-oegIL4WWU8XjUab_jK1hi5Fh",
@@ -103,9 +89,7 @@ const RESOURCES: Resource[] = [
     tag: "SP Prep",
     type: "docx",
     category: "SP Interview",
-    color: "#d97706",
-    bg: "rgba(217,119,6,0.07)",
-    border: "rgba(217,119,6,0.18)",
+    ...ACCENT_TONE,
   },
 ];
 
@@ -278,7 +262,7 @@ const HackWithInfyResources = () => {
                       </span>
                     )}
                     {res.type === "zip" && (
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold border border-emerald-200 text-emerald-500 font-['Inter']">
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold border border-stone-200 text-stone-400 font-['Inter']">
                         ZIP
                       </span>
                     )}

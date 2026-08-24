@@ -4,9 +4,10 @@ import { ArrowLeft, CheckCircle2, Circle, ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const INFY_BLUE = "#007CC3";
-const INFY_BG   = "rgba(0,124,195,0.07)";
-const INFY_BDR  = "rgba(0,124,195,0.18)";
+import {
+  INFY_BLUE, INFY_BG, INFY_BDR,
+  DIFF_STYLES, PRIMARY_TONE, NEUTRAL_TONE,
+} from "./theme";
 
 // ─── Syllabus data ────────────────────────────────────────────────────────────
 
@@ -141,15 +142,9 @@ type Role = "DSE" | "SP";
 
 const ROLE_TABS: Role[] = ["DSE", "SP"];
 
-const DIFF_STYLES: Record<string, { color: string; bg: string; border: string }> = {
-  Easy:   { color: "#059669", bg: "rgba(5,150,105,0.08)",   border: "rgba(5,150,105,0.2)"   },
-  Medium: { color: "#d97706", bg: "rgba(217,119,6,0.08)",   border: "rgba(217,119,6,0.2)"   },
-  Hard:   { color: "#dc2626", bg: "rgba(220,38,38,0.08)",   border: "rgba(220,38,38,0.2)"   },
-};
-
 const ROLE_STYLES: Record<Role, { color: string; bg: string; border: string }> = {
-  DSE: { color: "#0891b2", bg: "rgba(8,145,178,0.08)",   border: "rgba(8,145,178,0.2)"   },
-  SP:  { color: INFY_BLUE, bg: INFY_BG,                  border: INFY_BDR               },
+  DSE: NEUTRAL_TONE,
+  SP: PRIMARY_TONE,
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -292,7 +287,7 @@ const HackWithInfySyllabus = () => {
                       {sec.topics.length} topics
                     </span>
                     {secDone > 0 && (
-                      <span className="text-[11px] text-emerald-600 font-['Inter'] font-medium">
+                      <span className="text-[11px] font-['Inter'] font-medium" style={{ color: INFY_BLUE }}>
                         {secDone}/{sec.topics.length} done
                       </span>
                     )}
@@ -315,18 +310,18 @@ const HackWithInfySyllabus = () => {
                           onClick={() => toggle(key)}
                           className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors"
                           style={{
-                            background: done ? "rgba(5,150,105,0.05)" : "rgba(0,0,0,0.015)",
-                            border: `1px solid ${done ? "rgba(5,150,105,0.2)" : "transparent"}`,
+                            background: done ? INFY_BG : "rgba(0,0,0,0.015)",
+                            border: `1px solid ${done ? INFY_BDR : "transparent"}`,
                           }}
                         >
                           {done ? (
-                            <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "#059669" }} />
+                            <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: INFY_BLUE }} />
                           ) : (
                             <Circle className="w-4 h-4 flex-shrink-0 text-stone-300" />
                           )}
                           <span
                             className="flex-1 text-[13px] font-['Inter']"
-                            style={{ color: done ? "#059669" : "#1c1c1e", textDecoration: done ? "line-through" : "none" }}
+                            style={{ color: done ? INFY_BLUE : "#1c1c1e", textDecoration: done ? "line-through" : "none" }}
                           >
                             {t.name}
                           </span>

@@ -4,9 +4,7 @@ import { ArrowLeft, ChevronDown, ExternalLink, Clock } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const INFY_BLUE = "#007CC3";
-const INFY_BG   = "rgba(0,124,195,0.07)";
-const INFY_BDR  = "rgba(0,124,195,0.18)";
+import { INFY_BLUE, INFY_DARK, INFY_BG, INFY_BDR, DIFF_STYLES, NEUTRAL, NEUTRAL_BG, NEUTRAL_BDR } from "./theme";
 
 // ─── Question data ─────────────────────────────────────────────────────────────
 
@@ -314,12 +312,6 @@ const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
 const ROUNDS = ["Round 1", "Round 2", "Interview"] as const;
 const DIFFS: Difficulty[] = ["Easy", "Medium", "Hard"];
 
-const DIFF_STYLES: Record<Difficulty, { color: string; bg: string; border: string }> = {
-  Easy:   { color: "#059669", bg: "rgba(5,150,105,0.08)",   border: "rgba(5,150,105,0.2)"   },
-  Medium: { color: "#d97706", bg: "rgba(217,119,6,0.08)",   border: "rgba(217,119,6,0.2)"   },
-  Hard:   { color: "#dc2626", bg: "rgba(220,38,38,0.08)",   border: "rgba(220,38,38,0.2)"   },
-};
-
 // ─── Question card ────────────────────────────────────────────────────────────
 
 const QuestionCard = ({ q }: { q: Question }) => {
@@ -383,7 +375,7 @@ const QuestionCard = ({ q }: { q: Question }) => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-[12px] font-semibold font-['Inter'] transition-all hover:scale-[1.03] active:scale-[0.97]"
               style={{
-                background: `linear-gradient(135deg, ${INFY_BLUE}, #005a8e)`,
+                background: `linear-gradient(135deg, ${INFY_BLUE}, ${INFY_DARK})`,
                 boxShadow: `0 4px 14px rgba(0,124,195,0.2)`,
               }}
             >
@@ -505,9 +497,9 @@ const HackWithInfyPreviousYears = () => {
                   onClick={() => setSelectedRound(active ? null : r)}
                   className="px-3 py-1.5 rounded-xl text-[11.5px] font-semibold font-['Inter'] transition-all"
                   style={{
-                    background: active ? "#6b7280" : "rgba(107,114,128,0.08)",
-                    color: active ? "#fff" : "#6b7280",
-                    border: "1.5px solid rgba(107,114,128,0.2)",
+                    background: active ? NEUTRAL : NEUTRAL_BG,
+                    color: active ? "#fff" : NEUTRAL,
+                    border: `1.5px solid ${NEUTRAL_BDR}`,
                   }}
                 >
                   {r}

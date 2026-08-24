@@ -4,9 +4,10 @@ import { ArrowLeft, ChevronDown, Zap, AlertTriangle, CheckCircle2, Clock } from 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-const INFY_BLUE = "#007CC3";
-const INFY_BG   = "rgba(0,124,195,0.07)";
-const INFY_BDR  = "rgba(0,124,195,0.18)";
+import {
+  INFY_BLUE, INFY_BG, INFY_BDR,
+  PRIMARY_TONE, ACCENT_TONE, NEUTRAL_TONE,
+} from "./theme";
 
 // ─── Tips data ─────────────────────────────────────────────────────────────────
 
@@ -122,10 +123,12 @@ const INTERVIEW_TIPS: Section[] = [
 
 // ─── TipItem ──────────────────────────────────────────────────────────────────
 
+// Do / avoid / info are separated by icon, so they share the section palette:
+// blue for recommended actions, gold for cautions, neutral for context.
 const TYPE_COLORS = {
-  do:   { color: "#059669", bg: "rgba(5,150,105,0.07)",  border: "rgba(5,150,105,0.18)"  },
-  dont: { color: "#dc2626", bg: "rgba(220,38,38,0.07)",  border: "rgba(220,38,38,0.18)"  },
-  info: { color: INFY_BLUE, bg: INFY_BG,                 border: INFY_BDR               },
+  do: PRIMARY_TONE,
+  dont: ACCENT_TONE,
+  info: NEUTRAL_TONE,
 };
 
 const TipItem = ({ tip }: { tip: Tip }) => {
@@ -191,10 +194,6 @@ const HackWithInfyTips = () => {
     { scope: containerRef }
   );
 
-  const round1Accent = { color: INFY_BLUE, bg: INFY_BG, border: INFY_BDR };
-  const round2Accent = { color: "#059669", bg: "rgba(5,150,105,0.07)", border: "rgba(5,150,105,0.18)" };
-  const interviewAccent = { color: "#7c3aed", bg: "rgba(124,58,237,0.07)", border: "rgba(124,58,237,0.18)" };
-
   return (
     <>
       <div className="fixed inset-0 -z-10 bg-[#fcfcf9]" />
@@ -230,9 +229,9 @@ const HackWithInfyTips = () => {
         {/* Legend */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
           {[
-            { icon: CheckCircle2, label: "Do this", color: "#059669" },
-            { icon: AlertTriangle, label: "Avoid this", color: "#dc2626" },
-            { icon: Zap, label: "Good to know", color: INFY_BLUE },
+            { icon: CheckCircle2, label: "Do this", color: TYPE_COLORS.do.color },
+            { icon: AlertTriangle, label: "Avoid this", color: TYPE_COLORS.dont.color },
+            { icon: Zap, label: "Good to know", color: TYPE_COLORS.info.color },
           ].map(({ icon: Icon, label, color }) => (
             <div key={label} className="flex items-center gap-1.5">
               <Icon className="w-3.5 h-3.5" style={{ color }} />
@@ -254,7 +253,7 @@ const HackWithInfyTips = () => {
           </div>
           <div className="flex flex-col gap-3">
             {ROUND1_TIPS.map((s) => (
-              <AccordionSection key={s.title} section={s} accent={round1Accent} />
+              <AccordionSection key={s.title} section={s} accent={PRIMARY_TONE} />
             ))}
           </div>
         </div>
@@ -264,7 +263,7 @@ const HackWithInfyTips = () => {
           <div className="flex items-center gap-3 mb-4">
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.15em] uppercase font-['Inter']"
-              style={{ background: "rgba(5,150,105,0.07)", color: "#059669", border: "1px solid rgba(5,150,105,0.18)" }}
+              style={{ background: INFY_BG, color: INFY_BLUE, border: `1px solid ${INFY_BDR}` }}
             >
               <Clock className="w-3 h-3" />
               Round 2 — Advanced Coding Test · 4 Qs choose 3 · 3 hrs · Physical
@@ -272,7 +271,7 @@ const HackWithInfyTips = () => {
           </div>
           <div className="flex flex-col gap-3">
             {ROUND2_TIPS.map((s) => (
-              <AccordionSection key={s.title} section={s} accent={round2Accent} />
+              <AccordionSection key={s.title} section={s} accent={PRIMARY_TONE} />
             ))}
           </div>
         </div>
@@ -282,7 +281,7 @@ const HackWithInfyTips = () => {
           <div className="flex items-center gap-3 mb-4">
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.15em] uppercase font-['Inter']"
-              style={{ background: "rgba(124,58,237,0.07)", color: "#7c3aed", border: "1px solid rgba(124,58,237,0.18)" }}
+              style={{ background: INFY_BG, color: INFY_BLUE, border: `1px solid ${INFY_BDR}` }}
             >
               <Zap className="w-3 h-3" />
               Interview Round · ~1 hr · Technical + Behavioral
@@ -290,7 +289,7 @@ const HackWithInfyTips = () => {
           </div>
           <div className="flex flex-col gap-3">
             {INTERVIEW_TIPS.map((s) => (
-              <AccordionSection key={s.title} section={s} accent={interviewAccent} />
+              <AccordionSection key={s.title} section={s} accent={PRIMARY_TONE} />
             ))}
           </div>
         </div>
