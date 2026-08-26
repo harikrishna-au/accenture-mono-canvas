@@ -91,28 +91,15 @@ export const clerkAppearance = {
 };
 
 export const AuthSkeleton = () => (
-  <div className="animate-pulse space-y-5">
-    <div className="flex gap-2 p-1 rounded-xl bg-stone-100 border border-stone-200">
-      <div className="flex-1 h-8 rounded-[10px] bg-stone-200/70" />
-      <div className="flex-1 h-8 rounded-[10px] bg-stone-100" />
-    </div>
-    <div className="space-y-2 pt-1">
-      <div className="h-6 w-36 bg-stone-100 rounded-lg" />
-      <div className="h-3.5 w-52 bg-stone-100 rounded-lg" />
-    </div>
-    <div className="flex gap-2">
-      <div className="flex-1 h-10 bg-stone-100 rounded-xl border border-stone-200" />
-      <div className="flex-1 h-10 bg-stone-100 rounded-xl border border-stone-200" />
-    </div>
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-px bg-stone-100" />
-      <div className="w-6 h-3 bg-stone-100 rounded" />
-      <div className="flex-1 h-px bg-stone-100" />
+  <div className="animate-pulse space-y-4">
+    <div className="flex gap-1 p-1 rounded-xl bg-stone-100">
+      <div className="flex-1 h-10 rounded-[10px] bg-white" />
+      <div className="flex-1 h-10 rounded-[10px] bg-transparent" />
     </div>
     <div className="space-y-1.5">
       <div className="h-3 w-24 bg-stone-100 rounded" />
-      <div className="h-10 bg-stone-100 rounded-xl border border-stone-200" />
+      <div className="h-11 bg-stone-50 rounded-xl border border-stone-100" />
     </div>
-    <div className="h-10 bg-stone-900/12 rounded-xl" />
+    <div className="h-12 bg-stone-900/10 rounded-xl" />
   </div>
 );

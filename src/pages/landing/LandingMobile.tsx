@@ -7,7 +7,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { Link, NavigateFunction } from "react-router-dom";
-import { ArrowRight, ChevronRight, Sparkles, ShieldCheck, Mail, UserPlus, LogIn, Check } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Mail } from "lucide-react";
 import { AuthView, clerkAppearance, AuthSkeleton } from "./authConfig";
 
 interface Feature {
@@ -34,12 +34,10 @@ export const LandingMobile = ({
   isPremium,
   isLoaded,
   isClerkVerificationStep,
-  features,
 }: LandingMobileProps) => (
   <div className="lg:hidden relative z-10">
-    {/* Signed-in: skip landing, show welcome directly */}
     <SignedIn>
-      <div className="min-h-screen flex flex-col items-center justify-center px-5">
+      <div className="min-h-dvh flex flex-col items-center justify-center px-5">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,244 +81,85 @@ export const LandingMobile = ({
     </SignedIn>
 
     <SignedOut>
-      {/* Section 1: Hero */}
-      <section className="min-h-screen flex flex-col">
-        <div className="flex items-center justify-between px-5 pt-7 pb-2">
-          <div className="flex items-center gap-2">
+      <div className="min-h-dvh flex flex-col px-5 pt-5 pb-24">
+        <header className="flex items-center h-11 mb-6">
+          <div className="flex items-center gap-2 min-w-0">
             <img
               src="/favicon.svg"
               alt="Harry The Blaze"
               className="w-7 h-7 flex-shrink-0"
               style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.22))" }}
             />
-            <span className="font-['Merriweather'] font-black text-[0.82rem] tracking-tight text-stone-800">
+            <span className="font-['Merriweather'] font-black text-[0.82rem] tracking-tight text-stone-800 truncate">
               HARRY THE BLAZE
             </span>
           </div>
-          <a
-            href="#auth-section"
-            onClick={() => setView("sign-in")}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-full text-[12.5px] font-['Inter'] font-semibold bg-white border border-stone-200 text-stone-700 active:scale-95 transition-transform"
-          >
-            Sign In
-          </a>
-        </div>
+        </header>
 
-        <div className="px-5 pt-8 pb-6 flex-1">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-5 bg-white border border-stone-200"
-            style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.03)" }}
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            <span className="text-[10px] font-['Inter'] font-semibold text-stone-600">
-              Campus Placement Accelerator · Free to join
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="font-['Merriweather'] font-black text-stone-900 leading-[1.1] tracking-tight text-[2rem] mb-4"
-          >
-            Crack campus<br />
-            placements.{" "}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+        >
+          <h1 className="font-['Merriweather'] font-black text-stone-900 leading-[1.15] tracking-tight text-[1.65rem]">
+            Crack campus placements.{" "}
             <span className="text-stone-400">Faster.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.16 }}
-            className="font-['Inter'] text-[14px] text-stone-500 leading-relaxed mb-8"
-          >
-            AI mock interviews, gamified aptitude tests, communication practice — and 1:1 sessions with students who just got placed.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.22 }}
-            className="flex flex-col gap-3 mb-10"
-          >
-            <a
-              href="#auth-section"
-              onClick={() => setView("sign-up")}
-              className="flex items-center justify-center gap-2 py-4 rounded-2xl font-['Inter'] font-semibold text-[15px] bg-stone-900 text-white active:scale-[0.98] transition-transform"
-            >
-              Get Started Free
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <a
-              href="#auth-section"
-              className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-['Inter'] font-medium text-[14px] text-stone-600 border border-stone-200 bg-white active:scale-[0.98] transition-transform"
-              onClick={() => setView("sign-in")}
-            >
-              Already have an account? Sign In
-            </a>
-          </motion.div>
-
-          {/* Social proof */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="flex items-center gap-4 mb-8"
-          >
-            <div className="flex -space-x-2">
-              {["#d6cfc7", "#c4bdb4", "#b8b0a8", "#a8a29e"].map((c, i) => (
-                <div
-                  key={i}
-                  className="w-7 h-7 rounded-full border-2 border-[#fcfcf9] flex items-center justify-center text-[9px] font-bold text-white"
-                  style={{ background: c }}
-                >
-                  {["A", "R", "K", "S"][i]}
-                </div>
-              ))}
-            </div>
-            <div>
-              <div className="flex items-center gap-1 mb-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-2.5 h-2.5 text-amber-400 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="font-['Inter'] text-[11px] text-stone-500">
-                <span className="font-semibold text-stone-700">500+ students</span> placed
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Features list */}
-          <div className="space-y-3">
-            {features.map(({ icon: Icon, label, sub, to }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.35, delay: 0.35 + i * 0.06 }}
-                className={`flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-stone-100 shadow-sm${to ? " cursor-pointer hover:border-amber-200 hover:shadow-md transition-all active:scale-[0.98]" : ""}`}
-                onClick={to ? () => navigate(to) : undefined}
-              >
-                <div className="w-9 h-9 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-stone-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-['Inter'] text-[13px] font-semibold text-stone-800">{label}</p>
-                  <p className="font-['Inter'] text-[11px] text-stone-400">{sub}</p>
-                </div>
-                {to ? (
-                  <ChevronRight className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-stone-200 flex-shrink-0 mr-1.5" />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center pb-6 gap-1">
-          <p className="font-['Inter'] text-[11px] text-stone-400">Scroll to sign up</p>
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Section 2: Auth */}
-      {/* Not min-h-screen: the form is shorter than a phone screen, so forcing a
-          full viewport left a half-screen of blank space below the footer links. */}
-      <section
-        id="auth-section"
-        className="flex flex-col px-5 pt-10 pb-12"
-        style={{ scrollMarginTop: "0px" }}
-      >
-        <div className="mb-7">
-          {view === "sign-up" ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3">
-              <Sparkles className="w-3 h-3" />
-              Free forever · No credit card
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-semibold bg-stone-100 text-stone-600 border border-stone-200 mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-stone-400 inline-block" />
-              Welcome back
-            </span>
-          )}
-          <h2 className="font-['Merriweather'] font-black text-[1.5rem] text-stone-900 leading-tight mb-1">
-            {view === "sign-in" ? "Welcome back" : "Create your free account"}
-          </h2>
-          <p className="font-['Inter'] text-[13px] text-stone-500">
-            {view === "sign-in" ? "Sign in to continue your prep." : "Join 500+ students. Takes under a minute."}
+          </h1>
+          <p className="font-['Inter'] text-[13.5px] text-stone-500 leading-relaxed mt-2">
+            Games, interviews, and 1:1 with seniors who just got placed.
           </p>
-          {view === "sign-up" && (
-            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 mt-3">
-              {["Free forever", "No credit card", "Ready in 60s"].map((b) => (
-                <span key={b} className="inline-flex items-center gap-1 text-[11px] font-['Inter'] font-medium text-stone-500">
-                  <Check className="w-3 h-3 text-emerald-500" strokeWidth={3} />
-                  {b}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        </motion.div>
 
-        <SignedOut>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.06 }}
+          className="mt-6 rounded-2xl bg-white border border-stone-200/90 p-4"
+          style={{ boxShadow: "0 8px 28px rgba(28, 25, 23, 0.06)" }}
+        >
           {!isLoaded ? (
             <AuthSkeleton />
           ) : (
             <>
-              <div
-                className={`flex gap-1 p-1 rounded-2xl mb-6 ${isClerkVerificationStep ? "hidden" : ""}`}
-                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}
-              >
-                {(["sign-up", "sign-in"] as AuthView[]).map((v) => {
-                  const active = view === v;
-                  const Icon = v === "sign-up" ? UserPlus : LogIn;
-                  return (
-                    <button
-                      key={v}
-                      onClick={() => setView(v)}
-                      className="flex-1 py-2.5 rounded-xl font-['Inter'] transition-all duration-200 active:scale-[0.97] flex flex-col items-center leading-tight gap-0.5"
-                      style={
-                        active
-                          ? { background: "#ffffff", color: "#1c1c1e", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }
-                          : { color: "#a8a29e" }
-                      }
-                    >
-                      <span className="flex items-center gap-1.5 text-[13.5px] font-bold">
-                        <Icon className="w-3.5 h-3.5" />
-                        {v === "sign-up" ? "Sign Up" : "Sign In"}
-                      </span>
-                      <span className="text-[10px] font-medium opacity-75">
-                        {v === "sign-up" ? "New here — it's free" : "I have an account"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              {!isClerkVerificationStep && (
+                <div
+                  className="flex p-1 rounded-xl mb-4"
+                  style={{ background: "rgba(0,0,0,0.045)" }}
+                  role="tablist"
+                  aria-label="Account"
+                >
+                  {(["sign-up", "sign-in"] as AuthView[]).map((v) => {
+                    const active = view === v;
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setView(v)}
+                        className="flex-1 min-h-[40px] rounded-[10px] font-['Inter'] text-[13.5px] font-semibold transition-all duration-200 active:scale-[0.98]"
+                        style={
+                          active
+                            ? { background: "#ffffff", color: "#1c1c1e", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
+                            : { color: "#78716c" }
+                        }
+                      >
+                        {v === "sign-up" ? "Sign up" : "Sign in"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {isClerkVerificationStep && (
-                <div className="mb-6 flex items-start gap-3 p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+                <div className="mb-4 flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
                   <Mail className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-['Inter'] text-[12.5px] font-semibold text-amber-900 leading-snug">
+                    <p className="font-['Inter'] text-[13px] font-semibold text-amber-900 leading-snug">
                       Check your email to verify
                     </p>
-                    <p className="font-['Inter'] text-[11.5px] text-amber-700 leading-snug mt-0.5">
-                      We just sent you a verification email. Enter the code below — and check your <span className="font-semibold">spam folder</span> if it's not in your inbox within a minute.
+                    <p className="font-['Inter'] text-[12px] text-amber-700 leading-snug mt-0.5">
+                      Enter the code below. If it is not in your inbox, check spam.
                     </p>
                   </div>
                 </div>
@@ -329,10 +168,10 @@ export const LandingMobile = ({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={view + "-mob"}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.18 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.16 }}
                   className="w-full"
                 >
                   {view === "sign-in" ? (
@@ -342,30 +181,24 @@ export const LandingMobile = ({
                   )}
                 </motion.div>
               </AnimatePresence>
-
-              {!isClerkVerificationStep && (
-                <p className="mt-5 text-center font-['Inter'] text-[12.5px] text-stone-500">
-                  {view === "sign-in" ? "New to Harry The Blaze? " : "Already have an account? "}
-                  <button
-                    onClick={() => setView(view === "sign-in" ? "sign-up" : "sign-in")}
-                    className="font-semibold text-stone-900 hover:underline underline-offset-2 py-2 px-0.5"
-                  >
-                    {view === "sign-in" ? "Create a free account" : "Sign in instead"}
-                  </button>
-                </p>
-              )}
-
-              <div className="flex items-center justify-center gap-2 text-stone-400 pt-6">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500/70" />
-                <span className="font-['Inter'] text-[11px]">
-                  Secure sign-in · We never share your data
-                </span>
-              </div>
             </>
           )}
-        </SignedOut>
+        </motion.div>
 
-        <div className="flex items-center gap-2 pt-6 flex-wrap">
+        <p className="mt-4 text-center font-['Inter'] text-[12px] text-stone-400">
+          500+ students · Free · No credit card
+        </p>
+        <p className="mt-2 text-center font-['Inter'] text-[12px] text-stone-400">
+          Cognitive games · Communication · AI interviews
+        </p>
+
+        <div className="mt-auto pt-8 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500/70" />
+          <span className="font-['Inter'] text-[11px] text-stone-400">
+            Secure · We never share your data
+          </span>
+        </div>
+        <nav className="flex flex-wrap items-center justify-center gap-x-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
           {[
             { label: "About", to: "/about" },
             { label: "Terms", to: "/terms" },
@@ -375,13 +208,13 @@ export const LandingMobile = ({
             <Link
               key={label}
               to={to}
-              className="inline-flex items-center min-h-[44px] px-2.5 text-[12px] font-['Inter'] text-stone-400 hover:text-stone-600 transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] px-2.5 text-[12px] font-['Inter'] text-stone-400"
             >
               {label}
             </Link>
           ))}
-        </div>
-      </section>
+        </nav>
+      </div>
     </SignedOut>
   </div>
 );
