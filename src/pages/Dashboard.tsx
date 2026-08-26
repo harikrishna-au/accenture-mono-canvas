@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/clerk-react";
 import { Lock, Crown, ClipboardList, Users, Linkedin, Bot, ArrowLeft, MessageCircle, Hammer } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
@@ -52,27 +52,38 @@ const Dashboard = () => {
     }
   }, [searchParams]);
 
-  // Function to trigger feedback popup check
+  // Both the tour and the feedback survey are opened on a timer, and the effect
+  // below re-runs as Clerk and the premium check settle. Each re-run used to queue
+  // another copy of the same popup, so a new user could get the tour twice.
+  const tourTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const triggerFeedbackCheck = () => {
+    if (feedbackTimer.current) return;
     const hasSeenFeedback = localStorage.getItem('has_seen_feedback_v1');
-    if (!hasSeenFeedback && !premiumLoading && isSignedIn) {
-      setTimeout(() => {
-        setShowFeedbackPopup(true);
-        localStorage.setItem('has_seen_feedback_v1', 'true');
-      }, 2000);
-    }
+    if (hasSeenFeedback || premiumLoading || !isSignedIn) return;
+    feedbackTimer.current = setTimeout(() => {
+      setShowFeedbackPopup(true);
+      localStorage.setItem('has_seen_feedback_v1', 'true');
+    }, 2000);
   };
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('has_seen_tour_v1');
     if (!hasSeenTour) {
-      setTimeout(() => setShowTour(true), 1000);
+      if (tourTimer.current) return;
+      tourTimer.current = setTimeout(() => setShowTour(true), 1000);
       // Feedback will be triggered after tour closes
-    } else {
-      // Tour already seen, safe to trigger feedback check directly
-      triggerFeedbackCheck();
+      return;
     }
+    // Tour already seen, safe to trigger feedback check directly
+    triggerFeedbackCheck();
   }, [premiumLoading, isSignedIn]);
+
+  useEffect(() => () => {
+    if (tourTimer.current) clearTimeout(tourTimer.current);
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  }, []);
 
   const handleTourClose = () => {
     setShowTour(false);
@@ -83,7 +94,10 @@ const Dashboard = () => {
   // Handle Auto-Open Payment (Referral Flow)
   useEffect(() => {
     const shouldAutoOpen = localStorage.getItem("auto_open_payment");
-    if (shouldAutoOpen && isSignedIn && !isPremium) {
+    // Waiting on the tour and the survey keeps this from opening a third overlay
+    // on top of them; the flag survives until then, so the effect re-runs and
+    // opens the popup once the others are dismissed.
+    if (shouldAutoOpen && isSignedIn && !isPremium && !showTour && !showFeedbackPopup) {
       // Delay to let dashboard animations finish
       const timer = setTimeout(() => {
         setShowPaymentPopup(true);
@@ -91,7 +105,7 @@ const Dashboard = () => {
       }, 2500);
       return () => clearTimeout(timer);
     }
-  }, [isSignedIn, isPremium]);
+  }, [isSignedIn, isPremium, showTour, showFeedbackPopup]);
 
   const handleSubscribe = async () => {
     if (isPremium) {

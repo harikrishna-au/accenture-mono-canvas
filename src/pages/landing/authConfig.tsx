@@ -16,7 +16,17 @@ export const clerkAppearance = {
   elements: {
     rootBox: { width: "100%" },
     card: { boxShadow: "none", border: "none", padding: "0", backgroundColor: "transparent", width: "100%" },
-    cardBox: { boxShadow: "none", border: "none", backgroundColor: "transparent", width: "100%" },
+    // Clerk's cardBox ships with overflow-x: hidden for its own card transitions.
+    // Once the card border and padding are removed above, the form content sits a
+    // pixel to the left of that clip edge, which shaved the vertical stem off the
+    // first letter of every field label — "Email address" rendered as ".mail address".
+    cardBox: {
+      boxShadow: "none",
+      border: "none",
+      backgroundColor: "transparent",
+      width: "100%",
+      overflow: "visible",
+    },
     main: { backgroundColor: "transparent", gap: "0.9rem" },
 
     // Hide Clerk's built-in header — the landing page renders its own branded
@@ -27,27 +37,32 @@ export const clerkAppearance = {
     // Form fields — match the card's stone/rounded styling
     form: { gap: "0.85rem" },
     formFieldLabel: {
-      fontSize: "12.5px",
+      fontSize: "13px",
       fontWeight: "600",
       color: "#44403c",
       marginBottom: "4px",
     },
+    // 16px is the threshold below which iOS Safari zooms the page when a field is
+    // focused; at 14px, tapping the email box zoomed the whole layout in. The
+    // min-height keeps the field a comfortable 44px finger target.
     formFieldInput: {
       backgroundColor: "#faf9f7",
       border: "1px solid #e7e5e0",
       borderRadius: "12px",
-      fontSize: "14px",
-      padding: "11px 14px",
+      fontSize: "16px",
+      padding: "12px 14px",
+      minHeight: "46px",
       boxShadow: "none",
     },
     formButtonPrimary: {
       backgroundColor: "#1c1c1e",
       fontFamily: "'Inter', sans-serif",
-      fontSize: "14px",
+      fontSize: "15px",
       fontWeight: "600",
       textTransform: "none",
       borderRadius: "12px",
-      padding: "11px",
+      padding: "13px",
+      minHeight: "48px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
     },
 
@@ -56,6 +71,7 @@ export const clerkAppearance = {
       border: "1px solid #e7e5e0",
       borderRadius: "12px",
       backgroundColor: "#ffffff",
+      minHeight: "46px",
     },
     socialButtonsBlockButtonText: { fontWeight: "500", color: "#44403c" },
 
@@ -64,7 +80,7 @@ export const clerkAppearance = {
 
     // Verification / OTP step
     identityPreview: { backgroundColor: "#faf9f7", border: "1px solid #e7e5e0", borderRadius: "10px" },
-    otpCodeFieldInput: { border: "1px solid #e7e5e0", borderRadius: "10px" },
+    otpCodeFieldInput: { border: "1px solid #e7e5e0", borderRadius: "10px", fontSize: "16px" },
     formResendCodeLink: { color: "#1c1c1e", fontWeight: "600" },
 
     // We provide our own switch links below the form

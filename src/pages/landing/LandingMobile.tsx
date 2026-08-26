@@ -100,7 +100,7 @@ export const LandingMobile = ({
           <a
             href="#auth-section"
             onClick={() => setView("sign-in")}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-['Inter'] font-semibold bg-white border border-stone-200 text-stone-700 active:scale-95 transition-transform"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-full text-[12.5px] font-['Inter'] font-semibold bg-white border border-stone-200 text-stone-700 active:scale-95 transition-transform"
           >
             Sign In
           </a>
@@ -240,9 +240,11 @@ export const LandingMobile = ({
       </section>
 
       {/* Section 2: Auth */}
+      {/* Not min-h-screen: the form is shorter than a phone screen, so forcing a
+          full viewport left a half-screen of blank space below the footer links. */}
       <section
         id="auth-section"
-        className="min-h-screen flex flex-col px-5 pt-10 pb-8"
+        className="flex flex-col px-5 pt-10 pb-12"
         style={{ scrollMarginTop: "0px" }}
       >
         <div className="mb-7">
@@ -346,7 +348,7 @@ export const LandingMobile = ({
                   {view === "sign-in" ? "New to Harry The Blaze? " : "Already have an account? "}
                   <button
                     onClick={() => setView(view === "sign-in" ? "sign-up" : "sign-in")}
-                    className="font-semibold text-stone-900 hover:underline underline-offset-2"
+                    className="font-semibold text-stone-900 hover:underline underline-offset-2 py-2 px-0.5"
                   >
                     {view === "sign-in" ? "Create a free account" : "Sign in instead"}
                   </button>
@@ -363,7 +365,7 @@ export const LandingMobile = ({
           )}
         </SignedOut>
 
-        <div className="flex items-center gap-4 pt-8 flex-wrap">
+        <div className="flex items-center gap-2 pt-6 flex-wrap">
           {[
             { label: "About", to: "/about" },
             { label: "Terms", to: "/terms" },
@@ -373,7 +375,7 @@ export const LandingMobile = ({
             <Link
               key={label}
               to={to}
-              className="text-[11px] font-['Inter'] text-stone-400 hover:text-stone-600 transition-colors"
+              className="inline-flex items-center min-h-[44px] px-2.5 text-[12px] font-['Inter'] text-stone-400 hover:text-stone-600 transition-colors"
             >
               {label}
             </Link>
