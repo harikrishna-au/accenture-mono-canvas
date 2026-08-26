@@ -28,6 +28,7 @@ import Header from "@/components/Header";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import PaymentPopup from "@/components/PaymentPopup";
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 const createTileId = (row: number, col: number) => `${String.fromCharCode(65 + row)}${col + 1}`;
 
@@ -60,6 +61,12 @@ export default function FindMin() {
   const [gameMode, setGameMode] = useState<'arcade' | 'practice'>('arcade');
   const [showModeSelect, setShowModeSelect] = useState(false);
   const [showLevelSelect, setShowLevelSelect] = useState(false);
+
+  useRecordOnFinish("/game/matrix", gameComplete, () => ({
+    score: levelsWon,
+    total: 6,
+    label: "levels",
+  }));
 
   // Premium users go straight into arcade mode — no blocking popup
 

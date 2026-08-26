@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { ArrowLeft, ArrowUpRight, Cpu, Zap, Navigation, Crown } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Cpu, Zap, Navigation, Crown, CheckCircle2 } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { useActivityResults } from "@/hooks/useActivityResults";
+import { formatAttempts, formatBestScore, type ActivityResult } from "@/lib/activityResults";
 
 // ─── Game definitions ─────────────────────────────────────────────────────────
 
@@ -187,6 +189,12 @@ interface Props {
 export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const results = useActivityResults();
+
+  const totalGames = ACCENTURE_GAMES.length + COGNIZANT_GAMES.length;
+  const gamesPlayed = [...ACCENTURE_GAMES, ...COGNIZANT_GAMES].filter(
+    (g) => results[g.path]
+  ).length;
 
   useGSAP(
     () => {
@@ -223,6 +231,25 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
         <p className="text-stone-400 text-[0.88rem] font-['Inter'] font-light">
           Game-based simulations modelled on the exact cognitive tests used in MNC assessments.
         </p>
+
+        {/* Only shown once something has actually been played — an empty bar on
+            arrival would say "all the work is ahead of you". */}
+        {gamesPlayed > 0 && (
+          <div className="flex items-center gap-3 mt-5">
+            <div className="w-[180px] h-1.5 rounded-full bg-stone-100 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.round((gamesPlayed / totalGames) * 100)}%`,
+                  background: `linear-gradient(90deg, ${COMPANIES.accenture.accent}, ${COMPANIES.cognizant.accent})`,
+                }}
+              />
+            </div>
+            <span className="text-[11.5px] font-semibold text-stone-500 font-['Inter']">
+              {gamesPlayed} of {totalGames} games played
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Accenture ── */}
@@ -237,6 +264,7 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
             <GameCard
               key={game.num}
               game={game}
+              result={results[game.path]}
               isPremium={isPremium}
               onSubscribe={onSubscribe}
               navigate={navigate}
@@ -255,7 +283,12 @@ export const CognitiveGamesPage = ({ isPremium, onSubscribe }: Props) => {
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {COGNIZANT_GAMES.map((game) => (
-            <CognizantGameCard key={game.num} game={game} navigate={navigate} />
+            <CognizantGameCard
+              key={game.num}
+              game={game}
+              result={results[game.path]}
+              navigate={navigate}
+            />
           ))}
         </div>
       </div>
@@ -290,16 +323,33 @@ function CompanyHeader({
   );
 }
 
+// ─── Saved result line ────────────────────────────────────────────────────────
+
+function ResultLine({ result, color }: { result: ActivityResult; color: string }) {
+  return (
+    <div className="flex items-center gap-2 text-[11.5px] font-['Inter']">
+      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+      <span className="font-semibold" style={{ color }}>
+        {formatBestScore(result)}
+      </span>
+      <span className="text-stone-300">·</span>
+      <span className="text-stone-500">{formatAttempts(result)}</span>
+    </div>
+  );
+}
+
 // ─── Classic game card ────────────────────────────────────────────────────────
 
 function GameCard({
   game,
+  result,
   isPremium,
   onSubscribe,
   navigate,
   showPremium,
 }: {
   game: typeof ACCENTURE_GAMES[0];
+  result?: ActivityResult;
   isPremium: boolean;
   onSubscribe: () => void;
   navigate: ReturnType<typeof useNavigate>;
@@ -356,13 +406,17 @@ function GameCard({
           <p className="text-stone-500 text-[12.5px] leading-relaxed font-['Inter']">{game.desc}</p>
         </div>
 
+        {result && <ResultLine result={result} color={game.color} />}
+
         <div className="flex items-center justify-between">
           <div className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-wide border font-['Inter']"
             style={{ color: game.color, background: game.bg, borderColor: game.border }}>
             {game.tag}
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[12px] font-semibold font-['Inter']" style={{ color: game.color }}>Play now</span>
+            <span className="text-[12px] font-semibold font-['Inter']" style={{ color: game.color }}>
+              {result ? "Play again" : "Play now"}
+            </span>
             <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: game.color }} />
           </div>
         </div>
@@ -375,9 +429,11 @@ function GameCard({
 
 function CognizantGameCard({
   game,
+  result,
   navigate,
 }: {
   game: typeof COGNIZANT_GAMES[0];
+  result?: ActivityResult;
   navigate: ReturnType<typeof useNavigate>;
 }) {
   return (
@@ -412,12 +468,14 @@ function CognizantGameCard({
               {game.emoji}
             </div>
           </div>
-          <div
-            className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
-            style={{ color: game.color, background: game.bg, borderColor: game.border }}
-          >
-            New
-          </div>
+          {!result && (
+            <div
+              className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
+              style={{ color: game.color, background: game.bg, borderColor: game.border }}
+            >
+              New
+            </div>
+          )}
         </div>
 
         <div className="flex-1">
@@ -427,13 +485,17 @@ function CognizantGameCard({
           <p className="text-stone-500 text-[12.5px] leading-relaxed font-['Inter']">{game.desc}</p>
         </div>
 
+        {result && <ResultLine result={result} color={game.color} />}
+
         <div className="flex items-center justify-between">
           <div className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-wide border font-['Inter']"
             style={{ color: game.color, background: game.bg, borderColor: game.border }}>
             {game.tag}
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[12px] font-semibold font-['Inter']" style={{ color: game.color }}>Play now</span>
+            <span className="text-[12px] font-semibold font-['Inter']" style={{ color: game.color }}>
+              {result ? "Play again" : "Play now"}
+            </span>
             <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: game.color }} />
           </div>
         </div>

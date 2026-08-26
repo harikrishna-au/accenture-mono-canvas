@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 type TaskType = 'number' | 'letter';
@@ -64,6 +65,12 @@ export default function SwitchChallenge() {
   const [streak, setStreak] = useState(0);
   const [taskHistory, setTaskHistory] = useState<TaskType[]>([]);
   const currentTask_ref = React.useRef<TaskType>('number');
+
+  useRecordOnFinish("/game/switch", phase === 'end', () => ({
+    score: correct,
+    total: TOTAL_TRIALS,
+    label: "correct",
+  }));
 
   const nextTrial = useCallback((num: number) => {
     if (num >= TOTAL_TRIALS) { setPhase('end'); return; }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 type Phase = 'intro' | 'showing' | 'recall' | 'feedback' | 'end';
 
@@ -24,6 +25,11 @@ export default function DigitChallenge() {
   const [roundResult, setRoundResult] = useState<'correct' | 'wrong' | null>(null);
   const [maxLevel, setMaxLevel] = useState(3);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useRecordOnFinish("/game/digit", phase === 'end', () => ({
+    score: maxLevel,
+    label: "digit span",
+  }));
 
   const startRound = (len: number) => {
     const seq = generateSequence(len);

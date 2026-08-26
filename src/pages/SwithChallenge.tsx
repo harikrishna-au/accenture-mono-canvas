@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── Symbols ─────────────────────────────────────────────────────────────────
 
@@ -113,6 +114,12 @@ export default function SwithChallenge() {
   const [answered, setAnswered] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useRecordOnFinish("/game/swith", phase === 'end', () => ({
+    score: correct,
+    total: TOTAL_ROUNDS,
+    label: "correct",
+  }));
 
   const nextRound = useCallback((num: number) => {
     if (num >= TOTAL_ROUNDS) { setPhase('end'); return; }

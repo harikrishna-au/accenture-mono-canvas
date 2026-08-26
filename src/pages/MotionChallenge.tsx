@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 interface Target {
   id: number;
@@ -46,6 +47,12 @@ export default function MotionChallenge() {
   const spawnTimer = useRef<ReturnType<typeof setInterval>>();
   const expireTimer = useRef<ReturnType<typeof setInterval>>();
   const countdownTimer = useRef<ReturnType<typeof setInterval>>();
+
+  useRecordOnFinish("/game/motion", phase === 'end', () => ({
+    score: hits,
+    total: hits + misses,
+    label: "hits",
+  }));
 
   const stopAll = () => {
     clearInterval(spawnTimer.current);

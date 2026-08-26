@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Clock, Trophy } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Question {
@@ -520,6 +521,12 @@ export default function GridChallenge() {
   const [gameOver, setGameOver] = useState(false);
   const [results, setResults] = useState<boolean[]>([]);
   const [streak, setStreak] = useState(0);
+
+  useRecordOnFinish("/game/grid-challenge", gameOver, () => ({
+    score: results.filter(Boolean).length,
+    total: TOTAL_QUESTIONS,
+    label: "correct",
+  }));
 
   useEffect(() => {
     if (answered || gameOver) return;

@@ -4,12 +4,14 @@ import {
     ArrowLeft, ArrowUpRight, Mic, Crown, Lock, X,
     MessageSquare, Headphones, BookOpen, Repeat2,
     PencilLine, AlertCircle, Radio, Mail, BarChart2, MonitorCheck,
-    Play,
+    Play, CheckCircle2,
 } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { toast } from "sonner";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
+import { useActivityResults } from "@/hooks/useActivityResults";
+import { formatAttempts, formatBestScore, type ActivityResult } from "@/lib/activityResults";
 import PageWrapper from "@/components/PageWrapper";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -449,6 +451,19 @@ function Pattern2Modal({
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
+function RoundResultLine({ result, color }: { result: ActivityResult; color: string }) {
+    return (
+        <div className="flex items-center gap-2 text-[11.5px] font-['Inter']">
+            <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+            <span className="font-semibold" style={{ color }}>
+                {formatBestScore(result)}
+            </span>
+            <span className="text-stone-300">·</span>
+            <span className="text-stone-500">{formatAttempts(result)}</span>
+        </div>
+    );
+}
+
 function PatternsContent() {
     const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -456,6 +471,10 @@ function PatternsContent() {
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
     const [showPatternModal, setShowPatternModal] = useState(false);
     const [showPattern2Modal, setShowPattern2Modal] = useState(false);
+
+    const results = useActivityResults();
+    const accentureResult = results[ACTIVE_PATTERN.path];
+    const cognizantResult = results[PATTERN_2.path];
 
     useGSAP(
         () => {
@@ -658,6 +677,10 @@ function PatternsContent() {
                                 </p>
                             </div>
 
+                            {accentureResult && (
+                                <RoundResultLine result={accentureResult} color={ACTIVE_PATTERN.color} />
+                            )}
+
                             {/* Footer */}
                             <div className="flex items-center justify-between">
                                 <div
@@ -668,7 +691,7 @@ function PatternsContent() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <span className="text-[12px] font-semibold font-['Inter']" style={{ color: ACTIVE_PATTERN.color }}>
-                                        View Round
+                                        {accentureResult ? "Retake round" : "View Round"}
                                     </span>
                                     <ArrowUpRight
                                         className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -730,12 +753,18 @@ function PatternsContent() {
                                 </h3>
                                 <p className="text-stone-500 text-[12.5px] leading-relaxed font-['Inter']">{PATTERN_2.desc}</p>
                             </div>
+
+                            {cognizantResult && (
+                                <RoundResultLine result={cognizantResult} color={PATTERN_2.color} />
+                            )}
                             <div className="flex items-center justify-between">
                                 <div className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-wide border font-['Inter']" style={{ color: PATTERN_2.color, background: PATTERN_2.bg, borderColor: PATTERN_2.border }}>
                                     {PATTERN_2.tag}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="text-[12px] font-semibold font-['Inter']" style={{ color: PATTERN_2.color }}>View Round</span>
+                                    <span className="text-[12px] font-semibold font-['Inter']" style={{ color: PATTERN_2.color }}>
+                                        {cognizantResult ? "Retake round" : "View Round"}
+                                    </span>
                                     <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: PATTERN_2.color }} />
                                 </div>
                             </div>

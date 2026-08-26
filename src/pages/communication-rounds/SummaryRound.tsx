@@ -5,8 +5,23 @@ import { useGame } from './GameContext';
 import { useNavigate } from 'react-router-dom';
 import { CommunicationBackendService } from '@/communication/service/CommunicationService';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { useRecordOnFinish } from '@/hooks/useActivityResults';
 
 const service = new CommunicationBackendService();
+
+// The round's own scores are all zero except the written section, so the AI
+// dimension scores are the only meaningful outcome. Their scale is set by the
+// backend, so it is kept as a plain figure rather than a percentage.
+function aiAverage(analysis: any): number | null {
+    const scores = [
+        analysis?.fluency_score,
+        analysis?.grammar_score,
+        analysis?.vocabulary_score,
+        analysis?.pronunciation_score,
+    ].filter((s): s is number => typeof s === 'number');
+    if (scores.length === 0) return null;
+    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+}
 
 export function SummaryRound() {
     const { gameHistory, resetGame } = useGame();
@@ -17,6 +32,13 @@ export function SummaryRound() {
     useEffect(() => {
         analyzeGame();
     }, []);
+
+    // Recorded once the analysis settles either way, so a failed analysis still
+    // counts as an attempt instead of vanishing.
+    useRecordOnFinish('/game/communication', !isAnalyzing && gameHistory.length > 0, () => ({
+        score: aiAverage(analysisResult),
+        label: 'avg score',
+    }));
 
     const analyzeGame = async () => {
         try {

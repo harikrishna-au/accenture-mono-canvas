@@ -8,6 +8,7 @@ import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 // import { useRazorpay } from "@/hooks/useRazorpay";
 import PaymentPopup from "@/components/PaymentPopup";
 import { toast } from "sonner";
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // Grid Types
 type CellType = 'EMPTY' | 'KEY' | 'GOAL' | 'START';
@@ -179,6 +180,12 @@ const HiddenMaze = () => {
     const [gameMode, setGameMode] = useState<'arcade' | 'practice'>('arcade');
     const [showModeSelect, setShowModeSelect] = useState(false);
     const [showLevelSelect, setShowLevelSelect] = useState(false);
+
+    useRecordOnFinish("/game/hidden-maze", gameFinished, () => ({
+        score: levelsWon,
+        total: LEVELS.length,
+        label: "levels",
+    }));
 
     // Premium users go straight into arcade mode — no blocking popup
 

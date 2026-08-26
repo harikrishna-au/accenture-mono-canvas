@@ -4,6 +4,7 @@ import { useGameP2 } from './GameContextP2';
 import { useNavigate } from 'react-router-dom';
 import { CommunicationBackendService } from '@/communication/service/CommunicationService';
 import { CheckCircle, AlertCircle, Trophy } from 'lucide-react';
+import { useRecordOnFinish } from '@/hooks/useActivityResults';
 
 const service = new CommunicationBackendService();
 
@@ -24,6 +25,12 @@ export function SummaryRoundP2() {
     useEffect(() => {
         analyze();
     }, []);
+
+    useRecordOnFinish('/game/communication-p2', gameHistory.length > 0, () => ({
+        score: gameHistory.filter(h => h.score === 1).length,
+        total: gameHistory.length,
+        label: 'sections',
+    }));
 
     const analyze = async () => {
         try {

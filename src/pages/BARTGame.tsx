@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── BART — Balloon Analogue Risk Task ─────────────────────────────────────────
 // 15 balloons. Each has a hidden random explosion threshold (8–80 pumps).
@@ -31,6 +32,11 @@ export default function BARTGame() {
   const [history, setHistory] = useState<Array<{ pumps: number; state: BalloonState; earned: number }>>([]);
   const [isPumping, setIsPumping] = useState(false);
   const holdTimer = useRef<ReturnType<typeof setInterval>>();
+
+  useRecordOnFinish("/game/bart", phase === 'end', () => ({
+    score: totalScore,
+    label: "pts",
+  }));
 
   const startGame = () => {
     setTotalScore(0);

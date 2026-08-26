@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -185,6 +186,14 @@ export default function DualTaskChallenge() {
   const [levelNum, setLevelNum] = useState(0);
   const [symCorrect, setSymCorrect] = useState(0); // correct sym answers total
   const [recallCorrectCount, setRecallCorrectCount] = useState(0);
+
+  // Points can go negative from penalties, so accuracy across both tasks is the
+  // figure worth keeping: one symmetry answer per round plus one recall a level.
+  useRecordOnFinish("/game/dual-task", gamePhase === 'end', () => ({
+    score: symCorrect + recallCorrectCount,
+    total: TOTAL_LEVELS * (ROUNDS_PER + 1),
+    label: "correct",
+  }));
 
   // ── Per-level state ──────────────────────────────────────────────────────
   const [rounds,       setRounds]       = useState<RoundData[]>([]);

@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { LogOut, Flag } from "lucide-react";
 import { usePremiumStatus } from "@/hooks/usePremiumStatus";
 import PaymentPopup from "@/components/PaymentPopup";
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 interface Balloon {
     id: number;
@@ -29,6 +30,16 @@ const BalloonMathGame: React.FC = () => {
     const [showInstructions, setShowInstructions] = useState(false);
     const [roundPerfect, setRoundPerfect] = useState(true);
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+    // Free players never reach `gameOver` — the run ends at the paywall — so the
+    // result has to be recorded there too, and only once per run.
+    const [hitFreeLimit, setHitFreeLimit] = useState(false);
+
+    useRecordOnFinish("/game/balloon", gameOver || hitFreeLimit, () => ({
+        score,
+        total: round,
+        label: "perfect rounds",
+        completed: gameOver,
+    }));
 
     const FREE_ROUNDS = 3;
     const TIME_PER_ROUND = 15; // Increased time slightly to keep it snappy for 3 bubbles if needed, or keep 10.
@@ -181,6 +192,7 @@ const BalloonMathGame: React.FC = () => {
     const nextRound = (success: boolean) => {
         if (!isPremium && round >= FREE_ROUNDS) {
             // Non-premium: show paywall after 3 free rounds
+            setHitFreeLimit(true);
             setShowPaymentPopup(true);
             return;
         }

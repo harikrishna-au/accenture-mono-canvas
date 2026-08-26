@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Trophy, Play, ArrowDown, CheckCircle } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -246,6 +247,12 @@ export default function InductiveChallenge() {
   const [answered, setAnswered] = useState(false);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useRecordOnFinish("/game/inductive", phase === 'end', () => ({
+    score: correctCount,
+    total: TOTAL_LEVELS,
+    label: "correct",
+  }));
 
   const nextLevel = useCallback((num: number) => {
     if (num >= TOTAL_LEVELS) { setPhase('end'); return; }

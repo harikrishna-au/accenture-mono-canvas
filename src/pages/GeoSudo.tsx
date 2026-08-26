@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import { ArrowLeft, Clock, Trophy, CheckCircle, Info } from 'lucide-react';
+import { useRecordOnFinish } from "@/hooks/useActivityResults";
 
 type Shape = 0 | 1 | 2 | 3;
 type Cell = Shape | null;
@@ -85,6 +86,12 @@ export default function GeoSudo() {
   const [gameOver, setGameOver] = useState(false);
   const [puzzlesSolved, setPuzzlesSolved] = useState(0);
   const [showTip, setShowTip] = useState(true);
+
+  useRecordOnFinish("/game/geo-sudo", gameOver, () => ({
+    score: puzzlesSolved,
+    total: PUZZLES.length,
+    label: "puzzles",
+  }));
 
   const initPuzzle = useCallback((idx: number) => {
     const p = PUZZLES[idx];
