@@ -11,7 +11,7 @@ interface PaymentPopupProps {
     onClose: () => void;
 }
 
-const BASE_PRICE = 149;
+const BASE_PRICE = 299;
 
 async function validateCouponServer(code: string): Promise<number | null> {
     try {

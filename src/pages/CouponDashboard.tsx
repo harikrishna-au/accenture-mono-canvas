@@ -9,6 +9,8 @@ const COUPON_MAP: Record<string, string> = {
     "2072602638": "K.P.R (₹99)",
     "869997654": "ROISIN (₹69)",
     "-1492342457": "ONERUPEE (₹1)",
+    "BYPASS_PREMIUM_FROM_HARRYTHEBLAZE": "HARRYTHEBLAZE (₹2)",
+    "NIT_JAMSHEDPUR": "NIT JAMSHEDPUR (₹199)",
 };
 
 interface CouponUsage {

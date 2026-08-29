@@ -22,8 +22,8 @@ export function useRazorpay() {
         });
     };
 
-    /** One-time payment (₹149 full access). */
-    const initiatePayment = async (amount: number = 149, couponCode?: string) => {
+    /** One-time payment (₹299 full access). */
+    const initiatePayment = async (amount: number = 299, couponCode?: string) => {
         if (!user) {
             toast.error("Please sign in to proceed");
             return false;

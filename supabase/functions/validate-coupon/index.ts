@@ -30,7 +30,7 @@ serve(async (req: Request) => {
     }
 
     const code = coupon_code.trim().toUpperCase();
-    if (code.length === 0 || code.length > 30) {
+    if (code.length === 0 || code.length > 50) {
       return new Response(
         JSON.stringify({ valid: false }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
