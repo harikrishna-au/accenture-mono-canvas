@@ -3,16 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Mapping hashes to readable labels/amounts based on the PaymentPopup file
-const COUPON_MAP: Record<string, string> = {
-    "390045773": "SRAVANTHI (₹79)",
-    "2072602638": "K.P.R (₹99)",
-    "869997654": "ROISIN (₹69)",
-    "-1492342457": "ONERUPEE (₹1)",
-    "BYPASS_PREMIUM_FROM_HARRYTHEBLAZE": "HARRYTHEBLAZE (₹2)",
-    "NIT_JAMSHEDPUR": "NIT JAMSHEDPUR (₹199)",
-};
-
 interface CouponUsage {
     coupon_code: string;
     count: number;
@@ -43,7 +33,7 @@ const CouponDashboard = () => {
 
                 // Convert to array for Recharts
                 const chartData = Object.entries(counts).map(([code, count]) => ({
-                    coupon_code: COUPON_MAP[code] || code, // Use label if available, else hash
+                    coupon_code: code,
                     count,
                 }));
 
