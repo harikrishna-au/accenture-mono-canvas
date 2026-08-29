@@ -24,10 +24,13 @@ const CouponDashboard = () => {
 
                 if (error) throw error;
 
-                // Process data to count occurrences
+                // Skip old hashed codes (digits only). New rows store the real coupon name.
+                const isHash = (code: string) => /^-?\d+$/.test(code);
+
                 const counts: Record<string, number> = {};
                 usages?.forEach((row: any) => {
                     const code = row.coupon_code;
+                    if (!code || isHash(code)) return;
                     counts[code] = (counts[code] || 0) + 1;
                 });
 
