@@ -181,6 +181,8 @@ interface TiltCardProps {
   border: string;
   className?: string;
   style?: React.CSSProperties;
+  id?: string;
+  label: string;
 }
 
 const TiltCard = ({
@@ -190,6 +192,8 @@ const TiltCard = ({
   border,
   className = "",
   style: extra = {},
+  id,
+  label,
 }: TiltCardProps) => {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [light, setLight] = useState({ x: 50, y: 35 });
@@ -208,6 +212,10 @@ const TiltCard = ({
   return (
     <div
       ref={ref}
+      id={id}
+      role="button"
+      tabIndex={0}
+      aria-label={label}
       onMouseMove={mm}
       onMouseEnter={() => setOn(true)}
       onMouseLeave={() => {
@@ -216,6 +224,12 @@ const TiltCard = ({
         setLight({ x: 50, y: 35 });
       }}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={`relative overflow-hidden cursor-pointer group ${className}`}
       style={{
         ...extra,
@@ -309,7 +323,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
         </h1>
 
         <p className="text-[0.92rem] text-stone-500 font-light max-w-[400px] leading-relaxed font-['Inter']">
-          Four focused tools. Built for the exact hiring process you're preparing for.
+          Everything you need for the hiring process you're preparing for.
         </p>
       </div>
 
@@ -322,6 +336,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           {/* Left wrapper — stretches to match right column height */}
           <div className="md:flex-[1.4] flex flex-col">
             <TiltCard
+              label="Cognitive Puzzles"
               onClick={() => onSelectCompany("accenture")}
               glow="rgba(124,58,237,0.18)"
               border="rgba(124,58,237,0.22)"
@@ -423,6 +438,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
 
             {/* ── Card 02: Communication Tests ── */}
             <TiltCard
+              label="Communication Tests"
               onClick={() => navigate("/game/communication-patterns")}
               glow="rgba(8,145,178,0.16)"
               border="rgba(8,145,178,0.22)"
@@ -505,6 +521,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
 
             {/* ── Card 03: AI Mock Interview ── */}
             <TiltCard
+              label="AI Mock Interview"
               onClick={() => navigate("/ai-interview")}
               glow="rgba(5,150,105,0.15)"
               border="rgba(5,150,105,0.22)"
@@ -589,6 +606,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
 
         {/* ── Card 04: Connect 1:1 — full-width banner ── */}
         <TiltCard
+          label="Connect 1:1"
           onClick={() => navigate("/connect")}
           glow="rgba(217,119,6,0.15)"
           border="rgba(217,119,6,0.22)"
@@ -650,8 +668,8 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             {/* Right: avatar stack + CTA button */}
             <div className="flex flex-col sm:items-end gap-3 flex-shrink-0">
               <ConnectViz />
-              <button
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn transition-all hover:scale-[1.03] active:scale-[0.97]"
+              <span
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn"
                 style={{
                   background: "linear-gradient(135deg, #d97706, #b45309)",
                   boxShadow: "0 4px 16px rgba(217,119,6,0.3)",
@@ -659,7 +677,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               >
                 Book a session
                 <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-              </button>
+              </span>
             </div>
           </div>
 
@@ -671,6 +689,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
 
         {/* ── Card 05: Important Coding Questions Checklist — full-width banner ── */}
         <TiltCard
+          label="Important Coding Questions"
           onClick={() => navigate("/coding-questions")}
           glow="rgba(220,38,38,0.14)"
           border="rgba(220,38,38,0.22)"
@@ -733,8 +752,8 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               <div className="w-40 hidden sm:block">
                 <DSACheckViz />
               </div>
-              <button
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn transition-all hover:scale-[1.03] active:scale-[0.97]"
+              <span
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn"
                 style={{
                   background: "linear-gradient(135deg, #dc2626, #991b1b)",
                   boxShadow: "0 4px 16px rgba(220,38,38,0.28)",
@@ -742,7 +761,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               >
                 Open Checklist
                 <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-              </button>
+              </span>
             </div>
           </div>
 
@@ -758,6 +777,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           {/* ── Forge — Resume Builder ── */}
           <TiltCard
             id="onboarding-premium-card"
+            label="Resume Builder"
             onClick={() => navigate("/forge")}
             glow="rgba(28,25,23,0.18)"
             border="rgba(255,255,255,0.07)"
@@ -765,11 +785,11 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
             style={{ background: "#1c1917" } as React.CSSProperties}
           >
             <div className="absolute bottom-3 right-5 pointer-events-none select-none">
-              <span className="font-['Merriweather'] font-black" style={{ fontSize: "7rem", color: "rgba(255,255,255,0.04)", lineHeight: 1 }}>07</span>
+              <span className="font-['Merriweather'] font-black text-[4.5rem] sm:text-[7rem]" style={{ color: "rgba(255,255,255,0.04)", lineHeight: 1 }}>06</span>
             </div>
             <div className="relative z-10 p-6 flex flex-col h-full gap-3">
               <div className="flex items-center justify-between">
-                <p className="font-['Inter'] text-stone-500" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>07 / Forge</p>
+                <p className="font-['Inter'] text-stone-500" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>06 / Forge</p>
                 <span className="font-['Inter'] font-bold text-stone-500" style={{ fontSize: 9, letterSpacing: "0.2em", border: "1px solid rgba(255,255,255,0.12)", padding: "2px 7px", borderRadius: 4 }}>FREE</span>
               </div>
               <div style={{ flex: 1 }} />
@@ -789,6 +809,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           {/* ── Radar — Job Match ── */}
           <TiltCard
             id="onboarding-radar-card"
+            label="Job Match"
             onClick={() => navigate("/radar")}
             glow="rgba(28,25,23,0.08)"
             border="rgba(28,25,23,0.07)"
@@ -810,7 +831,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               </div>
             </div>
             <div className="relative z-10 p-6 flex flex-col h-full gap-3">
-              <p className="font-['Inter'] text-stone-400" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>08 / Radar</p>
+              <p className="font-['Inter'] text-stone-400" style={{ fontSize: 9, letterSpacing: "0.38em", textTransform: "uppercase" }}>07 / Radar</p>
               <div style={{ flex: 1 }} />
               <div>
                 <h3 className="font-['Merriweather'] font-black text-stone-900" style={{ fontSize: "1.55rem", letterSpacing: "-0.02em", marginBottom: 8 }}>Job Match</h3>

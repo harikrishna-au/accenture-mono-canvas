@@ -587,7 +587,16 @@ function PatternsContent() {
 
                     {/* Accenture — Active */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Accenture communication round"
                         onClick={handlePatternClick}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handlePatternClick();
+                            }
+                        }}
                         className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
                         style={{
                             background: "#ffffff",
@@ -704,7 +713,16 @@ function PatternsContent() {
 
                     {/* Cognizant — Active */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Cognizant communication round"
                         onClick={() => setShowPattern2Modal(true)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setShowPattern2Modal(true);
+                            }
+                        }}
                         className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
                         style={{
                             background: "#ffffff",

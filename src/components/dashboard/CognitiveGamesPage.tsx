@@ -357,7 +357,16 @@ function GameCard({
 }) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={game.name}
       onClick={() => navigate(game.path)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate(game.path);
+        }
+      }}
       className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
       style={{
         background: "#ffffff",
@@ -438,7 +447,16 @@ function CognizantGameCard({
 }) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={game.name}
       onClick={() => navigate(game.path)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate(game.path);
+        }
+      }}
       className="relative rounded-2xl p-6 flex flex-col gap-5 cursor-pointer group overflow-hidden"
       style={{
         background: "#ffffff",
