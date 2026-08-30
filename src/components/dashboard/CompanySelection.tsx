@@ -322,8 +322,8 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
           <span className="text-stone-400 font-light italic">actually test.</span>
         </h1>
 
-        <p className="text-[0.92rem] text-stone-500 font-light max-w-[400px] leading-relaxed font-['Inter']">
-          Everything you need for the hiring process you're preparing for.
+        <p className="text-[0.92rem] text-stone-500 font-light max-w-[440px] leading-relaxed font-['Inter']">
+          Accenture 2026 placements — cognitive games and communication rounds can be practiced here.
         </p>
       </div>
 

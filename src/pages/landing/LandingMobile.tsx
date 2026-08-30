@@ -139,6 +139,15 @@ export const LandingMobile = ({
           AI mock interviews, cognitive games, communication practice — and 1:1 with seniors who just got placed.
         </motion.p>
 
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.13 }}
+          className="font-['Inter'] text-[13px] text-stone-700 leading-relaxed mt-2.5 font-medium"
+        >
+          Accenture 2026 placements — cognitive games and communication rounds can be practiced here.
+        </motion.p>
+
         <motion.a
           href="#auth-section"
           onClick={() => setView("sign-up")}

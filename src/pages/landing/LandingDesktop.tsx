@@ -101,10 +101,19 @@ export const LandingDesktop = ({
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
-          className="font-['Inter'] text-stone-500 leading-relaxed mb-7 max-w-md"
+          className="font-['Inter'] text-stone-500 leading-relaxed mb-2 max-w-md"
           style={{ fontSize: "0.96rem" }}
         >
           AI interviews, gamified aptitude, communication practice — and 1:1 sessions with students who just got placed.
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.28, ease: "easeOut" }}
+          className="font-['Inter'] text-[0.88rem] text-stone-700 leading-relaxed mb-7 max-w-md font-medium"
+        >
+          Accenture 2026 placements — cognitive games and communication rounds can be practiced here.
         </motion.p>
 
         {/* Trust row — avatars + rating + count */}
