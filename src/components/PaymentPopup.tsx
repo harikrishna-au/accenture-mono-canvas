@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Check, Loader2, Zap } from "lucide-react";
+import { X, Check, Loader2, Zap, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,7 +11,28 @@ interface PaymentPopupProps {
     onClose: () => void;
 }
 
+const LIST_PRICE = 500;
 const BASE_PRICE = 299;
+
+function msUntilMidnight() {
+    const now = new Date();
+    const end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+    return Math.max(0, end.getTime() - now.getTime());
+}
+
+function pad(n: number) {
+    return String(n).padStart(2, "0");
+}
+
+function splitCountdown(ms: number) {
+    const total = Math.floor(ms / 1000);
+    return {
+        h: pad(Math.floor(total / 3600)),
+        m: pad(Math.floor((total % 3600) / 60)),
+        s: pad(total % 60),
+    };
+}
 
 async function validateCouponServer(code: string): Promise<number | null> {
     try {
@@ -30,6 +51,7 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
     const [appliedAmount, setAppliedAmount] = useState<number | null>(null);
     const [validating, setValidating]       = useState(false);
     const [couponError, setCouponError]     = useState("");
+    const [remainMs, setRemainMs]          = useState(msUntilMidnight);
     const { initiatePayment, isLoading } = useRazorpay();
 
     // Auto-apply referral coupon from localStorage
@@ -46,9 +68,18 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
         });
     }, [isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        setRemainMs(msUntilMidnight());
+        const id = setInterval(() => setRemainMs(msUntilMidnight()), 1000);
+        return () => clearInterval(id);
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const finalAmount = appliedAmount ?? BASE_PRICE;
+    const { h, m, s } = splitCountdown(remainMs);
+    const savings = LIST_PRICE - finalAmount;
 
     const handleApplyCoupon = async () => {
         const code = coupon.trim();
@@ -93,16 +124,18 @@ const PaymentPopup = ({ isOpen, onClose }: PaymentPopupProps) => {
                 </div>
 
                 {/* Price display */}
-                <div className="rounded-xl border-2 border-amber-500 bg-amber-50 p-5 text-center space-y-1">
-                    {appliedAmount && appliedAmount < BASE_PRICE ? (
-                        <div className="space-y-0.5">
-                            <p className="text-neutral-400 text-sm line-through">₹{BASE_PRICE}</p>
-                            <p className="text-4xl font-bold text-neutral-900">₹{finalAmount}</p>
-                            <p className="text-green-600 text-xs font-semibold">You save ₹{BASE_PRICE - finalAmount}!</p>
-                        </div>
-                    ) : (
-                        <p className="text-4xl font-bold text-neutral-900">₹{BASE_PRICE}</p>
-                    )}
+                <div className="rounded-xl border-2 border-amber-500 bg-amber-50 p-5 text-center space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-semibold">
+                        <Clock className="w-3 h-3" />
+                        Offer ends in {h}:{m}:{s}
+                    </div>
+                    <div className="space-y-0.5">
+                        <p className="text-neutral-400 text-sm line-through">₹{LIST_PRICE}</p>
+                        <p className="text-4xl font-bold text-neutral-900">₹{finalAmount}</p>
+                        {savings > 0 && (
+                            <p className="text-green-600 text-xs font-semibold">You save ₹{savings}!</p>
+                        )}
+                    </div>
                     <p className="text-neutral-500 text-xs">One-time payment</p>
                 </div>
 
