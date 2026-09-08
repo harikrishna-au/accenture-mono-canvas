@@ -15,6 +15,7 @@ interface Feature {
   label: string;
   sub: string;
   to?: string;
+  featured?: boolean;
 }
 
 interface LandingDesktopProps {
@@ -104,7 +105,7 @@ export const LandingDesktop = ({
           className="font-['Inter'] text-stone-500 leading-relaxed mb-2 max-w-md"
           style={{ fontSize: "0.96rem" }}
         >
-          AI interviews, gamified aptitude, communication practice — and 1:1 sessions with students who just got placed.
+          AI interviews, gamified aptitude, communication practice — and Connect 1:1 with students who just got placed.
         </motion.p>
 
         <motion.p
@@ -158,7 +159,31 @@ export const LandingDesktop = ({
 
         {/* Interactive feature list */}
         <div className="space-y-1">
-          {features.map(({ icon: Icon, label, sub, to }, i) => (
+          {features.filter((f) => f.featured).map(({ icon: Icon, label, sub, to }) => (
+            <motion.a
+              key={label}
+              href={to}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, x: -14 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.38, ease: "easeOut" }}
+              className="group w-full text-left flex items-center gap-3.5 rounded-2xl px-3.5 py-3.5 -mx-1 mb-2 border-2 border-stone-900 bg-white hover:bg-stone-50 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center flex-shrink-0">
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="flex items-center gap-2">
+                  <span className="font-['Inter'] text-[14px] font-bold text-stone-900 leading-tight">{label}</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-600">Live</span>
+                </span>
+                <span className="font-['Inter'] text-[12px] text-stone-500">{sub}</span>
+              </div>
+              <ArrowRight className="w-4 h-4 text-stone-900 flex-shrink-0" />
+            </motion.a>
+          ))}
+          {features.filter((f) => !f.featured).map(({ icon: Icon, label, sub, to }, i) => (
             <motion.div
               key={label}
               initial={{ opacity: 0, x: -14 }}

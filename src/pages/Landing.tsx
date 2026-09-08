@@ -18,7 +18,7 @@ const features = [
   { icon: Brain, label: "AI Mock Interviews", sub: "Real-time adaptive feedback" },
   { icon: Trophy, label: "Gamified Aptitude", sub: "Learn through engaging games" },
   { icon: Mic, label: "Communication Rounds", sub: "Speaking, writing & fluency" },
-  { icon: Users, label: "Placed Guru Sessions", sub: "1:1 with recently placed seniors" },
+  { icon: Users, label: "Connect 1:1", sub: "Live call with a recently placed senior", to: "https://topmate.io/hari_krishna_nallana", featured: true },
   { icon: Radar, label: "Radar — Job Match", sub: "Find roles that fit your skill profile", to: "/radar" },
 ];
 
