@@ -113,7 +113,7 @@ const ConnectViz = () => (
           width: 32,
           height: 32,
           borderRadius: "50%",
-          background: `rgba(217,119,6,${op})`,
+          background: `rgba(28,25,23,${op})`,
           border: "2.5px solid white",
           marginLeft: i > 0 ? -10 : 0,
           display: "flex",
@@ -135,7 +135,7 @@ const ConnectViz = () => (
         fontSize: 11,
         fontWeight: 600,
         letterSpacing: "0.04em",
-        color: "rgba(217,119,6,0.65)",
+        color: "rgba(28,25,23,0.55)",
         fontFamily: "'Inter', sans-serif",
       }}
     >
@@ -607,17 +607,19 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
         {/* ── Card 04: Connect 1:1 — full-width banner ── */}
         <TiltCard
           label="Connect 1:1"
-          onClick={() => navigate("/connect")}
-          glow="rgba(217,119,6,0.15)"
-          border="rgba(217,119,6,0.22)"
+          onClick={() =>
+            window.open("https://topmate.io/hari_krishna_nallana", "_blank", "noopener,noreferrer")
+          }
+          glow="rgba(28,25,23,0.12)"
+          border="rgba(28,25,23,0.22)"
           className="w-full rounded-2xl"
-          style={{ background: "rgba(255,251,242,0.97)" }}
+          style={{ background: "#ffffff" }}
         >
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse 50% 120% at 92% 50%, rgba(217,119,6,0.09) 0%, transparent 65%)",
+                "radial-gradient(ellipse 50% 120% at 92% 50%, rgba(28,25,23,0.05) 0%, transparent 65%)",
             }}
           />
 
@@ -627,26 +629,25 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: "rgba(217,119,6,0.1)",
-                  border: "1px solid rgba(217,119,6,0.18)",
+                  background: "#1c1917",
                 }}
               >
-                <Users className="w-5 h-5" style={{ color: "#d97706" }} />
+                <Users className="w-5 h-5 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-2.5 mb-0.5">
                   <div
                     className="text-[9px] font-bold tracking-[0.38em] uppercase font-['Inter']"
-                    style={{ color: "#d97706" }}
+                    style={{ color: "#78716c" }}
                   >
                     04
                   </div>
                   <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide border font-['Inter']"
                     style={{
-                      color: "#d97706",
-                      background: "rgba(217,119,6,0.09)",
-                      borderColor: "rgba(217,119,6,0.22)",
+                      color: "#44403c",
+                      background: "#f5f5f4",
+                      borderColor: "#e7e5e4",
                     }}
                   >
                     PAID
@@ -671,8 +672,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
               <span
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-[13px] font-semibold font-['Inter'] group/btn"
                 style={{
-                  background: "linear-gradient(135deg, #d97706, #b45309)",
-                  boxShadow: "0 4px 16px rgba(217,119,6,0.3)",
+                  background: "#1c1917",
                 }}
               >
                 Book a session
@@ -683,7 +683,7 @@ export const CompanySelection = ({ onSelectCompany }: CompanySelectionProps) => 
 
           <div
             className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            style={{ background: "linear-gradient(90deg, #d97706, transparent 70%)" }}
+            style={{ background: "linear-gradient(90deg, #1c1917, transparent 70%)" }}
           />
         </TiltCard>
 
